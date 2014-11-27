@@ -22,6 +22,7 @@ public class MetricsResponseBuilder {
 
 
     public static String buildResponse(String tenant, String query, long from, long to) throws Exception {
+        logger.debug("Processing query " + query + " for tenant " + tenant);
         long start = System.nanoTime();
         // Build paths
         logger.debug("Fetching paths from ES");
@@ -83,6 +84,7 @@ public class MetricsResponseBuilder {
         }
 
         sb.append("}}");
+        logger.debug("Finished processing query " + query + " for tenant " + tenant);
         return sb.toString();
     }
 
