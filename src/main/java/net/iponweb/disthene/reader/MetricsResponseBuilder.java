@@ -94,7 +94,7 @@ public class MetricsResponseBuilder {
     }
 
     private static int getRollup(Long from, Long to) {
-        if ((from - to) / 900 > 1600) {
+        if ((to - from) / 900 > 1600) {
             return 900;
         } else {
             return 60;
@@ -102,7 +102,7 @@ public class MetricsResponseBuilder {
     }
 
     private static int getPeriod(Long from, Long to) {
-        if ((from - to) / 900 > 1600) {
+        if ((to - from) / 900 > 1600) {
             return 69120;
         } else {
             return 89280;
