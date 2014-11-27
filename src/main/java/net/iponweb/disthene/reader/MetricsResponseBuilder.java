@@ -22,8 +22,12 @@ public class MetricsResponseBuilder {
 
 
     public static String buildResponse(String tenant, String query, long from, long to) throws Exception {
+        long start = System.nanoTime();
         // Build paths
+        logger.debug("Fetching paths from ES");
         List<String> paths = PathsService.getInstance().getPaths(tenant, query);
+        long end = System.nanoTime();
+        logger.debug("Fetched paths from ES in " + (end - start) / 1000000 + "ms");
 
         Long now = new DateTime().getMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
