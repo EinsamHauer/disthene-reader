@@ -3,6 +3,7 @@ package net.iponweb.disthene.reader;
 import com.datastax.driver.core.*;
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.utils.ListUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
  * @author Andrei Ivanov
  */
 public class MetricsResponseBuilder {
+    final static Logger logger = Logger.getLogger(MetricsResponseBuilder.class);
 
     private static final String cassandraQuery = "SELECT time, data FROM metric.metric " +
             "where path = ? and tenant = ? and period = ? and rollup = ? " +
@@ -47,6 +49,9 @@ public class MetricsResponseBuilder {
         }
 
         int length = timestampIndices.size();
+        logger.debug("Expected number of data points in series is " + length);
+        logger.debug("Expected number of series is " + paths.size());
+
         Gson gson = new Gson();
         // Get results from C* and build the response right away
         // Using Gson here - probably additional overhead
