@@ -30,7 +30,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
             }
             boolean keepAlive = DefaultHttpHeaders.isKeepAlive(req);
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer("Hi from Disthene".getBytes()));
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(getResponse(req).getBytes()));
             response.headers().set(CONTENT_TYPE, "application/json");
             response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
 
@@ -47,5 +47,28 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         ctx.close();
+    }
+
+    private String getResponse(HttpRequest request) {
+        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+        String path = decoder.path();
+
+        switch (path) {
+            case "/metrics":
+                try {
+                    return MetricsResponseBuilder.buildResponse(
+                            decoder.parameters().get("tenant").get(0),
+                            decoder.parameters().get("path").get(0),
+                            Long.valueOf(decoder.parameters().get("from").get(0)),
+                            Long.valueOf(decoder.parameters().get("to").get(0)));
+                } catch (Exception e) {
+                    return "Error";
+                }
+            case "/paths":
+                return "Called paths";
+            default:
+                return "Error";
+        }
+
     }
 }

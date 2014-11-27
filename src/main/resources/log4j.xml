@@ -18,8 +18,12 @@
         <level value="error"/>
     </logger>
 
+    <logger name="org.apache.http">
+        <level value="error"/>
+    </logger>
+
     <logger name="net.iponweb.disthene.*">
-        <level value="info"/>
+        <level value="debug"/>
     </logger>
 
     <!-- Root Logger -->

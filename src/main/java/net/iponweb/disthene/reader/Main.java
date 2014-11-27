@@ -22,6 +22,15 @@ public class Main {
     private static EventLoopGroup workerGroup = new NioEventLoopGroup(10);
 
     public static void main(String[] args) throws Exception {
+        logger.info("String connection to ES");
+        PathsService.getInstance();
+        logger.info("Done");
+
+        logger.info("String connection to C*");
+        CassandraService.getInstance();
+        logger.info("Done");
+
+
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
         serverBootstrap.group(bossGroup, workerGroup)
@@ -31,8 +40,6 @@ public class Main {
 
         channel = serverBootstrap.bind(port).sync().channel();
         logger.info("Listening on port " + port);
-
-        System.out.println("Hello World!");
     }
 
     public static void shutdown() {
