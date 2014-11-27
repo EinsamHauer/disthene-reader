@@ -22,11 +22,11 @@ public class Main {
     private static EventLoopGroup workerGroup = new NioEventLoopGroup(10);
 
     public static void main(String[] args) throws Exception {
-        logger.info("String connection to ES");
+        logger.info("Starting connection to ES");
         PathsService.getInstance();
         logger.info("Done");
 
-        logger.info("String connection to C*");
+        logger.info("Starting connection to C*");
         CassandraService.getInstance();
         logger.info("Done");
 
