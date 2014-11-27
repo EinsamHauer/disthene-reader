@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
+import org.apache.log4j.Logger;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
@@ -15,6 +16,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author Andrei Ivanov
  */
 public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
+    final static Logger logger = Logger.getLogger(DistheneServerHandler.class);
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
@@ -62,6 +64,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                             Long.valueOf(decoder.parameters().get("from").get(0)),
                             Long.valueOf(decoder.parameters().get("to").get(0)));
                 } catch (Exception e) {
+                    logger.error(e);
                     return "Error";
                 }
             case "/paths":
