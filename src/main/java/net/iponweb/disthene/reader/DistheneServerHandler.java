@@ -58,6 +58,8 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
         String path = decoder.path();
 
+        logger.debug("Query was: " + request.getUri());
+
         switch (path) {
             case "/metrics":
                 try {
@@ -79,7 +81,6 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                 } catch (Exception e) {
                     logger.error("Encountered an error fetching paths", e);
                     logger.error("Parameters were:" + decoder.parameters());
-                    logger.error("Query was: " + request.getUri());
 
                     return "Error";
                 }
