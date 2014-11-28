@@ -28,6 +28,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        logger.debug("Message was: " + msg.getClass().getName());
         if (msg instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) msg;
 
@@ -60,6 +61,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
 
         logger.debug("Query was: " + request.getUri());
         logger.debug("Method was: " + request.getMethod());
+        logger.debug("Content was: " + request.getDecoderResult());
 
         switch (path) {
             case "/metrics":
