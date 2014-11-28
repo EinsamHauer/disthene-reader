@@ -77,9 +77,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                             );
                 } catch (Exception e) {
                     logger.error("Encountered an error fetching paths", e);
-                    logger.error("Parameters were:");
-                    logger.error(decoder.parameters().get("tenant").get(0));
-                    logger.error(decoder.parameters().get("query").get(0));
+                    logger.error("Parameters were:" + decoder.parameters());
                     logger.error("Query was: " + request.getUri());
 
                     return "Error";
