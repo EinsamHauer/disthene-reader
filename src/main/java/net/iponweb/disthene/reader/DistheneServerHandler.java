@@ -1,5 +1,7 @@
 package net.iponweb.disthene.reader;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,6 +13,7 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -37,10 +40,10 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
         try {
-            Map<String, String> parameters = decodeParameters(msg);
             HttpRequest req = (HttpRequest) msg;
             QueryStringDecoder decoder = new QueryStringDecoder(req.getUri());
             String path = decoder.path();
+            Map<String, String> parameters = decodeParameters(msg, path);
 
             logger.debug("Path: " + path);
             for(Map.Entry<String, String> param : parameters.entrySet()) {
@@ -68,30 +71,27 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private Map<String, String> decodeParameters(Object msg) throws IOException {
+    private Map<String, String> decodeParameters(Object msg, String path) throws IOException {
         Map<String, String> result = new HashMap<>();
-        if (msg instanceof HttpRequest) {
 
-            if (((HttpRequest) msg).getMethod().equals(HttpMethod.POST)) {
-                HttpPostRequestDecoder decoder = new HttpPostRequestDecoder((HttpRequest) msg);
-                logger.debug("POST request");
-                logger.debug(((HttpContent) msg).content().toString(Charset.defaultCharset()));
-                for(InterfaceHttpData data : decoder.getBodyHttpDatas()) {
-                    logger.debug("Found data: " + data.getHttpDataType().toString());
-                    if (data instanceof Attribute) {
-                        result.put(data.getName(), ((Attribute) data).getValue());
-                    }
-                }
-            } else {
+        switch (path) {
+            case "/metrics":
                 QueryStringDecoder decoder = new QueryStringDecoder(((HttpRequest) msg).getUri());
                 for(Map.Entry<String, List<String>> entry : decoder.parameters().entrySet()) {
                     result.put(entry.getKey(), entry.getValue().size() > 0 ? entry.getValue().get(0) : null);
                 }
+            case "/paths":
+                logger.debug("POST request");
+                logger.debug(((HttpContent) msg).content().toString(Charset.defaultCharset()));
+                Gson gson = new Gson();
+                Type stringStringMap = new TypeToken<Map<String, String>>(){}.getType();
+                Map<String,String> map = gson.fromJson(((HttpContent) msg).content().toString(Charset.defaultCharset()), stringStringMap);
 
-
-            }
-
+                for(Map.Entry<String,String> param : map.entrySet()) {
+                    result.put(param.getKey(), param.getValue());
+                }
         }
+
         logger.debug(result);
 
         return result;
@@ -121,4 +121,5 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
         }
 
     }
+
 }
