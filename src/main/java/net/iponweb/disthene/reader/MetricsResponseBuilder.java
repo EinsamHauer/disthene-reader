@@ -26,7 +26,7 @@ public class MetricsResponseBuilder {
         long start = System.nanoTime();
         // Build paths
         logger.debug("Fetching paths from ES");
-        List<String> paths = PathsService.getInstance().getPaths(tenant, query);
+        List<String> paths = PathsService.getInstance().getPathPaths(tenant, query);
         long end = System.nanoTime();
         logger.debug("Fetched paths from ES in " + (end - start) / 1000000 + "ms");
 

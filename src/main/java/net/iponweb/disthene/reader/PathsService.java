@@ -50,7 +50,18 @@ public class PathsService {
         client = factory.getObject();
     }
 
-    public List<String> getPaths(String tenant, String wildcard) throws Exception {
+    public List<String> getPathPaths(String tenant, String wildcard) throws Exception {
+        List<CyanitePath> resultingPaths = getPaths(tenant, wildcard);
+
+        List<String> resultList = new ArrayList<>();
+        for (CyanitePath path : resultingPaths) {
+            resultList.add(path.getPath());
+        }
+
+        return resultList;
+    }
+
+    public List<CyanitePath> getPaths(String tenant, String wildcard) throws Exception {
         String regEx = WildcardUtil.getRegExFromWildcard(wildcard);
 
 
@@ -66,19 +77,15 @@ public class PathsService {
                 FilterBuilders.termFilter("tenant", tenant))).size(totalResults);
         search = new Search.Builder(searchSourceBuilder.toString()).addIndex("cyanite_paths").build();
         result = client.execute(search);
-        List<CyanitePath> resultingPaths = result.getSourceAsObjectList(CyanitePath.class);
-
-        List<String> resultList = new ArrayList<>();
-        for (CyanitePath path : resultingPaths) {
-            resultList.add(path.getPath());
-        }
-
-        return resultList;
+        return result.getSourceAsObjectList(CyanitePath.class);
     }
 
 
     private static class CyanitePath {
         private String path;
+        private int depth;
+        private String tenant;
+        private boolean leaf;
 
         public String getPath() {
             return path;
@@ -86,6 +93,30 @@ public class PathsService {
 
         public void setPath(String path) {
             this.path = path;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        public String getTenant() {
+            return tenant;
+        }
+
+        public void setTenant(String tenant) {
+            this.tenant = tenant;
+        }
+
+        public boolean isLeaf() {
+            return leaf;
+        }
+
+        public void setLeaf(boolean leaf) {
+            this.leaf = leaf;
         }
     }
 }

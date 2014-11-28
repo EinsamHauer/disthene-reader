@@ -2,12 +2,14 @@ package net.iponweb.disthene.reader;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 /**
  * @author Andrei Ivanov
  */
 public class VariousTests {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Gson gson = new Gson();
         Double values[] = new Double[100];
 /*
@@ -15,7 +17,8 @@ public class VariousTests {
             values[i] = (double) i;
         }
 */
-        System.out.println(gson.toJson(values));
+        List paths = PathsService.getInstance().getPaths("bidswitch", "userverlua-eu-gce-1.userver.requests.path.*");
+        System.out.println(gson.toJson(paths));
 
     }
 

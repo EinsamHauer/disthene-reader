@@ -68,7 +68,14 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                     return "Error";
                 }
             case "/paths":
-                return "Called paths";
+                try {
+                    return PathsResponseBuilder.buildResponse(decoder.parameters().get("tenant").get(0),
+                            decoder.parameters().get("query").get(0)
+                            );
+                } catch (Exception e) {
+                    logger.error(e);
+                    return "Error";
+                }
             default:
                 return "Error";
         }
