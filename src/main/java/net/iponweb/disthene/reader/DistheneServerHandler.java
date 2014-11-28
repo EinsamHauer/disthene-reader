@@ -72,8 +72,9 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                 }
             case "/paths":
                 try {
-                    return PathsResponseBuilder.buildResponse(decoder.parameters().get("tenant").get(0),
-                            decoder.parameters().get("query").get(0)
+                    return PathsResponseBuilder.buildResponse(
+                            decoder.parameters().get("tenant") == null ? "NONE" : decoder.parameters().get("tenant").get(0),
+                            decoder.parameters().get("query") == null ? "*" : decoder.parameters().get("query").get(0)
                             );
                 } catch (Exception e) {
                     logger.error("Encountered an error fetching paths", e);
