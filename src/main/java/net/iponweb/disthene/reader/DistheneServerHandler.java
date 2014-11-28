@@ -78,10 +78,8 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                 } catch (Exception e) {
                     logger.error("Encountered an error fetching paths", e);
                     logger.error("Parameters were:");
-                    for (Map.Entry<String, List<String>> param : decoder.parameters().entrySet()) {
-                        logger.error(param.getKey() + " : " + param.getValue());
-
-                    }
+                    logger.error(decoder.parameters().get("tenant").get(0));
+                    logger.error(decoder.parameters().get("query").get(0));
 
                     return "Error";
                 }
