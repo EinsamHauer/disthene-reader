@@ -41,6 +41,11 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
             QueryStringDecoder decoder = new QueryStringDecoder(req.getUri());
             String path = decoder.path();
 
+            logger.debug("Path: " + path);
+            for(Map.Entry<String, String> param : parameters.entrySet()) {
+                logger.debug(param.getKey() + "=" + param.getValue());
+            }
+
             if (DefaultHttpHeaders.is100ContinueExpected(req)) {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
             }
