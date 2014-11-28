@@ -59,6 +59,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
         String path = decoder.path();
 
         logger.debug("Query was: " + request.getUri());
+        logger.debug("Method was: " + request.getMethod());
 
         switch (path) {
             case "/metrics":
