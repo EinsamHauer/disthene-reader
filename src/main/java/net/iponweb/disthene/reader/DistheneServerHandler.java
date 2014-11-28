@@ -7,6 +7,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
 import org.apache.log4j.Logger;
 
+import java.util.List;
+import java.util.Map;
+
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -74,6 +77,12 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                             );
                 } catch (Exception e) {
                     logger.error("Encountered an error fetching paths", e);
+                    logger.error("Parameters were:");
+                    for (Map.Entry<String, List<String>> param : decoder.parameters().entrySet()) {
+                        logger.error(param.getKey() + " : " + param.getValue());
+
+                    }
+
                     return "Error";
                 }
             default:
