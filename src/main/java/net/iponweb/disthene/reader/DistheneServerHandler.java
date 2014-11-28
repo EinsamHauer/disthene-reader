@@ -73,7 +73,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                             decoder.parameters().get("query").get(0)
                             );
                 } catch (Exception e) {
-                    logger.error(e);
+                    logger.error("Encountered an error fetching paths", e);
                     return "Error";
                 }
             default:
