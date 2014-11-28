@@ -1,6 +1,9 @@
 package net.iponweb.disthene.reader;
 
 import com.datastax.driver.core.*;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
@@ -17,6 +20,10 @@ public class MetricsResponseBuilder {
     final static Logger logger = Logger.getLogger(MetricsResponseBuilder.class);
 
     private static final String cassandraQuery = "SELECT time, data FROM metric.metric " +
+            "where path = ? and tenant = ? and period = ? and rollup = ? " +
+            "and time >= ? and time <= ? order by time";
+
+    private static final String cassandraQueryLong = "SELECT path, time, data FROM metric.metric " +
             "where path = ? and tenant = ? and period = ? and rollup = ? " +
             "and time >= ? and time <= ? order by time";
 
@@ -37,12 +44,17 @@ public class MetricsResponseBuilder {
 
         // Now let's query C*
         Session session = CassandraService.getInstance().getSession();
+/*
         PreparedStatement statement = session.prepare(cassandraQuery);
         Map<String, ResultSetFuture> futures = new HashMap<>();
         for (String path : paths) {
             BoundStatement boundStatement = statement.bind(path, tenant, period, rollup, from, Math.min(to, now));
             futures.put(path, session.executeAsync(boundStatement));
         }
+*/
+
+        List<ListenableFuture<ResultSet>> futures = sendQueries(session, cassandraQueryLong, paths, tenant,
+                period, rollup, from, to);
 
         // now build the weird data structures ("in the meanwhile")
         Map<Long, Integer> timestampIndices = new HashMap<>();
@@ -68,6 +80,7 @@ public class MetricsResponseBuilder {
                 .append(",\"step\":").append(rollup)
                 .append(",\"series\":{");
 
+/*
         String comma = "";
         for (Map.Entry<String, ResultSetFuture> future : futures.entrySet()) {
             String path = future.getKey();
@@ -82,11 +95,46 @@ public class MetricsResponseBuilder {
             }
             sb.append(gson.toJson(values));
         }
+*/
+        String comma = "";
+        for (ListenableFuture<ResultSet> future : futures) {
+            ResultSet rs = future.get();
+            String path = null;
+
+            Double values[] = new Double[length];
+            for (Row row : rs) {
+                path = row.getString("path");
+                values[timestampIndices.get(row.getLong("time"))] =
+                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+            }
+
+            if (path != null) {
+                sb.append(comma);
+                comma = ",";
+                sb.append("\"").append(path).append("\":");
+                sb.append(gson.toJson(values));
+            }
+        }
 
         sb.append("}}");
         logger.debug("Finished processing query " + query + " for tenant " + tenant);
         return sb.toString();
     }
+
+    private static List<ListenableFuture<ResultSet>> sendQueries(Session session, String query,
+                                                                 List<String> paths, String tenant, int period, int rollup,
+                                                                 long from, long to) {
+        List<ResultSetFuture> futures = Lists.newArrayListWithExpectedSize(paths.size());
+        PreparedStatement statement = session.prepare(query);
+
+        for (String path : paths) {
+            BoundStatement boundStatement = statement.bind(path, tenant, period, rollup, from, to);
+            futures.add(session.executeAsync(boundStatement));
+        }
+
+        return Futures.inCompletionOrder(futures);
+    }
+
 
     private static boolean isSumMetric(String path) {
         return path.startsWith("sum");

@@ -7,9 +7,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.Attribute;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -20,9 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
-import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -80,6 +75,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                 for(Map.Entry<String, List<String>> entry : decoder.parameters().entrySet()) {
                     result.put(entry.getKey(), entry.getValue().size() > 0 ? entry.getValue().get(0) : null);
                 }
+                break;
             case "/paths":
                 logger.debug("POST request");
                 logger.debug(((HttpContent) msg).content().toString(Charset.defaultCharset()));
@@ -90,6 +86,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                 for(Map.Entry<String,String> param : map.entrySet()) {
                     result.put(param.getKey(), param.getValue());
                 }
+                break;
         }
 
         logger.debug(result);
