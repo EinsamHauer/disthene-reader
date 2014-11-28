@@ -74,6 +74,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
             if (((HttpRequest) msg).getMethod().equals(HttpMethod.POST)) {
                 HttpPostRequestDecoder decoder = new HttpPostRequestDecoder((HttpRequest) msg);
                 for(InterfaceHttpData data : decoder.getBodyHttpDatas()) {
+                    logger.debug("Found data: " + data.getHttpDataType().toString());
                     if (data instanceof Attribute) {
                         result.put(data.getName(), ((Attribute) data).getValue());
                     }
