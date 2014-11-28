@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
             if (((HttpRequest) msg).getMethod().equals(HttpMethod.POST)) {
                 HttpPostRequestDecoder decoder = new HttpPostRequestDecoder((HttpRequest) msg);
                 logger.debug("POST request");
+                logger.debug(((HttpContent) msg).content().toString(Charset.defaultCharset()));
                 for(InterfaceHttpData data : decoder.getBodyHttpDatas()) {
                     logger.debug("Found data: " + data.getHttpDataType().toString());
                     if (data instanceof Attribute) {
