@@ -80,6 +80,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                     logger.error("Parameters were:");
                     logger.error(decoder.parameters().get("tenant").get(0));
                     logger.error(decoder.parameters().get("query").get(0));
+                    logger.error("Query was: " + request.getUri());
 
                     return "Error";
                 }
