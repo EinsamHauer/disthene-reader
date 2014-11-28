@@ -35,7 +35,7 @@ public class Main {
         serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.INFO))
+                .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new DisthenServerInitializer());
 
         channel = serverBootstrap.bind(port).sync().channel();
