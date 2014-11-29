@@ -1,11 +1,12 @@
 package net.iponweb.disthene.reader;
 
 import com.datastax.driver.core.*;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.futures.DistheneFutures;
 import net.iponweb.disthene.reader.futures.SinglePathFuture;
@@ -16,6 +17,8 @@ import org.joda.time.DateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Andrei Ivanov
@@ -174,16 +177,17 @@ public class MetricsResponseBuilder {
                                                                  List<String> paths, String tenant, int period, int rollup,
                                                                  long from, long to,
                                                                  final int length, final Map<Long, Integer> timestampIndices) {
+        ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
 
 
         for (final String path : paths) {
-            AsyncFunction<ResultSet, SinglePathResult> serializeFunction =
-                    new AsyncFunction<ResultSet, SinglePathResult>() {
-                        public ListenableFuture<SinglePathResult> apply(ResultSet resultSet) {
+            Function<ResultSet, SinglePathResult> serializeFunction =
+                    new Function<ResultSet, SinglePathResult>() {
+                        public SinglePathResult apply(ResultSet resultSet) {
                             SinglePathResult result = new SinglePathResult(path);
                             result.makeJson(resultSet, length, timestampIndices);
-                            return Futures.immediateFuture(result);
+                            return result;
                         }
                     };
 
@@ -191,7 +195,8 @@ public class MetricsResponseBuilder {
             futures.add(
                     Futures.transform(
                             session.executeAsync(query, path, tenant, period, rollup, from, to),
-                            serializeFunction
+                            serializeFunction,
+                            executorService
                     )
             );
         }
