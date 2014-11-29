@@ -1,6 +1,8 @@
 package net.iponweb.disthene.reader;
 
 import com.datastax.driver.core.*;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 import org.apache.log4j.Logger;
 
 /**
@@ -43,7 +45,8 @@ public class CassandraService {
 
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
-                .withCompression(ProtocolOptions.Compression.NONE)
+                .withCompression(ProtocolOptions.Compression.LZ4)
+                .withLoadBalancingPolicy(new TokenAwarePolicy(new RoundRobinPolicy()))
                 .withPort(9042);
         for(String cp : CASSANDRA_CPS) {
             builder.addContactPoint(cp);
