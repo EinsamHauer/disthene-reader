@@ -165,7 +165,7 @@ public class MetricsResponseBuilder {
         Map<String, ResultSetFuture> futures = new HashMap<>();
 
         for (String path : paths) {
-            futures.put(path, session.executeAsync(query, tenant, period, rollup, from, to));
+            futures.put(path, session.executeAsync(query, path, tenant, period, rollup, from, to));
         }
 
         return DistheneFutures.inCompletionOrder(futures);
