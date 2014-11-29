@@ -163,11 +163,9 @@ public class MetricsResponseBuilder {
                                                                  List<String> paths, String tenant, int period, int rollup,
                                                                  long from, long to) {
         Map<String, ResultSetFuture> futures = new HashMap<>();
-        PreparedStatement statement = session.prepare(query);
 
         for (String path : paths) {
-            BoundStatement boundStatement = statement.bind(path, tenant, period, rollup, from, to);
-            futures.put(path, session.executeAsync(boundStatement));
+            futures.put(path, session.executeAsync(query, tenant, period, rollup, from, to));
         }
 
         return DistheneFutures.inCompletionOrder(futures);
