@@ -140,6 +140,15 @@ public class MetricsResponseBuilder {
                 values[timestampIndices.get(row.getLong("time"))] =
                         isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
             }
+
+            sb.append("[");
+            String innerComma = "";
+            for(Double value : values) {
+                sb.append(innerComma);
+                innerComma = ",";
+                sb.append(value);
+            }
+            sb.append("]");
 //            sb.append(gson.toJson(values));
         }
 
