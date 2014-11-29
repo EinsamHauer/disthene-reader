@@ -44,14 +44,10 @@ public class CassandraService {
         socketOptions.setReadTimeoutMillis(1000000);
 
         PoolingOptions poolingOptions = new PoolingOptions();
-        poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, 16);
-        poolingOptions.setMaxConnectionsPerHost(HostDistance.REMOTE, 16);
-        poolingOptions.setCoreConnectionsPerHost(HostDistance.REMOTE, 4);
-        poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL, 4);
+        poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, 8192);
+        poolingOptions.setMaxConnectionsPerHost(HostDistance.REMOTE, 8192);
         poolingOptions.setMaxSimultaneousRequestsPerConnectionThreshold(HostDistance.REMOTE, 128);
         poolingOptions.setMaxSimultaneousRequestsPerConnectionThreshold(HostDistance.LOCAL, 128);
-
-        poolingOptions.setMaxSimultaneousRequestsPerHostThreshold(HostDistance.REMOTE, 12000);
 
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
