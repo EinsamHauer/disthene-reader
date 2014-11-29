@@ -60,8 +60,11 @@ public class MetricsResponseBuilder {
         List<ListenableFuture<ResultSet>> futures = sendQueries(session, cassandraQueryLong, paths, tenant,
                 period, rollup, from, to);
 */
+        start = System.nanoTime();
         List<SinglePathFuture> futures = sendQueriesEx(session, cassandraQuery, paths, tenant,
                 period, rollup, from, to);
+        end = System.nanoTime();
+        logger.debug("Submitted queries in " + (end - start) / 1000000 + "ms");
 
         // now build the weird data structures ("in the meanwhile")
         Map<Long, Integer> timestampIndices = new HashMap<>();
