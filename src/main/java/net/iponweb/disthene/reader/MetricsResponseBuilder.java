@@ -1,10 +1,13 @@
 package net.iponweb.disthene.reader;
 
 import com.datastax.driver.core.*;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
+import net.iponweb.disthene.reader.futures.DistheneFutures;
+import net.iponweb.disthene.reader.futures.SinglePathFuture;
 import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -53,7 +56,11 @@ public class MetricsResponseBuilder {
         }
 */
 
+/*
         List<ListenableFuture<ResultSet>> futures = sendQueries(session, cassandraQueryLong, paths, tenant,
+                period, rollup, from, to);
+*/
+        List<SinglePathFuture> futures = sendQueriesEx(session, cassandraQuery, paths, tenant,
                 period, rollup, from, to);
 
         // now build the weird data structures ("in the meanwhile")
@@ -96,6 +103,7 @@ public class MetricsResponseBuilder {
             sb.append(gson.toJson(values));
         }
 */
+/*
         String comma = "";
         for (ListenableFuture<ResultSet> future : futures) {
             ResultSet rs = future.get();
@@ -115,6 +123,22 @@ public class MetricsResponseBuilder {
                 sb.append(gson.toJson(values));
             }
         }
+*/
+
+        String comma = "";
+        for (SinglePathFuture future : futures) {
+            ResultSet resultSet = future.get();
+            String path = future.getPath();
+            sb.append(comma);
+            comma = ",";
+            sb.append("\"").append(path).append("\":");
+            Double values[] = new Double[length];
+            for (Row row : resultSet) {
+                values[timestampIndices.get(row.getLong("time"))] =
+                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+            }
+            sb.append(gson.toJson(values));
+        }
 
         sb.append("}}");
         logger.debug("Finished processing query " + query + " for tenant " + tenant);
@@ -133,6 +157,20 @@ public class MetricsResponseBuilder {
         }
 
         return Futures.inCompletionOrder(futures);
+    }
+
+    private static ImmutableList<SinglePathFuture> sendQueriesEx(Session session, String query,
+                                                                 List<String> paths, String tenant, int period, int rollup,
+                                                                 long from, long to) {
+        Map<String, ResultSetFuture> futures = new HashMap<>();
+        PreparedStatement statement = session.prepare(query);
+
+        for (String path : paths) {
+            BoundStatement boundStatement = statement.bind(path, tenant, period, rollup, from, to);
+            futures.put(path, session.executeAsync(boundStatement));
+        }
+
+        return DistheneFutures.inCompletionOrder(futures);
     }
 
 
