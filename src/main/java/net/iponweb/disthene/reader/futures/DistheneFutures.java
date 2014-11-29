@@ -14,9 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class DistheneFutures {
 
-    public static ImmutableList<SinglePathFuture> inCompletionOrder(Map<String, ? extends ListenableFuture<ResultSet>> futures
-            , final int length
-            , final Map<Long, Integer> timestampIndices) {
+    public static ImmutableList<SinglePathFuture> inCompletionOrder(Map<String, ? extends ListenableFuture<ResultSet>> futures) {
         final ConcurrentLinkedQueue<SinglePathFuture> delegates = Queues.newConcurrentLinkedQueue();
         ImmutableList.Builder<SinglePathFuture> listBuilder = ImmutableList.builder();
         DistheneExecutor executor = new DistheneExecutor(MoreExecutors.directExecutor());
@@ -30,7 +28,6 @@ public class DistheneFutures {
                     SinglePathFuture first = delegates.remove();
                     first.setPath(path);
                     first.setFuture(future);
-                    first.makeJson(length, timestampIndices);
                 }
             }, executor);
             listBuilder.add(delegate);

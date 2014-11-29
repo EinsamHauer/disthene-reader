@@ -8,6 +8,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.futures.DistheneFutures;
 import net.iponweb.disthene.reader.futures.SinglePathFuture;
+import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
@@ -59,6 +60,11 @@ public class MetricsResponseBuilder {
         List<ListenableFuture<ResultSet>> futures = sendQueries(session, cassandraQueryLong, paths, tenant,
                 period, rollup, from, to);
 */
+        start = System.nanoTime();
+        List<SinglePathFuture> futures = sendQueriesEx(session, cassandraQuery, paths, tenant,
+                period, rollup, from, to);
+        end = System.nanoTime();
+        logger.debug("Submitted queries in " + (end - start) / 1000000 + "ms");
 
         // now build the weird data structures ("in the meanwhile")
         Map<Long, Integer> timestampIndices = new HashMap<>();
@@ -72,13 +78,6 @@ public class MetricsResponseBuilder {
         int length = timestampIndices.size();
         logger.debug("Expected number of data points in series is " + length);
         logger.debug("Expected number of series is " + paths.size());
-
-        start = System.nanoTime();
-        List<SinglePathFuture> futures = sendQueriesEx(session, cassandraQuery, paths, tenant,
-                period, rollup, from, to, length, timestampIndices);
-        end = System.nanoTime();
-        logger.debug("Submitted queries in " + (end - start) / 1000000 + "ms");
-
 
         Gson gson = new Gson();
         // Get results from C* and build the response right away
@@ -131,13 +130,11 @@ public class MetricsResponseBuilder {
 
         String comma = "";
         for (SinglePathFuture future : futures) {
-//            ResultSet resultSet = future.get();
+            ResultSet resultSet = future.get();
             String path = future.getPath();
             sb.append(comma);
             comma = ",";
             sb.append("\"").append(path).append("\":");
-            sb.append(future.getJson());
-/*
             Double values[] = new Double[length];
             for (Row row : resultSet) {
                 values[timestampIndices.get(row.getLong("time"))] =
@@ -152,7 +149,6 @@ public class MetricsResponseBuilder {
                 sb.append(",").append(values[i]);
             }
             sb.append("]");
-*/
 //            sb.append(gson.toJson(values));
         }
 
@@ -177,14 +173,14 @@ public class MetricsResponseBuilder {
 
     private static ImmutableList<SinglePathFuture> sendQueriesEx(Session session, String query,
                                                                  List<String> paths, String tenant, int period, int rollup,
-                                                                 long from, long to, int length, Map<Long, Integer> timestampIndices) {
+                                                                 long from, long to) {
         Map<String, ResultSetFuture> futures = new HashMap<>();
 
         for (String path : paths) {
             futures.put(path, session.executeAsync(query, path, tenant, period, rollup, from, to));
         }
 
-        return DistheneFutures.inCompletionOrder(futures, length, timestampIndices);
+        return DistheneFutures.inCompletionOrder(futures);
     }
 
 
