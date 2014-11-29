@@ -48,8 +48,8 @@ public class CassandraService {
         poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL, 1024);
         poolingOptions.setMaxSimultaneousRequestsPerConnectionThreshold(HostDistance.REMOTE, 12000);
         poolingOptions.setMaxSimultaneousRequestsPerConnectionThreshold(HostDistance.LOCAL, 12000);
-        poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, 512);
-        poolingOptions.setMaxConnectionsPerHost(HostDistance.REMOTE, 512);
+        poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, 1040);
+        poolingOptions.setMaxConnectionsPerHost(HostDistance.REMOTE, 1040);
 
         poolingOptions.setMaxSimultaneousRequestsPerHostThreshold(HostDistance.REMOTE, 12000);
 
