@@ -43,7 +43,7 @@ public class CassandraService {
 
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
-                .withCompression(ProtocolOptions.Compression.LZ4)
+                .withCompression(ProtocolOptions.Compression.NONE)
                 .withPort(9042);
         for(String cp : CASSANDRA_CPS) {
             builder.addContactPoint(cp);
