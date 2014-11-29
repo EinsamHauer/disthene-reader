@@ -141,15 +141,7 @@ public class MetricsResponseBuilder {
                         isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
             }
 
-            sb.append("[");
-            String innerComma = "";
-            for(Double value : values) {
-                sb.append(innerComma);
-                innerComma = ",";
-                sb.append(value);
-            }
-            sb.append("]");
-//            sb.append(gson.toJson(values));
+            gson.toJson(values, sb);
         }
 
         sb.append("}}");
