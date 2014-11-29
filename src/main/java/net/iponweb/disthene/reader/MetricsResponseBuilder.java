@@ -8,6 +8,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.futures.DistheneFutures;
 import net.iponweb.disthene.reader.futures.SinglePathFuture;
+import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
@@ -136,8 +137,8 @@ public class MetricsResponseBuilder {
             sb.append("\"").append(path).append("\":");
             Double values[] = new Double[length];
             for (Row row : resultSet) {
-                values[timestampIndices.get(row.getLong("time"))] = 1.;
-//                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+                values[timestampIndices.get(row.getLong("time"))] =
+                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
             }
 //            sb.append(gson.toJson(values));
         }
