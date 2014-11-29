@@ -114,7 +114,7 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
                             parameters.get("query") == null ? "*" : parameters.get("query")
                             );
             default:
-                throw new UnsupportedOperationException("Path not supported");
+                throw new UnsupportedOperationException("Path not supported: " + path);
         }
 
     }
