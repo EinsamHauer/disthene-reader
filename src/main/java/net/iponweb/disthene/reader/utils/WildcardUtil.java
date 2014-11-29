@@ -9,4 +9,8 @@ public class WildcardUtil {
         return wildcard.replace(".", "\\.").replace("*", ".*").replace("{", "(")
                 .replace("}", ")").replace(",", "|");
     }
+
+    public static boolean isSumMetric(String path) {
+        return path.startsWith("sum");
+    }
 }
