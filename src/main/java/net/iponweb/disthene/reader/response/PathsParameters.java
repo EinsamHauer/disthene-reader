@@ -1,5 +1,7 @@
 package net.iponweb.disthene.reader.response;
 
+import com.google.gson.Gson;
+
 /**
  * @author Andrei Ivanov
  */
@@ -22,5 +24,10 @@ public class PathsParameters {
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

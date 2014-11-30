@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader;
 
 
 import com.google.gson.Gson;
+import net.iponweb.disthene.reader.services.PathsService;
 import org.apache.log4j.Logger;
 
 /**

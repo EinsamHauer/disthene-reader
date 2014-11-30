@@ -9,6 +9,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import net.iponweb.disthene.reader.services.CassandraService;
+import net.iponweb.disthene.reader.services.PathsService;
 import org.apache.log4j.Logger;
 
 /**

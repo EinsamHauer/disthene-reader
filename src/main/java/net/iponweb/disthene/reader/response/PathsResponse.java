@@ -1,15 +1,17 @@
 package net.iponweb.disthene.reader.response;
 
+import net.iponweb.disthene.reader.services.PathsService;
+import org.apache.log4j.Logger;
+
 /**
  * @author Andrei Ivanov
  */
 public class PathsResponse {
+    final static Logger logger = Logger.getLogger(PathsResponse.class);
 
 
     public static String getContent(PathsParameters parameters) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("tenant:").append(parameters.getTenant()).append("\n");
-        sb.append("query:").append(parameters.getQuery()).append("\n");
-        return sb.toString();
+        logger.debug("Processing query: " + parameters);
+        return PathsService.getInstance().getPathsAsJsonArray(parameters.getTenant(), parameters.getQuery());
     }
 }

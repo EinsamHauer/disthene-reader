@@ -9,8 +9,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
-import net.iponweb.disthene.reader.CassandraService;
-import net.iponweb.disthene.reader.PathsService;
+import net.iponweb.disthene.reader.services.CassandraService;
+import net.iponweb.disthene.reader.services.PathsService;
 import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,8 +38,7 @@ public class MetricsResponse {
         // Build paths
         logger.debug("Fetching paths from ES");
         long start = System.nanoTime();
-        // todo: support list
-        List<String> paths = PathsService.getInstance().getPathPaths(parameters.getTenant(), parameters.getPath().get(0));
+        Set<String> paths = PathsService.getInstance().getPathsSet(parameters.getTenant(), parameters.getPath());
         long end = System.nanoTime();
         logger.debug("Fetched paths from ES in " + (end - start) / 1000000 + "ms");
 

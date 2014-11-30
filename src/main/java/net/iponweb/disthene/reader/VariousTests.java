@@ -1,8 +1,14 @@
 package net.iponweb.disthene.reader;
 
-import com.google.gson.Gson;
-
-import java.util.List;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 
 /**
  * @author Andrei Ivanov
@@ -10,16 +16,79 @@ import java.util.List;
 public class VariousTests {
 
     public static void main(String[] args) throws Exception {
-        Gson gson = new Gson();
-        Double values[] = new Double[100];
-/*
-        for(int i = 0; i < values.length; i++) {
-            values[i] = (double) i;
+
+//        String regEx = "userverlua.*\\.userver\\.requests\\.path\\..*_bid.count";
+        String regEx = "[^\\.]*";
+        String tenant = "bidswitch";
+
+        Settings settings = ImmutableSettings.settingsBuilder()
+                .put("cluster.name", "cyanite").build();
+        TransportClient client = new TransportClient(settings)
+                .addTransportAddress(new InetSocketTransportAddress("es5.devops.iponweb.net", 9300))
+                .addTransportAddress(new InetSocketTransportAddress("es6.devops.iponweb.net", 9300))
+                .addTransportAddress(new InetSocketTransportAddress("es7.devops.iponweb.net", 9300))
+                .addTransportAddress(new InetSocketTransportAddress("es8.devops.iponweb.net", 9300));
+
+        long start = System.nanoTime();
+        SearchResponse response = client.prepareSearch("cyanite_paths")
+                .setScroll(new TimeValue(120000))
+                .setSize(10000)
+//                .addField("path")
+                .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
+                        FilterBuilders.termFilter("tenant", tenant)))
+                .execute().actionGet();
+
+        while (response.getHits().getHits().length > 0) {
+            for (SearchHit hit : response.getHits()) {
+                System.out.println(hit.getSourceAsString());
+            }
+            System.out.println("Got portion");
+            response = client.prepareSearchScroll(response.getScrollId())
+                    .setScroll(new TimeValue(120000))
+                    .execute().actionGet();
+
         }
-*/
-        List paths = PathsService.getInstance().getPaths("bidswitch", "userverlua-eu-gce-1.userver.requests.path.*");
-        System.out.println(gson.toJson(paths));
+        long end = System.nanoTime();
+        System.out.println("Fetched paths from ES in " + (end - start) / 1000000 + "ms");
 
     }
 
+    private static class CyanitePath {
+        private String path;
+        private int depth;
+        private String tenant;
+        private boolean leaf;
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        public String getTenant() {
+            return tenant;
+        }
+
+        public void setTenant(String tenant) {
+            this.tenant = tenant;
+        }
+
+        public boolean isLeaf() {
+            return leaf;
+        }
+
+        public void setLeaf(boolean leaf) {
+            this.leaf = leaf;
+        }
+    }
 }

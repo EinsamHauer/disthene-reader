@@ -9,6 +9,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
+import net.iponweb.disthene.reader.services.CassandraService;
+import net.iponweb.disthene.reader.services.PathsService;
 import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;

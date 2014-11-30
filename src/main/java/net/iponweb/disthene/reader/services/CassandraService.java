@@ -1,8 +1,9 @@
-package net.iponweb.disthene.reader;
+package net.iponweb.disthene.reader.services;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import net.iponweb.disthene.reader.Main;
 import org.apache.log4j.Logger;
 
 /**
