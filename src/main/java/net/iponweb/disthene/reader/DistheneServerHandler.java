@@ -2,11 +2,11 @@ package net.iponweb.disthene.reader;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
+import net.iponweb.disthene.reader.response.RequestDispatcher;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.*;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
+import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -32,33 +32,16 @@ public class DistheneServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object message) {
 
         try {
-            HttpRequest req = (HttpRequest) msg;
-            QueryStringDecoder decoder = new QueryStringDecoder(req.getUri());
-            String path = decoder.path();
-            Map<String, String> parameters = decodeParameters(msg, path);
+            HttpRequest request = (HttpRequest) message;
 
-            logger.debug("Path: " + path);
-            for(Map.Entry<String, String> param : parameters.entrySet()) {
-                logger.debug(param.getKey() + "=" + param.getValue());
-            }
-
-            if (DefaultHttpHeaders.is100ContinueExpected(req)) {
+            if (DefaultHttpHeaders.is100ContinueExpected(request)) {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
             }
-            boolean keepAlive = DefaultHttpHeaders.isKeepAlive(req);
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(getResponse(path, parameters).getBytes()));
-            response.headers().set(CONTENT_TYPE, "application/json");
-            response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
-
-            if (!keepAlive) {
-                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
-            } else {
-                response.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-                ctx.write(response);
-            }
+            FullHttpResponse response = new RequestDispatcher(message).getResponse();
+            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
             logger.error("Invalid request", e);
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR);
