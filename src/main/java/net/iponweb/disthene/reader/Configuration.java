@@ -18,7 +18,7 @@ public class Configuration {
     //ES
     public static String ES_CLUSTER_NAME = "cyanite";
     public static String ES_INDEX = "cyanite_paths";
-    public static int ES_SCROLL_SIZE = 100;
+    public static int ES_SCROLL_SIZE = 50000;
     public static int ES_TIMEOUT = 120000;
     public static String[] ES_NODES = {
             "es5.devops.iponweb.net",
