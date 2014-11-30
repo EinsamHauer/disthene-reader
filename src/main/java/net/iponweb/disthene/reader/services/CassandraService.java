@@ -3,21 +3,14 @@ package net.iponweb.disthene.reader.services;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
-import net.iponweb.disthene.reader.Main;
+import net.iponweb.disthene.reader.Configuration;
 import org.apache.log4j.Logger;
 
 /**
  * @author Andrei Ivanov
  */
 public class CassandraService {
-
-    private static final String[] CASSANDRA_CPS = {
-            "cassandra11.devops.iponweb.net",
-            "cassandra12.devops.iponweb.net",
-            "cassandra17.devops.iponweb.net",
-            "cassandra18.devops.iponweb.net"
-    };
-    private final static Logger logger = Logger.getLogger(Main.class);
+    private final static Logger logger = Logger.getLogger(CassandraService.class);
 
 
     private static volatile CassandraService instance = null;
@@ -57,7 +50,7 @@ public class CassandraService {
                 .withPoolingOptions(poolingOptions)
                 .withProtocolVersion(ProtocolVersion.V2)
                 .withPort(9042);
-        for(String cp : CASSANDRA_CPS) {
+        for(String cp : Configuration.CASSANDRA_CPS) {
             builder.addContactPoint(cp);
         }
         Cluster cluster = builder.build();

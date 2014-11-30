@@ -7,6 +7,14 @@ public class Configuration {
 
     public static int PORT = 9080;
 
+    //C*
+    public static String[] CASSANDRA_CPS = {
+            "cassandra11.devops.iponweb.net",
+            "cassandra12.devops.iponweb.net",
+            "cassandra17.devops.iponweb.net",
+            "cassandra18.devops.iponweb.net"
+    };
+
     //ES
     public static String ES_CLUSTER_NAME = "cyanite";
     public static String ES_INDEX = "cyanite_paths";

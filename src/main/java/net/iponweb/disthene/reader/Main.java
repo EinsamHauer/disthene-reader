@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
  */
 public class Main {
     final static Logger logger = Logger.getLogger(Main.class);
-    private static int port = 9080;
     private static Channel channel = null;
     private static EventLoopGroup bossGroup = new NioEventLoopGroup(10);
     private static EventLoopGroup workerGroup = new NioEventLoopGroup(10);
@@ -40,8 +39,8 @@ public class Main {
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new DisthenServerInitializer());
 
-        channel = serverBootstrap.bind(port).sync().channel();
-        logger.info("Listening on port " + port);
+        channel = serverBootstrap.bind(Configuration.PORT).sync().channel();
+        logger.info("Listening on port " + Configuration.PORT);
     }
 
     public static void shutdown() {
