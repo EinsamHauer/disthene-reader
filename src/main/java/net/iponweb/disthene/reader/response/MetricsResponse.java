@@ -15,10 +15,7 @@ import net.iponweb.disthene.reader.utils.ListUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,7 +35,13 @@ public class MetricsResponse {
         // Build paths
         logger.debug("Fetching paths from ES");
         long start = System.nanoTime();
-        Set<String> paths = PathsService.getInstance().getPathsSet(parameters.getTenant(), parameters.getPath());
+        Set<String> paths;
+        if (parameters.getPath().size() > 1) {
+            paths = new HashSet<>();
+            paths.addAll(parameters.getPath());
+        } else {
+            paths = PathsService.getInstance().getPathsSet(parameters.getTenant(), parameters.getPath());
+        }
         long end = System.nanoTime();
         logger.debug("Fetched paths from ES in " + (end - start) / 1000000 + "ms");
 
