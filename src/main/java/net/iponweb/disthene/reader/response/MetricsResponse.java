@@ -53,6 +53,9 @@ public class MetricsResponse {
         Long effectiveFrom = (parameters.getFrom() % rollup) == 0 ? parameters.getFrom() : parameters.getFrom() + rollup - (parameters.getFrom() % rollup);
         effectiveTo = effectiveTo - (effectiveTo % rollup);
 
+        logger.debug("Effective from: " + effectiveFrom);
+        logger.debug("Effective to: " + effectiveTo);
+
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
         Long timestamp = effectiveFrom;
