@@ -17,6 +17,7 @@ public class RequestDispatcher {
 
     private static final String METRICS_PATH = "/metrics";
     private static final String PATHS_PATH = "/paths";
+    private static final String PING_PATH = "/ping";
 
     private Object message;
     private QueryStringDecoder queryStringDecoder;
@@ -33,6 +34,8 @@ public class RequestDispatcher {
                 return getMetricsResponse();
             case PATHS_PATH:
                 return getPathsResponse();
+            case PING_PATH:
+                return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
             default:
                 return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         }
