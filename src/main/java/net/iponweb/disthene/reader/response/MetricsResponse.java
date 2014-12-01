@@ -50,7 +50,7 @@ public class MetricsResponse {
         Long effectiveTo = Math.min(parameters.getTo(), now);
         int rollup = getRollup(parameters.getFrom(), effectiveTo);
         int period = getPeriod(parameters.getFrom(), effectiveTo);
-        Long effectiveFrom = parameters.getFrom() + rollup - (parameters.getFrom() % rollup);
+        Long effectiveFrom = (parameters.getFrom() % rollup) == 0 ? parameters.getFrom() : parameters.getFrom() + rollup - (parameters.getFrom() % rollup);
         effectiveTo = effectiveTo - (effectiveTo % rollup);
 
         // now build the weird data structures ("in the meanwhile")
