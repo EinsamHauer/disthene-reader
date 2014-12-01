@@ -12,6 +12,11 @@ public class WildcardUtil {
                 .replace("}", ")").replace(",", "|");
     }
 
+    public static String getPathsRegExFromWildcard(String wildcard) {
+        return wildcard.replace(".", "\\.").replace("*", "[^\\.]*").replace("{", "(")
+                .replace("}", ")").replace(",", "|");
+    }
+
     public static int getPathDepth(String wildcard) {
         return StringUtils.countMatches(wildcard, ".") + 1;
     }
