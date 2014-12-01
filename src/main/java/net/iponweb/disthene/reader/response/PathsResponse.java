@@ -12,6 +12,7 @@ public class PathsResponse {
 
     public static String getContent(PathsParameters parameters) {
         logger.debug("Processing query: " + parameters);
-        return PathsService.getInstance().getPathsAsJsonArray(parameters.getTenant(), parameters.getQuery());
+        return PathsService.getInstance().getPathsAsJsonArray(parameters.getTenant(),
+                parameters.getQuery().equals("*") ? "[^\\.]*" : parameters.getQuery());
     }
 }
