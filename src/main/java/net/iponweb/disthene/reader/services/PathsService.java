@@ -84,6 +84,8 @@ public class PathsService {
         String regEx = WildcardUtil.getRegExFromWildcard(wildcard);
         int depth = WildcardUtil.getPathDepth(wildcard);
 
+        regEx = "[^\\.]*";
+
         SearchResponse response = client.prepareSearch(Configuration.ES_INDEX)
                 .setScroll(new TimeValue(Configuration.ES_TIMEOUT))
                 .setSize(Configuration.ES_SCROLL_SIZE)
