@@ -1,21 +1,17 @@
 package net.iponweb.disthene.reader;
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Andrei Ivanov
  */
 public class VariousTests {
-
     public static void main(String[] args) throws Exception {
+        System.out.println(StringUtils.countMatches("userverlua*.userver.requests.path.*_bid.count", "."));
+    }
+
+/*
+        public static void main(String[] args) throws Exception {
 
 //        String regEx = "userverlua.*\\.userver\\.requests\\.path\\..*_bid.count";
         String regEx = "[^\\.]*";
@@ -91,4 +87,5 @@ public class VariousTests {
             this.leaf = leaf;
         }
     }
+*/
 }
