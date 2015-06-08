@@ -31,6 +31,8 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
 
         try {
             HttpRequest request = (HttpRequest) message;
+            boolean keepAlive = HttpHeaders.isKeepAlive(request);
+
             FullHttpResponse response;
 
             if (DefaultHttpHeaders.is100ContinueExpected(request)) {
@@ -46,7 +48,12 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
             }
 
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            if (keepAlive) {
+                response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                ctx.write(response);
+            } else {
+                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            }
         } catch (Exception e) {
             logger.error("Invalid request", e);
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR);
