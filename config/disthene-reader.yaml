@@ -1,0 +1,32 @@
+reader:
+  bind: "0.0.0.0"
+  port: 8080
+  rollups:
+    - 60s:5356800s
+    - 900s:62208000s
+store:
+  cluster:
+    - "cassandra-1a.graphite.devops.iponweb.net"
+  port: 9042
+  keyspace: 'metric'
+  columnFamily: 'metric'
+  maxConnections: 2048
+  readTimeout: 10
+  connectTimeout: 10
+  maxRequests: 128
+index:
+  name: "cyanite"
+  cluster:
+    - "es-1a.graphite.devops.iponweb.net"
+    - "es-1b.graphite.devops.iponweb.net"
+  port: 9300
+  index: "cyanite_paths"
+  type: "path"
+  scroll: 50000
+  timeout: 120000
+  maxPaths: 2000
+stats:
+  interval: 60
+  tenant: "test"
+  hostname: "disthene-reader-1a"
+  log: true
