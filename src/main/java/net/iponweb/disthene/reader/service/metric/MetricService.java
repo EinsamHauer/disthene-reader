@@ -113,7 +113,7 @@ public class MetricService {
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
-            if (now - rollup.getPeriod() <= from) {
+            if (now - rollup.getPeriod() * rollup.getRollup() <= from) {
                 survivals.add(rollup);
             }
         }

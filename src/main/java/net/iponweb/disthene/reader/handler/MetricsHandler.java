@@ -35,7 +35,7 @@ public class MetricsHandler implements DistheneReaderHandler {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer(metricService.getMetricsAsJson(parameters.getTenant(), parameters.getPaths(), parameters.getFrom(), parameters.getTo()).getBytes()));
+                Unpooled.wrappedBuffer(metricService.getMetricsAsJson(parameters.getTenant(), parameters.getPath(), parameters.getFrom(), parameters.getTo()).getBytes()));
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         return response;
@@ -53,7 +53,7 @@ public class MetricsHandler implements DistheneReaderHandler {
             }
             if (queryStringDecoder.parameters().get("path") != null) {
                 for (String path : queryStringDecoder.parameters().get("path")) {
-                    parameters.getPaths().add(path);
+                    parameters.getPath().add(path);
                 }
             } else {
                 throw new MissingParameterException("Path parameter is missing");
@@ -76,7 +76,7 @@ public class MetricsHandler implements DistheneReaderHandler {
             if (parameters.getTenant() == null) {
                 throw new MissingParameterException("Tenant parameter is missing");
             }
-            if (parameters.getPaths().size() == 0) {
+            if (parameters.getPath().size() == 0) {
                 throw new MissingParameterException("Path parameter is missing");
             }
             if (parameters.getFrom() == null) {
@@ -94,7 +94,7 @@ public class MetricsHandler implements DistheneReaderHandler {
     private class MetricsParameters {
 
         private String tenant;
-        private List<String> paths = new ArrayList<>();
+        private List<String> path = new ArrayList<>();
         private Long from;
         private Long to;
 
@@ -106,12 +106,12 @@ public class MetricsHandler implements DistheneReaderHandler {
             this.tenant = tenant;
         }
 
-        public List<String> getPaths() {
-            return paths;
+        public List<String> getPath() {
+            return path;
         }
 
         public void setPath(List<String> paths) {
-            this.paths = paths;
+            this.path = paths;
         }
 
         public Long getFrom() {
@@ -134,7 +134,7 @@ public class MetricsHandler implements DistheneReaderHandler {
         public String toString() {
             return "MetricsParameters{" +
                     "tenant='" + tenant + '\'' +
-                    ", paths=" + paths +
+                    ", path=" + path +
                     ", from=" + from +
                     ", to=" + to +
                     '}';
