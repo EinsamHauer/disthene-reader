@@ -115,7 +115,7 @@
                     <finalName>disthene-reader</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>net.iponweb.disthene.reader.Main</mainClass>
+                            <mainClass>net.iponweb.disthene.reader.DistheneReader</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
