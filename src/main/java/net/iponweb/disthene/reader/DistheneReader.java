@@ -114,6 +114,12 @@ public class DistheneReader {
             logger.info("Shutting down carbon server");
             readerServer.shutdown();
 
+            logger.info("Shutting down index service");
+            indexService.shutdown();
+
+            logger.info("Shutting down C* service");
+            cassandraService.shutdown();
+
             logger.info("Shutdown complete");
 
             System.exit(0);

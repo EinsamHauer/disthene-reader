@@ -98,4 +98,7 @@ public class IndexService {
         return "[" + joiner.join(paths) + "]";
     }
 
+    public void shutdown() {
+        client.close();
+    }
 }
