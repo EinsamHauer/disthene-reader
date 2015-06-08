@@ -1,11 +1,15 @@
 package net.iponweb.disthene.reader;
 
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
+import net.iponweb.disthene.reader.handler.MetricsHandler;
 import net.iponweb.disthene.reader.handler.PathsHandler;
 import net.iponweb.disthene.reader.server.ReaderServer;
 import net.iponweb.disthene.reader.service.index.IndexService;
+import net.iponweb.disthene.reader.service.metric.MetricService;
+import net.iponweb.disthene.reader.service.store.CassandraService;
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.yaml.snakeyaml.Yaml;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -32,6 +36,8 @@ public class DistheneReader {
     private String configLocation;
     private ReaderServer readerServer;
     private IndexService indexService;
+    private CassandraService cassandraService;
+    private MetricService metricService;
 
 
     public DistheneReader(String configLocation) {
@@ -52,9 +58,19 @@ public class DistheneReader {
             logger.info("Creating index service");
             indexService = new IndexService(distheneReaderConfiguration.getIndex());
 
+            logger.info("Creating C* service");
+            cassandraService = new CassandraService(distheneReaderConfiguration.getStore());
+
+            logger.info("Creating metric service");
+            metricService = new MetricService(indexService, cassandraService, distheneReaderConfiguration);
+
             logger.info("Creating paths handler");
             PathsHandler pathsHandler = new PathsHandler(indexService);
             readerServer.registerHandler(PATHS_PATH, pathsHandler);
+
+            logger.info("Creating metrics handler");
+            MetricsHandler metricsHandler = new MetricsHandler(metricService);
+            readerServer.registerHandler(METRICS_PATH, metricsHandler);
 
             logger.info("Starting reader");
             readerServer.run();
@@ -66,9 +82,6 @@ public class DistheneReader {
             e.printStackTrace();
         }
     }
-
-
-
 
     public static void main(String[] args) {
         Options options = new Options();

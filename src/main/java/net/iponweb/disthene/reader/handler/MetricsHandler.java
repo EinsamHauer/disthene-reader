@@ -1,19 +1,17 @@
 package net.iponweb.disthene.reader.handler;
 
 import com.google.gson.Gson;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
-import net.iponweb.disthene.reader.service.index.IndexService;
-import net.iponweb.disthene.reader.service.store.CassandraService;
+import net.iponweb.disthene.reader.service.metric.MetricService;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Andrei Ivanov
@@ -22,44 +20,25 @@ public class MetricsHandler implements DistheneReaderHandler {
 
     final static Logger logger = Logger.getLogger(MetricsHandler.class);
 
-    private IndexService indexService;
-    private CassandraService cassandraService;
+    private MetricService metricService;
 
-    public MetricsHandler(IndexService indexService, CassandraService cassandraService) {
-        this.indexService = indexService;
-        this.cassandraService = cassandraService;
+    public MetricsHandler(MetricService metricService) {
+        this.metricService = metricService;
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws UnsupportedMethodException, MissingParameterException {
+    public FullHttpResponse handle(HttpRequest request) throws UnsupportedMethodException, MissingParameterException, ExecutionException, InterruptedException {
         MetricsParameters parameters = parse(request);
-        List<String> paths = indexService.getPaths(parameters.getTenant(), parameters.getPaths());
 
+        logger.debug("Got request: " + parameters);
 
-        // Calculate rollup etc
-/*
-        Long now = new DateTime().getMillis() * 1000;
-        Long effectiveTo = Math.min(parameters.getTo(), now);
-        int rollup = getRollup(parameters.getFrom(), effectiveTo);
-        int period = getPeriod(parameters.getFrom(), effectiveTo);
-        Long effectiveFrom = (parameters.getFrom() % rollup) == 0 ? parameters.getFrom() : parameters.getFrom() + rollup - (parameters.getFrom() % rollup);
-        effectiveTo = effectiveTo - (effectiveTo % rollup);
-
-        logger.debug("Effective from: " + effectiveFrom);
-        logger.debug("Effective to: " + effectiveTo);
-
-        // now build the weird data structures ("in the meanwhile")
-        final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
-        int index = 0;
-        while (timestamp <= effectiveTo) {
-            timestampIndices.put(timestamp, index++);
-            timestamp += rollup;
-        }
-
-*/
-
-        return null;
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.wrappedBuffer(metricService.getMetricsAsJson(parameters.getTenant(), parameters.getPaths(), parameters.getFrom(), parameters.getTo()).getBytes()));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        return response;
     }
 
     private MetricsParameters parse(HttpRequest request) throws MissingParameterException, UnsupportedMethodException {
@@ -149,6 +128,16 @@ public class MetricsHandler implements DistheneReaderHandler {
 
         public void setTo(Long to) {
             this.to = to;
+        }
+
+        @Override
+        public String toString() {
+            return "MetricsParameters{" +
+                    "tenant='" + tenant + '\'' +
+                    ", paths=" + paths +
+                    ", from=" + from +
+                    ", to=" + to +
+                    '}';
         }
     }
 

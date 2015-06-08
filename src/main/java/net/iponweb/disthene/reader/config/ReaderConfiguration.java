@@ -10,8 +10,7 @@ public class ReaderConfiguration {
     private String bind;
     private int port;
     private List<Rollup> rollups = new ArrayList<>();
-    private Rollup baseRollup;
-
+    private int resolution;
 
     public String getBind() {
         return bind;
@@ -34,12 +33,15 @@ public class ReaderConfiguration {
     }
 
     public void setRollups(List<Rollup> rollups) {
-        baseRollup = rollups.get(0);
-        this.rollups = rollups.subList(1, rollups.size());
+        this.rollups = rollups;
     }
 
-    public Rollup getBaseRollup() {
-        return baseRollup;
+    public int getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(int resolution) {
+        this.resolution = resolution;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class ReaderConfiguration {
                 "bind='" + bind + '\'' +
                 ", port=" + port +
                 ", rollups=" + rollups +
-                ", baseRollup=" + baseRollup +
+                ", resolution=" + resolution +
                 '}';
     }
 }
