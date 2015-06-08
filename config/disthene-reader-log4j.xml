@@ -12,7 +12,7 @@
 
     <appender name="FILE" class="org.apache.log4j.RollingFileAppender">
 
-        <param name="file" value="/var/log/disthene/disthene.log"/>
+        <param name="file" value="/var/log/disthene-reader/disthene-reader.log"/>
         <param name="maxFileSize" value="20MB"/>
         <param name="maxBackupIndex" value="50"/>
         <layout class="org.apache.log4j.PatternLayout">

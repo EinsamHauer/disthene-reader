@@ -25,8 +25,8 @@ import java.nio.file.Paths;
  */
 public class DistheneReader {
 
-    private static final String DEFAULT_CONFIG_LOCATION = "/etc/disthene/disthene-reader.yaml";
-    private static final String DEFAULT_LOG_CONFIG_LOCATION = "/etc/disthene/disthene-reader-log4j.xml";
+    private static final String DEFAULT_CONFIG_LOCATION = "/etc/disthene-reader/disthene-reader.yaml";
+    private static final String DEFAULT_LOG_CONFIG_LOCATION = "/etc/disthene-reader/disthene-reader-log4j.xml";
 
     private static final String METRICS_PATH = "/metrics";
     private static final String PATHS_PATH = "/paths";

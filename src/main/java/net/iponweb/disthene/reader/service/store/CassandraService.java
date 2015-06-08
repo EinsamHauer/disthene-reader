@@ -43,8 +43,8 @@ public class CassandraService {
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
                 .withCompression(ProtocolOptions.Compression.LZ4)
-//                .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra-1a.graphite.devops.iponweb.net", 9042))))                .withPoolingOptions(poolingOptions)
+                .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+//                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra-1a.graphite.devops.iponweb.net", 9042))))                .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
                 .withProtocolVersion(ProtocolVersion.V2)
                 .withPort(storeConfiguration.getPort());
