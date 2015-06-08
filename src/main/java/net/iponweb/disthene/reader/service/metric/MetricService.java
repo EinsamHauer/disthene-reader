@@ -108,7 +108,22 @@ public class MetricService {
 
     private Rollup getRollup(long from, long to) {
         long timeDelta = to -from;
-        Rollup result = distheneReaderConfiguration.getReader().getRollups().get(0);
+        long now = System.currentTimeMillis() / 1000L ;
+
+        // Let's find a rollup that potentially can have all the data taking retention in account
+        List<Rollup> survivals = new ArrayList<>();
+        for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
+            if (now - rollup.getPeriod() <= from) {
+                survivals.add(rollup);
+            }
+        }
+
+        // no survivals found - take the last rollup (may be there is something there)
+        if (survivals.size() == 0) {
+            return distheneReaderConfiguration.getReader().getRollups().get(distheneReaderConfiguration.getReader().getRollups().size() - 1);
+        }
+
+        Rollup result = survivals.get(0);
 
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
             if (timeDelta > distheneReaderConfiguration.getReader().getResolution() * rollup.getRollup()) {

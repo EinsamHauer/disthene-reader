@@ -3,10 +3,13 @@ package net.iponweb.disthene.reader.service.store;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.core.policies.WhiteListPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
 import org.apache.log4j.Logger;
 
+import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author Andrei Ivanov
@@ -40,8 +43,8 @@ public class CassandraService {
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
                 .withCompression(ProtocolOptions.Compression.LZ4)
-                .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-                .withPoolingOptions(poolingOptions)
+//                .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra-1a.graphite.devops.iponweb.net", 9042))))                .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
                 .withProtocolVersion(ProtocolVersion.V2)
                 .withPort(storeConfiguration.getPort());

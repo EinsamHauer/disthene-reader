@@ -56,7 +56,7 @@ public class MetricsHandler implements DistheneReaderHandler {
                     parameters.getPaths().add(path);
                 }
             } else {
-                throw new MissingParameterException("Tenant parameter is missing");
+                throw new MissingParameterException("Path parameter is missing");
             }
             if (queryStringDecoder.parameters().get("from") != null) {
                 parameters.setFrom(Long.valueOf(queryStringDecoder.parameters().get("from").get(0)));

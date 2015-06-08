@@ -3,6 +3,7 @@ package net.iponweb.disthene.reader;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.handler.MetricsHandler;
 import net.iponweb.disthene.reader.handler.PathsHandler;
+import net.iponweb.disthene.reader.handler.PingHandler;
 import net.iponweb.disthene.reader.server.ReaderServer;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.metric.MetricService;
@@ -71,6 +72,10 @@ public class DistheneReader {
             logger.info("Creating metrics handler");
             MetricsHandler metricsHandler = new MetricsHandler(metricService);
             readerServer.registerHandler(METRICS_PATH, metricsHandler);
+
+            logger.info("Creating ping handler");
+            PingHandler pingHandler = new PingHandler();
+            readerServer.registerHandler(PING_PATH, pingHandler);
 
             logger.info("Starting reader");
             readerServer.run();
