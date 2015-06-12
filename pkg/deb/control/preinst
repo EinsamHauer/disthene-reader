@@ -1,0 +1,8 @@
+#!/bin/sh -e
+USERNAME="disthene-reader"
+GROUPNAME="disthene-reader"
+getent group "$GROUPNAME" >/dev/null || groupadd -r "$GROUPNAME"
+getent passwd "$USERNAME" >/dev/null || \
+      useradd -r -g "$GROUPNAME" -d /usr/lib/disthene-reader -s /bin/false \
+      -c "Disthene-reader metric storage daemon" "$USERNAME"
+exit 0

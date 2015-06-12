@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -f /etc/default/disthene-reader ]; then
+    . /etc/default/disthene-reader
+fi
+
+JAR="/usr/lib/disthene/disthene-reader.jar"
+OPTS=""
+
+if [ -n "$DISTHENE_READER_CONFIG_FILE" ]; then
+  OPTS="$OPTS -c $DISTHENE_READER_CONFIG_FILE"
+fi
+
+if [ -n "$DISTHENE_READER_LOG_CONFIG_FILE" ]; then
+  OPTS="$OPTS -l $DISTHENE_READER_LOG_CONFIG_FILE"
+fi
+
+exec java $JAVA_OPTS -jar $JAR $OPTS
