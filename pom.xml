@@ -150,7 +150,7 @@
 
                                 <data>
                                     <src>${basedir}/pkg/deb/disthene-reader-default</src>
-                                    <dst>disthene</dst>
+                                    <dst>disthene-reader</dst>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
