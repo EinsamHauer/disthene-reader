@@ -49,7 +49,9 @@ public class MetricsHandler implements DistheneReaderHandler {
             if (queryStringDecoder.parameters().get("tenant") != null) {
                 parameters.setTenant(queryStringDecoder.parameters().get("tenant").get(0));
             } else {
-                throw new MissingParameterException("Tenant parameter is missing");
+                // assume tenant "NONE"
+                parameters.setTenant("NONE");
+                logger.debug("No tenant in request. Assuming NONE");
             }
             if (queryStringDecoder.parameters().get("path") != null) {
                 for (String path : queryStringDecoder.parameters().get("path")) {
