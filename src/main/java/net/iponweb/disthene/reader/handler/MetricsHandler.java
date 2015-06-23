@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
+import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import org.apache.log4j.Logger;
@@ -27,7 +28,7 @@ public class MetricsHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws UnsupportedMethodException, MissingParameterException, ExecutionException, InterruptedException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException {
         MetricsParameters parameters = parse(request);
 
         logger.debug("Got request: " + parameters);
@@ -41,7 +42,7 @@ public class MetricsHandler implements DistheneReaderHandler {
         return response;
     }
 
-    private MetricsParameters parse(HttpRequest request) throws MissingParameterException, UnsupportedMethodException {
+    private MetricsParameters parse(HttpRequest request) throws ParameterParsingException, UnsupportedMethodException {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
 
         if (request.getMethod().equals(HttpMethod.GET)) {
@@ -89,7 +90,7 @@ public class MetricsHandler implements DistheneReaderHandler {
             }
             return parameters;
         } else {
-            throw new UnsupportedMethodException();
+            throw new UnsupportedMethodException("Method is not supported: " + request.getMethod().name());
         }
     }
 

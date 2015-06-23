@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
+import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.service.index.IndexService;
@@ -97,13 +98,74 @@ public class MetricService {
 
         for (ListenableFuture<SinglePathResult> future : futures) {
             SinglePathResult singlePathResult = future.get();
-            singlePathJsons.add("\"" + singlePathResult.getPath() + "\":" + future.get().getJson());
+            singlePathJsons.add("\"" + singlePathResult.getPath() + "\":" + singlePathResult.getJson());
         }
 
 
         return "{\"from\":" + effectiveFrom + ",\"to\":" + effectiveTo + ",\"step\":" + bestRollup.getRollup() +
                 ",\"series\":{" + Joiner.on(",").skipNulls().join(singlePathJsons) + "}}";
 
+    }
+
+    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
+        List<String> paths = indexService.getPaths(tenant, wildcards);
+
+        // Calculate rollup etc
+        Long now = System.currentTimeMillis() * 1000;
+        Long effectiveTo = Math.min(to, now);
+        Rollup bestRollup = getRollup(from, effectiveTo);
+        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
+        logger.debug("Effective from: " + effectiveFrom);
+        logger.debug("Effective to: " + effectiveTo);
+
+        // now build the weird data structures ("in the meanwhile")
+        final Map<Long, Integer> timestampIndices = new HashMap<>();
+        Long timestamp = effectiveFrom;
+        int index = 0;
+        while (timestamp <= effectiveTo) {
+            timestampIndices.put(timestamp, index++);
+            timestamp += bestRollup.getRollup();
+        }
+
+        final int length = timestampIndices.size();
+        logger.debug("Expected number of data points in series is " + length);
+        logger.debug("Expected number of series is " + paths.size());
+
+
+        // Now let's query C*
+        List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
+        for (final String path : paths) {
+            Function<ResultSet, SinglePathResult> serializeFunction =
+                    new Function<ResultSet, SinglePathResult>() {
+                        public SinglePathResult apply(ResultSet resultSet) {
+                            SinglePathResult result = new SinglePathResult(path);
+                            result.makeArray(resultSet, length, timestampIndices);
+                            return result;
+                        }
+                    };
+
+
+            futures.add(
+                    Futures.transform(
+                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
+                            serializeFunction,
+                            executorService
+                    )
+            );
+        }
+        futures = Futures.inCompletionOrder(futures);
+
+        List<TimeSeries> timeSeries = new ArrayList<>();
+
+        for (ListenableFuture<SinglePathResult> future : futures) {
+            SinglePathResult singlePathResult = future.get();
+            TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
+            ts.setValues(singlePathResult.getValues());
+            timeSeries.add(ts);
+        }
+
+        return timeSeries;
     }
 
     private Rollup getRollup(long from, long to) {
@@ -137,6 +199,7 @@ public class MetricService {
     private static class SinglePathResult {
         String path;
         String json;
+        Double[] values;
 
         private SinglePathResult(String path) {
             this.path = path;
@@ -150,6 +213,10 @@ public class MetricService {
             return json;
         }
 
+        public Double[] getValues() {
+            return values;
+        }
+
         public void makeJson(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
             Double values[] = new Double[length];
             for (Row row : resultSet) {
@@ -158,6 +225,14 @@ public class MetricService {
             }
 
             json = new Gson().toJson(values);
+        }
+
+        public void makeArray(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
+            values = new Double[length];
+            for (Row row : resultSet) {
+                values[timestampIndices.get(row.getLong("time"))] =
+                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+            }
         }
 
         private static boolean isSumMetric(String path) {

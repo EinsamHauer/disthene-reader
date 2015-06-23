@@ -69,6 +69,11 @@
             <version>4.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.rubiconproject.oss</groupId>
+            <artifactId>jchronic</artifactId>
+            <version>0.2.6</version>
+        </dependency>
     </dependencies>
 
     <build>

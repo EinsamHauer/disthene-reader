@@ -43,7 +43,7 @@ public class IndexService {
     public List<String> getPaths(String tenant, List<String> wildcards) {
         List<String> regExs = new ArrayList<>();
         for(String wildcard : wildcards) {
-            regExs.add(WildcardUtil.getRegExFromWildcard(wildcard));
+            regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
         }
         String regEx = Joiner.on("|").skipNulls().join(regExs);
 
