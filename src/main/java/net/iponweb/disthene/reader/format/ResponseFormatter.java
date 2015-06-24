@@ -27,7 +27,7 @@ public class ResponseFormatter {
         List<String> results = new ArrayList<>();
 
         for(TimeSeries timeSeries : timeSeriesList) {
-            results.add(timeSeries.getName() + "," + timeSeries.getFrom() + "," + timeSeries.getTo() + "," + timeSeries.getStep() + "|" + Joiner.on(",").join(timeSeries.getValues()));
+            results.add(timeSeries.getName() + "," + timeSeries.getFrom() + "," + timeSeries.getTo() + "," + timeSeries.getStep() + "|" + Joiner.on(",").useForNull("null").join(timeSeries.getValues()));
         }
         String responseString = Joiner.on("\n").join(results);
 
