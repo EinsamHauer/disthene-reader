@@ -62,7 +62,7 @@ public class RenderHandler implements DistheneReaderHandler {
                 throw new InvalidParameterValueException("Could not parse target: " + targetString);
             }
         }
-        logger.debug(targets);
+//        logger.debug(targets);
 
         // now evaluate each target producing list of TimeSeries
         List<TimeSeries> results = new ArrayList<>();
@@ -71,9 +71,11 @@ public class RenderHandler implements DistheneReaderHandler {
             results.addAll(evaluator.eval(target));
         }
 
+/*
         for(TimeSeries ts : results) {
             logger.debug(ts);
         }
+*/
 
         return ResponseFormatter.formatResponse(results, parameters.format);
     }
