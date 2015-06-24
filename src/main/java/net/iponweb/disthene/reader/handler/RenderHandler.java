@@ -8,6 +8,8 @@ import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
+import net.iponweb.disthene.reader.format.Format;
+import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
@@ -73,8 +75,7 @@ public class RenderHandler implements DistheneReaderHandler {
             logger.debug(ts);
         }
 
-
-        throw  new NotImplementedException();
+        return ResponseFormatter.formatResponse(results, parameters.format);
     }
 
     private RenderParameters parse(HttpRequest request) throws ParameterParsingException {
@@ -146,10 +147,6 @@ public class RenderHandler implements DistheneReaderHandler {
         }
 
         return parameters;
-    }
-
-    private enum Format {
-        PNG, RAW, CSV, JSON, SVG, PICKLE,
     }
 
     // For now we absolutely need:

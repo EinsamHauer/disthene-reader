@@ -160,9 +160,11 @@ public class MetricService {
 
         for (ListenableFuture<SinglePathResult> future : futures) {
             SinglePathResult singlePathResult = future.get();
-            TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
-            ts.setValues(singlePathResult.getValues());
-            timeSeries.add(ts);
+            if (singlePathResult.getValues() != null) {
+                TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
+                ts.setValues(singlePathResult.getValues());
+                timeSeries.add(ts);
+            }
         }
 
         return timeSeries;
@@ -199,7 +201,7 @@ public class MetricService {
     private static class SinglePathResult {
         String path;
         String json;
-        Double[] values;
+        Double[] values = null;
 
         private SinglePathResult(String path) {
             this.path = path;
@@ -228,10 +230,12 @@ public class MetricService {
         }
 
         public void makeArray(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
-            values = new Double[length];
-            for (Row row : resultSet) {
-                values[timestampIndices.get(row.getLong("time"))] =
-                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+            if (resultSet.getAvailableWithoutFetching() > 0) {
+                values = new Double[length];
+                for (Row row : resultSet) {
+                    values[timestampIndices.get(row.getLong("time"))] =
+                            isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+                }
             }
         }
 

@@ -22,11 +22,11 @@ arg:
 
 call: FunctionName LEFT_PAREN args RIGHT_PAREN;
 
-partialPathElement: (EscapedChar | VALID_METRIC_CHAR)+ | FunctionName;
+partialPathElement: (EscapedChar)+ | FunctionName | path;
 
 number: Integer | Float | Scientific;
 
-path: VALID_METRIC_CHAR+;
+path: (VALID_METRIC_CHAR | number)+;
 
 Boolean: TRUE | FALSE;
 Integer: '-'* DIGIT+;
@@ -48,7 +48,7 @@ SYMBOL: [(){},=.'"];
 BACKSLASH: '\\';
 DIGIT: [0-9];
 WS: (' ' | '\t')+ -> skip;
-VALID_METRIC_CHAR: [!#$%&*+\-/0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]^_`abcdefghijklmnopqrstuvwxyz|~];
+VALID_METRIC_CHAR: [!#$%&*+\-/0123456789,:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]\{\}^_`abcdefghijklmnopqrstuvwxyz|~];
 TRUE: ('t' | 'T')('r' | 'R')('u' | 'U')('e' | 'E');
 FALSE: ('f' | 'F')('a' | 'A')('l' | 'L')('s' | 'S')('e' | 'E');
 
