@@ -4,6 +4,9 @@ import com.google.common.base.Joiner;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
+import net.iponweb.disthene.reader.glyph.ImageRenderer;
+import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
+import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
@@ -15,10 +18,11 @@ import java.util.List;
 public class ResponseFormatter {
 
 
-    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, Format format) throws NotImplementedException {
-        switch (format) {
+    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException {
+        switch (parameters.getFormat()) {
             case JSON: return formatResponseAsJson(timeSeriesList);
             case RAW: return formatResponseAsRaw(timeSeriesList);
+            case PNG: return formatResponseAsPng(timeSeriesList, parameters.getImageParameters());
             default:throw new NotImplementedException();
         }
     }
@@ -59,6 +63,16 @@ public class ResponseFormatter {
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(responseString.getBytes()));
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        return response;
+    }
+
+    private static FullHttpResponse formatResponseAsPng(List<TimeSeries> timeSeriesList, ImageParameters imageParameters) {
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.wrappedBuffer(new ImageRenderer(imageParameters, timeSeriesList).render()));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "image/png");
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
