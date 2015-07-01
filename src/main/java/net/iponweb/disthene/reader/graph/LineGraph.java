@@ -27,10 +27,7 @@ public class LineGraph extends Graph {
             return drawNoData();
         }
 
-        long startTime = Long.MAX_VALUE;
-        long endTime = Long.MIN_VALUE;
-
-        for(TimeSeries ts : data) {
+        for(DecoratedTimeSeries ts : data) {
             startTime = Math.min(startTime, ts.getFrom());
             endTime = Math.max(endTime, ts.getTo());
 
@@ -63,7 +60,7 @@ public class LineGraph extends Graph {
         }
 
         if (imageParameters.getLineMode().equals(ImageParameters.LineMode.SLOPE)) {
-            for (TimeSeries ts : data) {
+            for (DecoratedTimeSeries ts : data) {
                 if (ts.getValues().length <= 1) {
                     imageParameters.setLineMode(ImageParameters.LineMode.STAIRCASE);
                 }
@@ -72,7 +69,7 @@ public class LineGraph extends Graph {
 
         //assign colors
         int i = 0;
-        for(TimeSeries ts : data) {
+        for(DecoratedTimeSeries ts : data) {
             if (!ts.hasOption(TimeSeriesOption.COLOR)) {
                 ts.setOption(TimeSeriesOption.COLOR, imageParameters.getColorList().get(i % imageParameters.getColorList().size()));
                 i++;
@@ -104,13 +101,29 @@ public class LineGraph extends Graph {
             List<Color> colors = new ArrayList<>();
             List<Boolean> secondYAxes = new ArrayList<>();
 
-            for(TimeSeries ts : data) {
+            for(DecoratedTimeSeries ts : data) {
                 legends.add(ts.getName());
                 colors.add((Color) ts.getOption(TimeSeriesOption.COLOR));
                 secondYAxes.add(ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS));
             }
 
             drawLegend(legends, colors, secondYAxes, imageParameters.isUniqueLegend());
+        }
+
+        if (!imageParameters.isHideAxes()) {
+            FontMetrics fontMetrics = g2d.getFontMetrics(imageParameters.getFont());
+            yMax -= fontMetrics.getMaxAscent() * 2;
+        }
+
+        consolidateDataPoints();
+
+        int currentXMin = xMin;
+        int currentXMax = xMax;
+
+        if (secondYAxis) {
+            setupTwoYAxes();
+        } else {
+            setupYAxis();
         }
 
         return getBytes();

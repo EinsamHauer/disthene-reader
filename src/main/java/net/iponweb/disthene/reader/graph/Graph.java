@@ -1,12 +1,14 @@
 package net.iponweb.disthene.reader.graph;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
+import net.iponweb.disthene.reader.beans.TimeSeriesOption;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,9 +27,9 @@ public abstract class Graph {
     final static Logger logger = Logger.getLogger(Graph.class);
 
     protected ImageParameters imageParameters;
-    protected List<TimeSeries> data;
-    protected List<TimeSeries> dataLeft;
-    protected List<TimeSeries> dataRight;
+    protected List<DecoratedTimeSeries> data = new ArrayList<>();
+    protected List<DecoratedTimeSeries> dataLeft;
+    protected List<DecoratedTimeSeries> dataRight;
     protected boolean secondYAxis = false;
 
     protected int xMin;
@@ -35,13 +37,22 @@ public abstract class Graph {
     protected int yMin;
     protected int yMax;
 
+    protected int graphWidth;
+
+    protected long startTime = Long.MAX_VALUE;
+    protected long endTime = Long.MIN_VALUE;
+
+
+
     protected BufferedImage image;
     protected Graphics2D g2d;
 
 
     public Graph(ImageParameters imageParameters, List<TimeSeries> data) {
         this.imageParameters = imageParameters;
-        this.data = data;
+        for(TimeSeries ts : data) {
+            this.data.add(new DecoratedTimeSeries(ts));
+        }
 
         xMin = imageParameters.getMargin() + 10;
         xMax = imageParameters.getWidth() - imageParameters.getMargin();
@@ -168,15 +179,61 @@ public abstract class Graph {
         }
 
         if (secondYAxis && rightSideLabels) {
+            int boxSize = fontMetrics.getHeight() - 1;
+            int lineHeight = fontMetrics.getHeight() + 1;
+            int labelWidth = fontMetrics.stringWidth(longestLegend) + 2 * (boxSize + padding);
+            int columns = (int) Math.max(1, Math.floor((imageParameters.getWidth() - xMin) / labelWidth));
+            if (columns < 1) columns = 1;
+            int numRight = 0;
+            for(Boolean b : secondYAxes) {
+                if (b) numRight++;
+            }
+            int numberOfLines = Math.max(legends.size() - numRight, numRight);
+            columns = (int) Math.floor(columns / 2.0);
+            int legendHeight = Math.max(1, (numberOfLines / columns)) * (lineHeight + padding);
+            yMax -= legendHeight;
+            int x = xMin;
+            int y = yMax + 2 * padding;
+            int n = 0;
+            int xRight = xMax - xMin;
+            int yRight = y;
+            int nRight = 0;
 
+            for(int i = 0; i < legends.size(); i++) {
+                g2d.setPaint(colors.get(i));
+                if (secondYAxes.get(i)) {
+                    nRight++;
+                    g2d.fillRect(xRight - padding, yRight, boxSize, boxSize);
+                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.drawRect(xRight - padding, yRight, boxSize, boxSize);
+                    drawText(xRight - boxSize, yRight, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.RIGHT, VerticalAlign.TOP);
+                    xRight -= labelWidth;
+
+                    if (nRight % columns == 0) {
+                        xRight = xMax - xMin;
+                        yRight += lineHeight;
+                    }
+                } else {
+                    n++;
+                    g2d.fillRect(x, y, boxSize, boxSize);
+                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.drawRect(x, y, boxSize, boxSize);
+                    drawText(x + boxSize + padding, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.LEFT, VerticalAlign.TOP);
+                    x += labelWidth;
+
+                    if (n % columns == 0) {
+                        x = xMin;
+                        y += lineHeight;
+                    }
+                }
+
+            }
         } else {
             int boxSize = fontMetrics.getHeight() - 1;
             int lineHeight = fontMetrics.getHeight() + 1;
             int labelWidth = fontMetrics.stringWidth(longestLegend) + 2 * (boxSize + padding);
             int columns = (int) Math.floor(imageParameters.getWidth() / labelWidth);
-            if (columns < 1) {
-                columns = 1;
-            }
+            if (columns < 1) columns = 1;
             int numberOfLines = (int) Math.ceil((double) legends.size() / columns );
             int legendHeight = numberOfLines * (lineHeight + padding);
             yMax -= legendHeight;
@@ -187,7 +244,12 @@ public abstract class Graph {
             int y = yMax + (2 * padding);
             for(int i = 0; i < legends.size(); i++) {
                 if (secondYAxes.get(i)) {
-
+                    g2d.setPaint(colors.get(i));
+                    g2d.fillRect(x + labelWidth + padding, y, boxSize, boxSize);
+                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.drawRect(x + labelWidth + padding, y, boxSize, boxSize);
+                    drawText(x + labelWidth, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.RIGHT, VerticalAlign.TOP);
+                    x += labelWidth;
                 } else {
                     g2d.setPaint(colors.get(i));
                     g2d.fillRect(x, y, boxSize, boxSize);
@@ -203,6 +265,64 @@ public abstract class Graph {
                 }
             }
         }
+    }
+
+    protected void consolidateDataPoints() {
+        int numberOfPixels = (int) (xMax - xMin - imageParameters.getLineWidth() - 1);
+        graphWidth = (int) (xMax - xMin - imageParameters.getLineWidth() - 1);
+
+        for (DecoratedTimeSeries ts : data) {
+            double numberOfDataPoints = ts.getValues().length;
+            double divisor = ts.getValues().length;
+            double bestXStep = numberOfPixels / divisor;
+
+            if (bestXStep < imageParameters.getMinXStep()) {
+                int drawableDataPoints = numberOfPixels / imageParameters.getMinXStep();
+                double pointsPerPixel = Math.ceil( numberOfDataPoints / drawableDataPoints );
+                ts.setValuesPerPoint((int) pointsPerPixel);
+                ts.setxStep((numberOfPixels * pointsPerPixel) / numberOfDataPoints);
+            } else {
+                ts.setxStep(bestXStep);
+            }
+
+        }
+    }
+
+    protected void setupTwoYAxes() {
+
+    }
+
+    protected void setupYAxis() {
+        List<DecoratedTimeSeries> seriesWithMissingValues = new ArrayList<>();
+        for(DecoratedTimeSeries ts : data) {
+            for(Double value : ts.getValues()) {
+                if (value == null) {
+                    seriesWithMissingValues.add(ts);
+                    break;
+                }
+            }
+        }
+
+        double yMinValue = Double.MAX_VALUE;
+        for(DecoratedTimeSeries ts : data) {
+            if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
+                double mm = GraphUtils.safeMin(ts);
+                yMinValue = mm < yMinValue ? mm : yMinValue;
+            }
+        }
+
+        if (yMinValue > 0 && imageParameters.isDrawNullAsZero() && seriesWithMissingValues.size() > 0) {
+            yMinValue = 0;
+        }
+
+
+        //todo: continue here
+        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED)) {
+
+        } else {
+
+        }
+
     }
 
 

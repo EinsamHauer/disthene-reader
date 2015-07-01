@@ -3,6 +3,7 @@ package net.iponweb.disthene.reader.graphite.functions.factory;
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
 import net.iponweb.disthene.reader.graphite.functions.AverageFunction;
 import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
+import net.iponweb.disthene.reader.graphite.functions.SecondYAxisFunction;
 import net.iponweb.disthene.reader.graphite.functions.SumFunction;
 
 import java.lang.reflect.Constructor;
@@ -19,6 +20,7 @@ public class FunctionFactory {
     static {
         registry.put("sumSeries", SumFunction.class);
         registry.put("averageSeries", AverageFunction.class);
+        registry.put("secondYAxis", SecondYAxisFunction.class);
     }
 
     public static DistheneFunction getFunction(String name) throws InvalidFunctionException {

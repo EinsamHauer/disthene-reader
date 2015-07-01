@@ -38,6 +38,10 @@ public class ImageParameters {
     private int leftDashed = 0;
 
     private boolean uniqueLegend = false;
+    private int minXStep = 1;
+    private double lineWidth = 1.2;
+
+    private boolean drawNullAsZero = false;
 
     private List<Color> colorList = new ArrayList<>();
 
@@ -265,6 +269,30 @@ public class ImageParameters {
 
     public void setUniqueLegend(boolean uniqueLegend) {
         this.uniqueLegend = uniqueLegend;
+    }
+
+    public int getMinXStep() {
+        return minXStep;
+    }
+
+    public void setMinXStep(int minXStep) {
+        this.minXStep = minXStep;
+    }
+
+    public double getLineWidth() {
+        return lineWidth;
+    }
+
+    public void setLineWidth(double lineWidth) {
+        this.lineWidth = lineWidth;
+    }
+
+    public boolean isDrawNullAsZero() {
+        return drawNullAsZero;
+    }
+
+    public void setDrawNullAsZero(boolean drawNullAsZero) {
+        this.drawNullAsZero = drawNullAsZero;
     }
 
     public enum Side {

@@ -172,6 +172,25 @@ public class RenderParameters {
             parameters.setFormat(Format.PNG);
         }
 
+        //*************************************************************************************************************
+        // Image parameters
+        //*************************************************************************************************************
+        if (queryStringDecoder.parameters().get("width") != null) {
+            try {
+                parameters.getImageParameters().setWidth(Integer.valueOf(queryStringDecoder.parameters().get("width").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("Width format : " + queryStringDecoder.parameters().get("width").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("height") != null) {
+            try {
+                parameters.getImageParameters().setHeight(Integer.valueOf(queryStringDecoder.parameters().get("height").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("Height format : " + queryStringDecoder.parameters().get("height").get(0));
+            }
+        }
+
         return parameters;
     }
 
