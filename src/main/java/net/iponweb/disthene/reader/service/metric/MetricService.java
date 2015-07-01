@@ -107,6 +107,7 @@ public class MetricService {
 
     }
 
+    //todo: get paths sorted!
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
 

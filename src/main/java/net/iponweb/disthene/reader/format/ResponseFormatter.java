@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.glyph.ImageRenderer;
+import net.iponweb.disthene.reader.graph.LineGraph;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -71,7 +72,7 @@ public class ResponseFormatter {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer(new ImageRenderer(imageParameters, timeSeriesList).render()));
+                Unpooled.wrappedBuffer(new LineGraph(imageParameters, timeSeriesList).drawGraph()));
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "image/png");
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         return response;

@@ -1,6 +1,6 @@
 package net.iponweb.disthene.reader.beans;
 
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -13,6 +13,8 @@ public class TimeSeries {
     private int step;
 
     private Double[] values = new Double[0];
+
+    private Map<TimeSeriesOption, Object> options = new HashMap<>();
 
     public TimeSeries(String name, Long from, Long to, int step) {
         this.name = name;
@@ -59,6 +61,22 @@ public class TimeSeries {
 
     public void setStep(int step) {
         this.step = step;
+    }
+
+    public void addOption(TimeSeriesOption option) {
+        options.put(option, true);
+    }
+
+    public void setOption(TimeSeriesOption option, Object value) {
+        options.put(option, value);
+    }
+
+    public Object getOption(TimeSeriesOption option) {
+        return options.get(option);
+    }
+
+    public boolean hasOption(TimeSeriesOption option) {
+        return options.containsKey(option);
     }
 
     @Override
