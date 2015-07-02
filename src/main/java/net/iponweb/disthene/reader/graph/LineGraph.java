@@ -2,7 +2,9 @@ package net.iponweb.disthene.reader.graph;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
+import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,12 +19,12 @@ public class LineGraph extends Graph {
 
 
 
-    public LineGraph(ImageParameters imageParameters, List<TimeSeries> data) {
-        super(imageParameters, data);
+    public LineGraph(RenderParameters renderParameters, List<TimeSeries> data) {
+        super(renderParameters, data);
     }
 
     @Override
-    public byte[] drawGraph() {
+    public byte[] drawGraph() throws LogarithmicScaleNotAllowed {
         if (data.size() == 0) {
             return drawNoData();
         }
@@ -33,6 +35,9 @@ public class LineGraph extends Graph {
 
             if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
                 secondYAxis = true;
+                dataRight.add(ts);
+            } else {
+                dataLeft.add(ts);
             }
 
         }
@@ -75,10 +80,6 @@ public class LineGraph extends Graph {
                 i++;
             }
         }
-
-        //todo: remove
-        imageParameters.setTitle("Asasasas");
-
 
         if (!imageParameters.getTitle().isEmpty()) {
             drawTitle();
@@ -125,6 +126,28 @@ public class LineGraph extends Graph {
         } else {
             setupYAxis();
         }
+
+        while (currentXMin != xMin || currentXMax != xMax) {
+            consolidateDataPoints();
+            currentXMin = xMin;
+            currentXMax = xMax;
+
+            if (secondYAxis) {
+                setupTwoYAxes();
+            } else {
+                setupYAxis();
+            }
+        }
+
+        setupXAxis();
+
+        if (!imageParameters.isHideAxes()) {
+            drawLabels();
+            if (!imageParameters.isHideGrid()) {
+                drawGridLines();
+            }
+        }
+
 
         return getBytes();
     }

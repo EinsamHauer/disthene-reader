@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.glyph.ImageRenderer;
 import net.iponweb.disthene.reader.graph.LineGraph;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
@@ -19,11 +20,11 @@ import java.util.List;
 public class ResponseFormatter {
 
 
-    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException {
+    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException, LogarithmicScaleNotAllowed {
         switch (parameters.getFormat()) {
             case JSON: return formatResponseAsJson(timeSeriesList);
             case RAW: return formatResponseAsRaw(timeSeriesList);
-            case PNG: return formatResponseAsPng(timeSeriesList, parameters.getImageParameters());
+            case PNG: return formatResponseAsPng(timeSeriesList, parameters);
             default:throw new NotImplementedException();
         }
     }
@@ -68,11 +69,11 @@ public class ResponseFormatter {
         return response;
     }
 
-    private static FullHttpResponse formatResponseAsPng(List<TimeSeries> timeSeriesList, ImageParameters imageParameters) {
+    private static FullHttpResponse formatResponseAsPng(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) throws LogarithmicScaleNotAllowed {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer(new LineGraph(imageParameters, timeSeriesList).drawGraph()));
+                Unpooled.wrappedBuffer(new LineGraph(renderParameters, timeSeriesList).drawGraph()));
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "image/png");
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         return response;

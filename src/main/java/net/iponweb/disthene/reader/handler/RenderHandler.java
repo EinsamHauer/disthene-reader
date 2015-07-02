@@ -4,10 +4,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import net.iponweb.disthene.reader.beans.TimeSeries;
-import net.iponweb.disthene.reader.exceptions.EvaluationException;
-import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
-import net.iponweb.disthene.reader.exceptions.MissingParameterException;
-import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
+import net.iponweb.disthene.reader.exceptions.*;
 import net.iponweb.disthene.reader.format.Format;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
@@ -44,7 +41,7 @@ public class RenderHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, EvaluationException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, EvaluationException, LogarithmicScaleNotAllowed {
         RenderParameters parameters = RenderParameters.parse(request);
 
         logger.debug("Got request: " + parameters);

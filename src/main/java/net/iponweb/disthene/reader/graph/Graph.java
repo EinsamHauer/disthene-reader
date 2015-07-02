@@ -2,34 +2,42 @@ package net.iponweb.disthene.reader.graph;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
+import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.Seconds;
+import org.joda.time.format.DateTimeFormat;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrei Ivanov
- *
- * This class and those below in hierarchy are pure translations from graphite-web Python code.
- * This will probably changed some day. But for now reverse engineering the logic is too comaplicated.
- *
+ *         <p/>
+ *         This class and those below in hierarchy are pure translations from graphite-web Python code.
+ *         This will probably changed some day. But for now reverse engineering the logic is too comaplicated.
  */
 public abstract class Graph {
     final static Logger logger = Logger.getLogger(Graph.class);
 
+    private static final double[] PRETTY_VALUES = {0.1, 0.2, 0.25, 0.5, 1.0, 1.2, 1.25, 1.5, 2.0, 2.25, 2.5};
+
     protected ImageParameters imageParameters;
+    protected RenderParameters renderParameters;
+
     protected List<DecoratedTimeSeries> data = new ArrayList<>();
-    protected List<DecoratedTimeSeries> dataLeft;
-    protected List<DecoratedTimeSeries> dataRight;
+    protected List<DecoratedTimeSeries> dataLeft = new ArrayList<>();
+    protected List<DecoratedTimeSeries> dataRight = new ArrayList<>();
     protected boolean secondYAxis = false;
 
     protected int xMin;
@@ -38,19 +46,57 @@ public abstract class Graph {
     protected int yMax;
 
     protected int graphWidth;
+    protected int graphHeight;
 
     protected long startTime = Long.MAX_VALUE;
     protected long endTime = Long.MIN_VALUE;
 
+    protected DateTime startDateTime;
+    protected DateTime endDateTime;
 
+    protected double yStep;
+    protected double yBottom;
+    protected double yTop;
+    protected double ySpan;
+    protected double yScaleFactor;
+
+    protected double yStepL;
+    protected double yStepR;
+    protected double yBottomL;
+    protected double yBottomR;
+    protected double yTopL;
+    protected double yTopR;
+    protected double ySpanL;
+    protected double ySpanR;
+    protected double yScaleFactorL;
+    protected double yScaleFactorR;
+
+    protected List<Double> yLabelValues;
+    protected List<String> yLabels;
+    protected int yLabelWidth;
+
+    protected List<Double> yLabelValuesL;
+    protected List<Double> yLabelValuesR;
+    protected List<String> yLabelsL;
+    protected List<String> yLabelsR;
+    protected int yLabelWidthL;
+    protected int yLabelWidthR;
+
+    protected double xScaleFactor;
+    protected XAxisConfig xAxisConfig;
+    protected long xLabelStep;
+    protected long xMinorGridStep;
+    protected long xMajorGridStep;
 
     protected BufferedImage image;
     protected Graphics2D g2d;
 
 
-    public Graph(ImageParameters imageParameters, List<TimeSeries> data) {
-        this.imageParameters = imageParameters;
-        for(TimeSeries ts : data) {
+    public Graph(RenderParameters renderParameters, List<TimeSeries> data) {
+        this.renderParameters = renderParameters;
+        this.imageParameters = renderParameters.getImageParameters();
+
+        for (TimeSeries ts : data) {
             this.data.add(new DecoratedTimeSeries(ts));
         }
 
@@ -66,7 +112,7 @@ public abstract class Graph {
         g2d.fillRect(0, 0, imageParameters.getWidth(), imageParameters.getHeight());
     }
 
-    public abstract byte[] drawGraph();
+    public abstract byte[] drawGraph() throws LogarithmicScaleNotAllowed;
 
     protected byte[] getBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -78,6 +124,10 @@ public abstract class Graph {
             return new byte[0];
         }
 
+    }
+
+    protected void drawText(int x, int y, String text, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign) {
+        drawText(x, y, text, imageParameters.getFont(), imageParameters.getForegroundColor(), horizontalAlign, verticalAlign, 0);
     }
 
     protected void drawText(int x, int y, String text, Font font, Color color, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign) {
@@ -93,16 +143,29 @@ public abstract class Graph {
         int horizontal, vertical;
 
         switch (horizontalAlign) {
-            case RIGHT: horizontal = textWidth; break;
-            case CENTER: horizontal = textWidth / 2;  break;
-            default: horizontal = 0; break;
+            case RIGHT:
+                horizontal = textWidth;
+                break;
+            case CENTER:
+                horizontal = textWidth / 2;
+                break;
+            default:
+                horizontal = 0;
+                break;
         }
 
         switch (verticalAlign) {
-            case MIDDLE: vertical = fontMetrics.getHeight() / 2 - fontMetrics.getDescent(); break;
-            case BOTTOM: vertical = - fontMetrics.getDescent(); break;
-            case BASELINE: vertical = 0; break;
-            default: vertical = fontMetrics.getAscent();
+            case MIDDLE:
+                vertical = fontMetrics.getHeight() / 2 - fontMetrics.getDescent();
+                break;
+            case BOTTOM:
+                vertical = -fontMetrics.getDescent();
+                break;
+            case BASELINE:
+                vertical = 0;
+                break;
+            default:
+                vertical = fontMetrics.getAscent();
         }
 
         double angle = Math.toRadians(rotate);
@@ -128,7 +191,7 @@ public abstract class Graph {
 
         String[] split = imageParameters.getTitle().split("\n");
 
-        for(String line : split) {
+        for (String line : split) {
             drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.TOP);
             y += lineHeight;
         }
@@ -148,7 +211,7 @@ public abstract class Graph {
         List<Boolean> secondYAxesUnique = new ArrayList<>();
 
         if (uniqueLegend) {
-            for(int i = 0; i < legends.size(); i++) {
+            for (int i = 0; i < legends.size(); i++) {
                 if (!legendsUnique.contains(legends.get(i))) {
                     legendsUnique.add(legends.get(i));
                     colorsUnique.add(colors.get(i));
@@ -185,7 +248,7 @@ public abstract class Graph {
             int columns = (int) Math.max(1, Math.floor((imageParameters.getWidth() - xMin) / labelWidth));
             if (columns < 1) columns = 1;
             int numRight = 0;
-            for(Boolean b : secondYAxes) {
+            for (Boolean b : secondYAxes) {
                 if (b) numRight++;
             }
             int numberOfLines = Math.max(legends.size() - numRight, numRight);
@@ -199,7 +262,7 @@ public abstract class Graph {
             int yRight = y;
             int nRight = 0;
 
-            for(int i = 0; i < legends.size(); i++) {
+            for (int i = 0; i < legends.size(); i++) {
                 g2d.setPaint(colors.get(i));
                 if (secondYAxes.get(i)) {
                     nRight++;
@@ -234,7 +297,7 @@ public abstract class Graph {
             int labelWidth = fontMetrics.stringWidth(longestLegend) + 2 * (boxSize + padding);
             int columns = (int) Math.floor(imageParameters.getWidth() / labelWidth);
             if (columns < 1) columns = 1;
-            int numberOfLines = (int) Math.ceil((double) legends.size() / columns );
+            int numberOfLines = (int) Math.ceil((double) legends.size() / columns);
             int legendHeight = numberOfLines * (lineHeight + padding);
             yMax -= legendHeight;
 
@@ -242,7 +305,7 @@ public abstract class Graph {
 
             int x = xMin;
             int y = yMax + (2 * padding);
-            for(int i = 0; i < legends.size(); i++) {
+            for (int i = 0; i < legends.size(); i++) {
                 if (secondYAxes.get(i)) {
                     g2d.setPaint(colors.get(i));
                     g2d.fillRect(x + labelWidth + padding, y, boxSize, boxSize);
@@ -278,7 +341,7 @@ public abstract class Graph {
 
             if (bestXStep < imageParameters.getMinXStep()) {
                 int drawableDataPoints = numberOfPixels / imageParameters.getMinXStep();
-                double pointsPerPixel = Math.ceil( numberOfDataPoints / drawableDataPoints );
+                double pointsPerPixel = Math.ceil(numberOfDataPoints / drawableDataPoints);
                 ts.setValuesPerPoint((int) pointsPerPixel);
                 ts.setxStep((numberOfPixels * pointsPerPixel) / numberOfDataPoints);
             } else {
@@ -288,14 +351,216 @@ public abstract class Graph {
         }
     }
 
-    protected void setupTwoYAxes() {
+    protected void setupTwoYAxes() throws LogarithmicScaleNotAllowed {
+        List<DecoratedTimeSeries> lData = new ArrayList<>();
+        List<DecoratedTimeSeries> rData = new ArrayList<>();
+        lData.addAll(dataLeft);
+        rData.addAll(dataRight);
+        List<DecoratedTimeSeries> seriesWithMissingValuesL = new ArrayList<>();
+        List<DecoratedTimeSeries> seriesWithMissingValuesR = new ArrayList<>();
 
+        for (DecoratedTimeSeries ts : dataLeft) {
+            for (Double value : ts.getValues()) {
+                if (value == null) {
+                    seriesWithMissingValuesL.add(ts);
+                    break;
+                }
+            }
+        }
+
+        for (DecoratedTimeSeries ts : dataRight) {
+            for (Double value : ts.getValues()) {
+                if (value == null) {
+                    seriesWithMissingValuesR.add(ts);
+                    break;
+                }
+            }
+        }
+
+        double yMinValueL = Double.POSITIVE_INFINITY;
+        double yMinValueR = Double.POSITIVE_INFINITY;
+        double yMaxValueL;
+        double yMaxValueR;
+
+        if (imageParameters.isDrawNullAsZero() && seriesWithMissingValuesL.size() > 0) {
+            yMinValueL = 0;
+        } else {
+            for (DecoratedTimeSeries ts : dataLeft) {
+                if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
+                    double mm = GraphUtils.safeMin(ts);
+                    yMinValueL = mm < yMinValueL ? mm : yMinValueL;
+                }
+            }
+        }
+
+        if (imageParameters.isDrawNullAsZero() && seriesWithMissingValuesR.size() > 0) {
+            yMinValueR = 0;
+        } else {
+            for (DecoratedTimeSeries ts : dataRight) {
+                if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
+                    double mm = GraphUtils.safeMin(ts);
+                    yMinValueR = mm < yMinValueR ? mm : yMinValueR;
+                }
+            }
+        }
+
+        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED)) {
+            yMaxValueL = GraphUtils.maxSum(dataLeft);
+            yMaxValueR = GraphUtils.maxSum(dataRight);
+        } else {
+            yMaxValueL = GraphUtils.safeMax(dataLeft);
+            yMaxValueR = GraphUtils.safeMax(dataRight);
+        }
+
+        if (yMinValueL == Double.POSITIVE_INFINITY) {
+            yMinValueL = 0.0;
+        }
+        if (yMinValueR == Double.POSITIVE_INFINITY) {
+            yMinValueR = 0.0;
+        }
+
+        if (imageParameters.getyMaxLeft() < Double.POSITIVE_INFINITY) {
+            yMaxValueL = imageParameters.getyMaxLeft();
+        }
+        if (imageParameters.getyMaxRight() < Double.POSITIVE_INFINITY) {
+            yMaxValueR = imageParameters.getyMaxRight();
+        }
+        if (imageParameters.getyMinLeft() > Double.NEGATIVE_INFINITY) {
+            yMinValueL = imageParameters.getyMinLeft();
+        }
+        if (imageParameters.getyMinRight() > Double.NEGATIVE_INFINITY) {
+            yMinValueR = imageParameters.getyMinRight();
+        }
+        if (yMaxValueL <= yMinValueL) {
+            yMaxValueL = yMinValueL + 1;
+        }
+        if (yMaxValueR <= yMinValueR) {
+            yMaxValueR = yMinValueR + 1;
+        }
+
+        double yVarianceL = yMaxValueL - yMinValueL;
+        double yVarianceR = yMaxValueR - yMinValueR;
+        double orderL = Math.log10(yVarianceL);
+        double orderR = Math.log10(yVarianceR);
+        double orderFactorL = Math.pow(10, Math.floor(orderL));
+        double orderFactorR = Math.pow(10, Math.floor(orderR));
+        double vL = yVarianceL / orderFactorL;
+        double vR = yVarianceR / orderFactorR;
+
+        double distance = Double.POSITIVE_INFINITY;
+        double prettyValueL = PRETTY_VALUES[0];
+        double prettyValueR = PRETTY_VALUES[0];
+        for (int i = 0; i < imageParameters.getyDivisors().size(); i++) {
+            double q = vL / imageParameters.getyDivisors().get(i);
+            double p = GraphUtils.closest(q, PRETTY_VALUES);
+
+            if (Math.abs(q - p) < distance) {
+                distance = Math.abs(q - p);
+                prettyValueL = p;
+            }
+        }
+
+        distance = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < imageParameters.getyDivisors().size(); i++) {
+            double q = vR / imageParameters.getyDivisors().get(i);
+            double p = GraphUtils.closest(q, PRETTY_VALUES);
+
+            if (Math.abs(q - p) < distance) {
+                distance = Math.abs(q - p);
+                prettyValueR = p;
+            }
+        }
+
+        yStepL = prettyValueL * orderFactorL;
+        yStepR = prettyValueR * orderFactorR;
+
+        if (imageParameters.getyStepLeft() < Double.POSITIVE_INFINITY) {
+            yStepL = imageParameters.getyStepLeft();
+        }
+        if (imageParameters.getyStepRight() < Double.POSITIVE_INFINITY) {
+            yStepR = imageParameters.getyStepRight();
+        }
+
+        yBottomL = yStepL * Math.floor( yMinValueL / yStepL );
+        yBottomR = yStepR * Math.floor( yMinValueR / yStepR );
+        yTopL = yStepL * Math.ceil( yMaxValueL / yStepL );
+        yTopR = yStepR * Math.ceil( yMaxValueR / yStepR );
+
+        if (imageParameters.getLogBase() != 0 && yMaxValueL > 0) {
+            yBottomL = Math.pow(imageParameters.getLogBase(), Math.floor(Math.log(yMinValueL) / Math.log(imageParameters.getLogBase())));
+            yTopL = Math.pow(imageParameters.getLogBase(), Math.ceil(Math.log(yMaxValueL) / Math.log(imageParameters.getLogBase())));
+        } else if (imageParameters.getLogBase() != 0 && yMinValueL <= 0) {
+            throw new LogarithmicScaleNotAllowed("Logarithmic scale specified with a dataset with a minimum value less than or equal to zero");
+        }
+        if (imageParameters.getLogBase() != 0 && yMaxValueR > 0) {
+            yBottomR = Math.pow(imageParameters.getLogBase(), Math.floor(Math.log(yMinValueR) / Math.log(imageParameters.getLogBase())));
+            yTopR = Math.pow(imageParameters.getLogBase(), Math.ceil(Math.log(yMaxValueR) / Math.log(imageParameters.getLogBase())));
+        } else if (imageParameters.getLogBase() != 0 && yMinValueR <= 0) {
+            throw new LogarithmicScaleNotAllowed("Logarithmic scale specified with a dataset with a minimum value less than or equal to zero");
+        }
+
+        if (imageParameters.getyMaxLeft() < Double.POSITIVE_INFINITY) {
+            yTopL = imageParameters.getyMaxLeft();
+        }
+        if (imageParameters.getyMaxRight() < Double.POSITIVE_INFINITY) {
+            yTopR = imageParameters.getyMaxRight();
+        }
+        if (imageParameters.getyMinLeft() > Double.NEGATIVE_INFINITY) {
+            yBottomL = imageParameters.getyMinLeft();
+        }
+        if (imageParameters.getyMinRight() > Double.NEGATIVE_INFINITY) {
+            yBottomR = imageParameters.getyMinRight();
+        }
+
+        ySpanL = yTopL - yBottomL;
+        ySpanR = yTopR - yBottomR;
+
+        if (ySpanL == 0) {
+            yTopL++;
+            ySpanL++;
+        }
+        if (ySpanR == 0) {
+            yTopR++;
+            ySpanR++;
+        }
+
+        graphHeight = yMax - yMin;
+        yScaleFactorL = graphHeight / ySpanL;
+        yScaleFactorR = graphHeight / ySpanR;
+
+        yLabelValuesL = getYLabelValues(yBottomL, yTopL, yStepL);
+        yLabelValuesR = getYLabelValues(yBottomR, yTopR, yStepR);
+
+        FontMetrics fontMetrics = g2d.getFontMetrics(imageParameters.getFont());
+
+        yLabelsL = new ArrayList<>();
+        yLabelsR = new ArrayList<>();
+        for(Double value : yLabelValuesL) {
+            String label = makeLabel(value, yStepL, ySpanL);
+            yLabelsL.add(label);
+            if (fontMetrics.stringWidth(label) > yLabelWidthL) yLabelWidthL = fontMetrics.stringWidth(label);
+        }
+        for(Double value : yLabelValuesR) {
+            String label = makeLabel(value, yStepR, ySpanR);
+            yLabelsR.add(label);
+            if (fontMetrics.stringWidth(label) > yLabelWidthR) yLabelWidthR = fontMetrics.stringWidth(label);
+        }
+
+        int xxMin = (int) (imageParameters.getMargin() + (yLabelWidthL * 1.02));
+        if (xMin < xxMin) {
+            xMin = xxMin;
+        }
+
+        int xxMax = (int) (imageParameters.getWidth() - (yLabelWidthR * 1.02));
+        if (xMax >= xxMax) {
+            xMax = xxMax;
+        }
     }
 
-    protected void setupYAxis() {
+    protected void setupYAxis() throws LogarithmicScaleNotAllowed {
         List<DecoratedTimeSeries> seriesWithMissingValues = new ArrayList<>();
-        for(DecoratedTimeSeries ts : data) {
-            for(Double value : ts.getValues()) {
+        for (DecoratedTimeSeries ts : data) {
+            for (Double value : ts.getValues()) {
                 if (value == null) {
                     seriesWithMissingValues.add(ts);
                     break;
@@ -303,8 +568,8 @@ public abstract class Graph {
             }
         }
 
-        double yMinValue = Double.MAX_VALUE;
-        for(DecoratedTimeSeries ts : data) {
+        double yMinValue = Double.POSITIVE_INFINITY;
+        for (DecoratedTimeSeries ts : data) {
             if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
                 double mm = GraphUtils.safeMin(ts);
                 yMinValue = mm < yMinValue ? mm : yMinValue;
@@ -316,16 +581,404 @@ public abstract class Graph {
         }
 
 
-        //todo: continue here
+        double yMaxValue;
         if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED)) {
+            yMaxValue = GraphUtils.maxSum(data);
+        } else {
+            yMaxValue = GraphUtils.safeMax(data);
+        }
+
+        if (yMaxValue < 0 && imageParameters.isDrawNullAsZero() && seriesWithMissingValues.size() > 0) {
+            yMaxValue = 0;
+        }
+
+        if (yMinValue == Double.POSITIVE_INFINITY) {
+            yMinValue = 0;
+        }
+
+        if (yMaxValue == Double.NEGATIVE_INFINITY) {
+            yMaxValue = 0;
+        }
+
+        if (imageParameters.getyMax() != Double.POSITIVE_INFINITY) {
+            yMaxValue = imageParameters.getyMax();
+        }
+
+        if (imageParameters.getyMin() != Double.NEGATIVE_INFINITY) {
+            yMinValue = imageParameters.getyMin();
+        }
+
+        if (yMaxValue <= yMinValue) {
+            yMaxValue = yMinValue + 1;
+        }
+
+        double yVariance = yMaxValue - yMinValue;
+        double order;
+        double orderFactor;
+
+        order = Math.log10(yVariance);
+        orderFactor = Math.pow(10, Math.floor(order));
+
+/*
+        if (imageParameters.getyUnitSystem().equals(ImageParameters.UnitSystem.BINARY)) {
+            order = Math.log(yVariance) / Math.log(2);
+            orderFactor = Math.pow(2, Math.floor(order));
+        } else {
+            order = Math.log10(yVariance);
+            orderFactor = Math.pow(10, Math.floor(order));
+        }
+*/
+
+        double v = yVariance / orderFactor;
+
+        // todo: verify - it's not a pure translation
+        double distance = Double.POSITIVE_INFINITY;
+        double prettyValue = PRETTY_VALUES[0];
+        for (int i = 0; i < imageParameters.getyDivisors().size(); i++) {
+            double q = v / imageParameters.getyDivisors().get(i);
+            double p = GraphUtils.closest(q, PRETTY_VALUES);
+
+            if (Math.abs(q - p) < distance) {
+                distance = Math.abs(q - p);
+                prettyValue = p;
+
+            }
+        }
+
+        yStep = prettyValue * orderFactor;
+
+        if (imageParameters.getyStep() < Double.POSITIVE_INFINITY) {
+            yStep = imageParameters.getyStep();
+        }
+
+        yBottom = yStep * Math.floor(yMinValue / yStep);
+        yTop = yStep * Math.ceil(yMaxValue / yStep);
+
+        if (imageParameters.getLogBase() != 0 && yMaxValue > 0) {
+            yBottom = Math.pow(imageParameters.getLogBase(), Math.floor(Math.log(yMinValue) / Math.log(imageParameters.getLogBase())));
+            yTop = Math.pow(imageParameters.getLogBase(), Math.ceil(Math.log(yMaxValue) / Math.log(imageParameters.getLogBase())));
+        } else if (imageParameters.getLogBase() != 0 && yMinValue <= 0) {
+            throw new LogarithmicScaleNotAllowed("Logarithmic scale specified with a dataset with a minimum value less than or equal to zero");
+        }
+
+        if (imageParameters.getyMax() != Double.POSITIVE_INFINITY) {
+            yTop = imageParameters.getyMax();
+        }
+
+        if (imageParameters.getyMin() != Double.NEGATIVE_INFINITY) {
+            yBottom = imageParameters.getyMin();
+        }
+
+        ySpan = yTop - yBottom;
+
+        if (ySpan == 0) {
+            yTop++;
+            ySpan++;
+        }
+
+        graphHeight = yMax - yMin;
+        yScaleFactor = graphHeight / ySpan;
+
+
+        if (!imageParameters.isHideAxes()) {
+            yLabelValues = getYLabelValues(yBottom, yTop, yStep);
+            yLabels = new ArrayList<>();
+            yLabelWidth = 0;
+            FontMetrics fontMetrics = g2d.getFontMetrics(imageParameters.getFont());
+
+            for(Double value : yLabelValues) {
+                String label = makeLabel(value);
+                yLabels.add(label);
+                if (fontMetrics.stringWidth(label) > yLabelWidth) yLabelWidth = fontMetrics.stringWidth(label);
+            }
+
+            if (!imageParameters.isHideYAxis()) {
+                int xxMin = (int) (imageParameters.getMargin() + yLabelWidth * 1.02);
+                if (xMin < xxMin) {
+                    xMin = xxMin;
+                }
+            } else {
+                int xxMax = (int) (imageParameters.getMargin() - yLabelWidth * 1.02);
+                if (xMax >= xxMax) {
+                    xMax = xxMax;
+                }
+            }
 
         } else {
-
+            yLabelValues = new ArrayList<>();
+            yLabels = new ArrayList<>();
+            yLabelWidth = 0;
         }
+    }
+
+    protected void setupXAxis() {
+        startDateTime = new DateTime(startTime * 1000, renderParameters.getTz());
+        endDateTime = new DateTime(endTime * 1000, renderParameters.getTz());
+
+        double secondsPerPixel = (endTime - startTime) / graphWidth;
+        xScaleFactor = (double)graphWidth / (endTime - startTime);
+
+        xAxisConfig = XAxisConfigProvider.getXAxisConfig(secondsPerPixel, endTime - startTime);
+
+        xLabelStep = xAxisConfig.getLabelUnit() * xAxisConfig.getLabelStep();
+        xMinorGridStep = (long) (xAxisConfig.getMinorGridUnit() * xAxisConfig.getMinorGridStep());
+        xMajorGridStep = xAxisConfig.getMajorGridUnit() * xAxisConfig.getMajorGridStep();
+
+    }
+
+    protected void drawLabels() {
+        // Draw the Y-labels
+        if (!imageParameters.isHideYAxis()) {
+            if (!secondYAxis) {
+                for(int i = 0; i < yLabelValues.size(); i++) {
+                    int x;
+                    if (imageParameters.getyAxisSide().equals(ImageParameters.Side.LEFT)) {
+                        x = (int) (xMin - (yLabelWidth * 0.02));
+                    } else {
+                        x = (int) (xMax + (yLabelWidth * 0.02));
+                    }
+
+                    int y = getYCoord(yLabelValues.get(i));
+                    if (y < 0) y = 0;
+
+                    if (imageParameters.getyAxisSide().equals(ImageParameters.Side.LEFT)) {
+                        drawText(x, y, yLabels.get(i), HorizontalAlign.RIGHT, VerticalAlign.MIDDLE);
+                    } else {
+                        drawText(x, y, yLabels.get(i), HorizontalAlign.LEFT, VerticalAlign.MIDDLE);
+                    }
+                }
+            } else {
+                for(int i = 0; i < yLabelValuesL.size(); i++) {
+                    int x = (int) (xMin - (yLabelWidthL * 0.02));
+                    int y = getYCoordLeft(yLabelValuesL.get(i));
+                    if (y < 0) y = 0;
+                    drawText(x, y, yLabelsL.get(i), HorizontalAlign.RIGHT, VerticalAlign.MIDDLE);
+                }
+
+                for(int i = 0; i < yLabelValuesR.size(); i++) {
+                    int x = (int) (xMax + (yLabelWidthR * 0.02));
+                    int y = getYCoordRight(yLabelValuesR.get(i));
+                    if (y < 0) y = 0;
+                    drawText(x, y, yLabelsR.get(i), HorizontalAlign.LEFT, VerticalAlign.MIDDLE);
+                }
+            }
+        }
+
+        // Draw the X-labels
+        long labelDt = 0;
+        long labelDelta = 1;
+        if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.SEC) {
+            labelDt = startTime - (long)(startTime % xAxisConfig.getLabelStep());
+            labelDelta = (long) xAxisConfig.getLabelStep();
+        } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.MIN) {
+            DateTime tdt = new DateTime(startTime * 1000);
+            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour((int) (tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getLabelStep()))).getMillis() / 1000;
+            labelDelta = (long) xAxisConfig.getLabelStep() * 60;
+        } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.HOUR) {
+            DateTime tdt = new DateTime(startTime * 1000);
+            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay((int) (tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getLabelStep()))).getMillis() / 1000;
+            labelDelta = (long) xAxisConfig.getLabelStep() * 60 * 60;
+        } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.DAY) {
+            DateTime tdt = new DateTime(startTime * 1000);
+            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay(0).getMillis() / 1000;
+            labelDelta = (long) xAxisConfig.getLabelStep() * 60 * 60 * 24;
+        }
+
+        DateTime ddt = new DateTime(labelDt * 1000, renderParameters.getTz());
+
+        FontMetrics fontMetrics = g2d.getFontMetrics(imageParameters.getFont());
+
+        while (ddt.isBefore(endDateTime)) {
+            String label =  ddt.toString(DateTimeFormat.forPattern(xAxisConfig.getFormat()));
+            int x = (int) (xMin + (Seconds.secondsBetween(startDateTime, ddt).getSeconds() * xScaleFactor));
+            int y = yMax + fontMetrics.getMaxAscent();
+            drawText(x, y, label, HorizontalAlign.CENTER, VerticalAlign.TOP);
+
+            ddt = ddt.plusSeconds((int) labelDelta);
+        }
+    }
+
+    protected void drawGridLines() {
+        //todo: I'm here
 
     }
 
 
+    private int getYCoordRight(double value) {
+        double highestValue = Collections.max(yLabelValuesR);
+        double lowestValue = Collections.min(yLabelValuesR);
+        int pixelRange = yMax - yMin;
+
+        double relativeValue = value - lowestValue;
+        double valueRange = highestValue - lowestValue;
+
+        if (imageParameters.getLogBase() != 0) {
+            if (value < 0) {
+                return -1;
+            }
+
+            relativeValue = Math.log(value) / Math.log(imageParameters.getLogBase()) - Math.log(lowestValue) / Math.log(imageParameters.getLogBase());
+            valueRange = Math.log(highestValue) / Math.log(imageParameters.getLogBase()) - Math.log(lowestValue) / Math.log(imageParameters.getLogBase());
+        }
+
+        double pixelToValueRatio = pixelRange / valueRange;
+        double valueInPixels = pixelToValueRatio * relativeValue;
+        return (int) (yMax - valueInPixels);
+    }
+
+
+    private int getYCoordLeft(double value) {
+        double highestValue = Collections.max(yLabelValuesL);
+        double lowestValue = Collections.min(yLabelValuesL);
+        int pixelRange = yMax - yMin;
+
+        double relativeValue = value - lowestValue;
+        double valueRange = highestValue - lowestValue;
+
+        if (imageParameters.getLogBase() != 0) {
+            if (value < 0) {
+                return -1;
+            }
+
+            relativeValue = Math.log(value) / Math.log(imageParameters.getLogBase()) - Math.log(lowestValue) / Math.log(imageParameters.getLogBase());
+            valueRange = Math.log(highestValue) / Math.log(imageParameters.getLogBase()) - Math.log(lowestValue) / Math.log(imageParameters.getLogBase());
+        }
+
+        double pixelToValueRatio = pixelRange / valueRange;
+        double valueInPixels = pixelToValueRatio * relativeValue;
+        return (int) (yMax - valueInPixels);
+    }
+
+    private int getYCoord(double value) {
+        double highestValue = Collections.max(yLabelValues);
+        double lowestValue = Collections.min(yLabelValues);
+        int pixelRange = yMax - yMin;
+
+        double relativeValue = value - lowestValue;
+        double valueRange = highestValue - lowestValue;
+
+        if (imageParameters.getLogBase() != 0) {
+            if (value < 0) {
+                return -1;
+            }
+
+            relativeValue = Math.log(value) / Math.log(imageParameters.getLogBase()) - Math.log(lowestValue) / Math.log(imageParameters.getLogBase());
+            valueRange = Math.log(highestValue) / Math.log(imageParameters.getLogBase()) - Math.log(lowestValue) / Math.log(imageParameters.getLogBase());
+        }
+
+        double pixelToValueRatio = pixelRange / valueRange;
+        double valueInPixels = pixelToValueRatio * relativeValue;
+        return (int) (yMax - valueInPixels);
+    }
+
+    private List<Double> getYLabelValues(double min, double max, double step) {
+        if (imageParameters.getLogBase() != 0) {
+            return logRange(imageParameters.getLogBase(), min, max);
+        } else {
+            return fRange(step, min, max);
+        }
+
+    }
+
+    protected String makeLabel(double value, double step, double span) {
+        double tmpValue = formatUnitValue(value, step, imageParameters.getyUnitSystem());
+        String prefix = formatUnitPrefix(value, step, imageParameters.getyUnitSystem());
+
+        double ySpan = formatUnitValue(span, step, imageParameters.getyUnitSystem());
+        String spanPrefix = formatUnitPrefix(span, step, imageParameters.getyUnitSystem());
+
+        value = tmpValue;
+
+        if (value < 0.1) {
+            return value + prefix;
+        } else if (value < 1.0) {
+            return String.format("%.2f %s", value, prefix);
+        }
+
+        if (ySpan > 10 || !spanPrefix.equals(prefix)) {
+            return String.format("%.1f %s", value, prefix);
+/*
+            if (value != Math.floor(value)) {
+                return String.format("%.1f %s", value, prefix);
+            } else {
+                return String.format("%d %s", (int) value, prefix);
+            }
+*/
+        } else if (ySpan > 3) {
+            return String.format("%.1f %s", value, prefix);
+        } else if (ySpan > 0.1) {
+            return String.format("%.2f %s", value, prefix);
+        } else {
+            return value + prefix;
+        }
+    }
+
+    protected String makeLabel(double value) {
+        return makeLabel(value, yStep, ySpan);
+    }
+
+    private String formatUnitPrefix(double value, double step, ImageParameters.UnitSystem system) {
+        for(Map.Entry<String, Double> entry : imageParameters.getyUnitSystem().getPrefixMap().entrySet()) {
+            if (Math.abs(value) >= entry.getValue() && step >= entry.getValue()) {
+                return entry.getKey();
+            }
+
+        }
+
+        return "";
+    }
+
+    private double formatUnitValue(double value, double step, ImageParameters.UnitSystem system) {
+        for(Map.Entry<String, Double> entry : imageParameters.getyUnitSystem().getPrefixMap().entrySet()) {
+            if (Math.abs(value) >= entry.getValue() && step >= entry.getValue()) {
+                double v2 = value / entry.getValue();
+                if (v2 - Math.floor(v2) < 0.00000000001 && value > 1) {
+                    v2 = Math.floor(v2);
+                }
+                return v2;
+            }
+        }
+
+        if (value - Math.floor(value) < 0.00000000001 && value > 1) {
+            return Math.floor(value);
+        }
+
+        return value;
+    }
+
+    private List<Double> logRange(double base, double min, double max) {
+        List<Double> result = new ArrayList<>();
+        double current = min;
+
+        if (min > 0) {
+            current = Math.floor(Math.log(min) / Math.log(base));
+        }
+
+        double factor = current;
+
+        while (current < max) {
+            current = Math.pow(base, factor);
+            result.add(current);
+            factor++;
+        }
+
+        return result;
+    }
+
+    private List<Double> fRange(double step, double min, double max) {
+        List<Double> result = new ArrayList<>();
+        double f = min;
+
+        while (f < max) {
+            result.add(f);
+            f += step;
+            if (f == min) {
+                result.add(max);
+                break;
+            }
+        }
+        return result;
+    }
 
     protected enum HorizontalAlign {
         LEFT, CENTER, RIGHT;
