@@ -58,6 +58,12 @@ public class ImageParameters {
 
     private double logBase = 0;
 
+    private Color majorGridLineColor = new Color(96, 79, 96);
+    private Color minorGridLineColor = new Color(52, 52, 52);
+    private int minorY = 1;
+
+    private double areaAlpha = -1;
+
     public ImageParameters() {
         // init colors
 //        colorList.add(Color.BLUE);
@@ -383,6 +389,38 @@ public class ImageParameters {
 
     public void setyStepRight(double yStepRight) {
         this.yStepRight = yStepRight;
+    }
+
+    public Color getMajorGridLineColor() {
+        return majorGridLineColor;
+    }
+
+    public void setMajorGridLineColor(Color majorGridLineColor) {
+        this.majorGridLineColor = majorGridLineColor;
+    }
+
+    public Color getMinorGridLineColor() {
+        return minorGridLineColor;
+    }
+
+    public void setMinorGridLineColor(Color minorGridLineColor) {
+        this.minorGridLineColor = minorGridLineColor;
+    }
+
+    public int getMinorY() {
+        return minorY;
+    }
+
+    public void setMinorY(int minorY) {
+        this.minorY = minorY;
+    }
+
+    public double getAreaAlpha() {
+        return areaAlpha;
+    }
+
+    public void setAreaAlpha(double areaAlpha) {
+        this.areaAlpha = areaAlpha;
     }
 
     public enum Side {

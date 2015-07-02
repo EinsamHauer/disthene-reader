@@ -148,6 +148,7 @@ public class LineGraph extends Graph {
             }
         }
 
+        drawLines();
 
         return getBytes();
     }

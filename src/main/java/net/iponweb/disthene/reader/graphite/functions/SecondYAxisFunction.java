@@ -42,6 +42,7 @@ public class SecondYAxisFunction extends DistheneFunction {
 
         for(TimeSeries ts : processedArguments) {
             ts.addOption(TimeSeriesOption.SECOND_Y_AXIS);
+            ts.setName("secondYAxis(" + ts.getName() + ")");
         }
 
         return processedArguments;

@@ -7,6 +7,7 @@ import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormat;
 
@@ -16,10 +17,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Andrei Ivanov
@@ -267,7 +266,7 @@ public abstract class Graph {
                 if (secondYAxes.get(i)) {
                     nRight++;
                     g2d.fillRect(xRight - padding, yRight, boxSize, boxSize);
-                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.setPaint(new Color(111, 111, 111));
                     g2d.drawRect(xRight - padding, yRight, boxSize, boxSize);
                     drawText(xRight - boxSize, yRight, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.RIGHT, VerticalAlign.TOP);
                     xRight -= labelWidth;
@@ -279,7 +278,7 @@ public abstract class Graph {
                 } else {
                     n++;
                     g2d.fillRect(x, y, boxSize, boxSize);
-                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.setPaint(new Color(111, 111, 111));
                     g2d.drawRect(x, y, boxSize, boxSize);
                     drawText(x + boxSize + padding, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.LEFT, VerticalAlign.TOP);
                     x += labelWidth;
@@ -309,7 +308,7 @@ public abstract class Graph {
                 if (secondYAxes.get(i)) {
                     g2d.setPaint(colors.get(i));
                     g2d.fillRect(x + labelWidth + padding, y, boxSize, boxSize);
-                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.setPaint(new Color(111, 111, 111));
                     g2d.drawRect(x + labelWidth + padding, y, boxSize, boxSize);
                     drawText(x + labelWidth, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.RIGHT, VerticalAlign.TOP);
                     x += labelWidth;
@@ -317,7 +316,7 @@ public abstract class Graph {
                     g2d.setPaint(colors.get(i));
                     g2d.fillRect(x, y, boxSize, boxSize);
                     // todo; use color dictionary
-                    g2d.setPaint(new Color(175, 175, 175));
+                    g2d.setPaint(new Color(111, 111, 111));
                     g2d.drawRect(x, y, boxSize, boxSize);
                     drawText(x + boxSize + padding, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.LEFT, VerticalAlign.TOP);
                     x += labelWidth;
@@ -546,12 +545,12 @@ public abstract class Graph {
             if (fontMetrics.stringWidth(label) > yLabelWidthR) yLabelWidthR = fontMetrics.stringWidth(label);
         }
 
-        int xxMin = (int) (imageParameters.getMargin() + (yLabelWidthL * 1.02));
+        int xxMin = (int) (imageParameters.getMargin() + (yLabelWidthL * 1.15));
         if (xMin < xxMin) {
             xMin = xxMin;
         }
 
-        int xxMax = (int) (imageParameters.getWidth() - (yLabelWidthR * 1.02));
+        int xxMax = (int) (imageParameters.getWidth() - (yLabelWidthR * 1.15));
         if (xMax >= xxMax) {
             xMax = xxMax;
         }
@@ -693,14 +692,16 @@ public abstract class Graph {
             }
 
             if (!imageParameters.isHideYAxis()) {
-                int xxMin = (int) (imageParameters.getMargin() + yLabelWidth * 1.02);
-                if (xMin < xxMin) {
-                    xMin = xxMin;
-                }
-            } else {
-                int xxMax = (int) (imageParameters.getMargin() - yLabelWidth * 1.02);
-                if (xMax >= xxMax) {
-                    xMax = xxMax;
+                if (imageParameters.getyAxisSide().equals(ImageParameters.Side.LEFT)) {
+                    int xxMin = (int) (imageParameters.getMargin() + yLabelWidth * 1.15);
+                    if (xMin < xxMin) {
+                        xMin = xxMin;
+                    }
+                } else {
+                    int xxMax = (int) (imageParameters.getMargin() - yLabelWidth * 1.15);
+                    if (xMax >= xxMax) {
+                        xMax = xxMax;
+                    }
                 }
             }
 
@@ -733,9 +734,9 @@ public abstract class Graph {
                 for(int i = 0; i < yLabelValues.size(); i++) {
                     int x;
                     if (imageParameters.getyAxisSide().equals(ImageParameters.Side.LEFT)) {
-                        x = (int) (xMin - (yLabelWidth * 0.02));
+                        x = (int) (xMin - (yLabelWidth * 0.15));
                     } else {
-                        x = (int) (xMax + (yLabelWidth * 0.02));
+                        x = (int) (xMax + (yLabelWidth * 0.15));
                     }
 
                     int y = getYCoord(yLabelValues.get(i));
@@ -749,14 +750,14 @@ public abstract class Graph {
                 }
             } else {
                 for(int i = 0; i < yLabelValuesL.size(); i++) {
-                    int x = (int) (xMin - (yLabelWidthL * 0.02));
+                    int x = (int) (xMin - (yLabelWidthL * 0.15));
                     int y = getYCoordLeft(yLabelValuesL.get(i));
                     if (y < 0) y = 0;
                     drawText(x, y, yLabelsL.get(i), HorizontalAlign.RIGHT, VerticalAlign.MIDDLE);
                 }
 
                 for(int i = 0; i < yLabelValuesR.size(); i++) {
-                    int x = (int) (xMax + (yLabelWidthR * 0.02));
+                    int x = (int) (xMax + (yLabelWidthR * 0.15));
                     int y = getYCoordRight(yLabelValuesR.get(i));
                     if (y < 0) y = 0;
                     drawText(x, y, yLabelsR.get(i), HorizontalAlign.LEFT, VerticalAlign.MIDDLE);
@@ -771,18 +772,20 @@ public abstract class Graph {
             labelDt = startTime - (long)(startTime % xAxisConfig.getLabelStep());
             labelDelta = (long) xAxisConfig.getLabelStep();
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.MIN) {
-            DateTime tdt = new DateTime(startTime * 1000);
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
             labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour((int) (tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getLabelStep()))).getMillis() / 1000;
             labelDelta = (long) xAxisConfig.getLabelStep() * 60;
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.HOUR) {
-            DateTime tdt = new DateTime(startTime * 1000);
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
             labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay((int) (tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getLabelStep()))).getMillis() / 1000;
             labelDelta = (long) xAxisConfig.getLabelStep() * 60 * 60;
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.DAY) {
-            DateTime tdt = new DateTime(startTime * 1000);
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
             labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay(0).getMillis() / 1000;
             labelDelta = (long) xAxisConfig.getLabelStep() * 60 * 60 * 24;
         }
+
+        while(labelDt < startTime) labelDt += labelDelta;
 
         DateTime ddt = new DateTime(labelDt * 1000, renderParameters.getTz());
 
@@ -799,10 +802,189 @@ public abstract class Graph {
     }
 
     protected void drawGridLines() {
-        //todo: I'm here
+        g2d.setStroke(new BasicStroke(0f));
 
+        //Horizontal grid lines
+        int leftSide = xMin;
+        int rightSide = xMax;
+        List<Double> labelValues = secondYAxis ? yLabelValuesL : yLabelValues;
+
+        for(int i = 0; i < labelValues.size(); i++) {
+            g2d.setColor(imageParameters.getMajorGridLineColor());
+
+            int y = secondYAxis ? getYCoordLeft(labelValues.get(i)) : getYCoord(labelValues.get(i));
+            if (y < 0) continue;
+
+            g2d.drawLine(leftSide, y, rightSide, y);
+
+            // draw minor gridlines if this isn't the last label
+            g2d.setColor(imageParameters.getMinorGridLineColor());
+            if (imageParameters.getMinorY() >= 1 && i < (labelValues.size() - 1)) {
+                double distance = ((labelValues.get(i + 1) - labelValues.get(i)) / (1 + imageParameters.getMinorY()));
+
+                for(int minor = 0; minor < imageParameters.getMinorY(); minor++) {
+                    double minorValue = (labelValues.get(i) + ((1+minor) * distance));
+
+                    int yTopFactor = imageParameters.getLogBase() != 0 ? (int) (imageParameters.getLogBase() * imageParameters.getLogBase()) : 1;
+
+                    if (secondYAxis) {
+                        if (minorValue > yTopFactor * yTopL) continue;
+                    } else {
+                        if (minorValue > yTopFactor * yTop) continue;
+                    }
+
+                    int yMinor = secondYAxis ? getYCoordLeft(minorValue) : getYCoord(minorValue);
+                    if (yMinor < 0) continue;
+
+                    g2d.drawLine(leftSide, yMinor, rightSide, yMinor);
+                }
+            }
+        }
+
+        // Vertical grid lines
+        int top = yMin;
+        int bottom = yMax;
+
+        long dt = 0;
+        long delta = 1;
+        if (xAxisConfig.getMinorGridUnit() == XAxisConfigProvider.SEC) {
+            dt = startTime - (long)(startTime % xAxisConfig.getMinorGridStep());
+            delta = (long) xAxisConfig.getMinorGridStep();
+        } else if (xAxisConfig.getMinorGridUnit() == XAxisConfigProvider.MIN) {
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
+            dt = tdt.withSecondOfMinute(0).withMinuteOfHour((int) (tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getMinorGridStep()))).getMillis() / 1000;
+            delta = (long) xAxisConfig.getMinorGridStep() * 60;
+        } else if (xAxisConfig.getMinorGridUnit() == XAxisConfigProvider.HOUR) {
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
+            dt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay((int) (tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getMinorGridStep()))).getMillis() / 1000;
+            delta = (long) xAxisConfig.getMinorGridStep() * 60 * 60;
+        } else if (xAxisConfig.getMinorGridUnit() == XAxisConfigProvider.DAY) {
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
+            dt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay(0).getMillis() / 1000;
+            delta = (long) xAxisConfig.getMinorGridStep() * 60 * 60 * 24;
+        }
+
+        while(dt < startTime) dt += delta;
+
+        DateTime ddt = new DateTime(dt * 1000, renderParameters.getTz());
+
+        g2d.setColor(imageParameters.getMinorGridLineColor());
+
+        while (ddt.isBefore(endDateTime)) {
+            int x = (int) (xMin + (Seconds.secondsBetween(startDateTime, ddt).getSeconds() * xScaleFactor));
+
+            if (x < xMax) {
+                g2d.drawLine(x, bottom, x, top);
+            }
+
+            ddt = ddt.plusSeconds((int) delta);
+        }
+
+        // Now we do the major grid lines
+        g2d.setColor(imageParameters.getMajorGridLineColor());
+        long majorDt = 0;
+        long majorDelta = 1;
+
+        if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.SEC) {
+            majorDt = startTime - (long)(startTime % xAxisConfig.getMajorGridStep());
+            majorDelta = (long) xAxisConfig.getMajorGridStep();
+        } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.MIN) {
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
+            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour((int) (tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getMajorGridStep()))).getMillis() / 1000;
+            majorDelta = (long) xAxisConfig.getMajorGridStep() * 60;
+        } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.HOUR) {
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
+            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay((int) (tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getMajorGridStep()))).getMillis() / 1000;
+            majorDelta = (long) xAxisConfig.getMajorGridStep() * 60 * 60;
+        } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.DAY) {
+            DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
+            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay(0).getMillis() / 1000;
+            majorDelta = (long) xAxisConfig.getMajorGridStep() * 60 * 60 * 24;
+        }
+
+        while(majorDt < startTime) majorDt += majorDelta;
+
+        ddt = new DateTime(majorDt * 1000, renderParameters.getTz());
+
+        while (ddt.isBefore(endDateTime)) {
+            int x = (int) (xMin + (Seconds.secondsBetween(startDateTime, ddt).getSeconds() * xScaleFactor));
+
+            if (x < xMax) {
+                g2d.drawLine(x, bottom, x, top);
+            }
+
+            ddt = ddt.plusSeconds((int) majorDelta);
+        }
+
+        //Draw side borders for our graph area
+        g2d.drawLine(xMax, bottom, xMax, top);
+        g2d.drawLine(xMin, bottom, xMin, top);
     }
 
+    protected void drawLines() {
+        int width = (int) imageParameters.getLineWidth();
+        g2d.setStroke(new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+
+        int originalWidth = width;
+
+        boolean singleStacked = false;
+
+        for(DecoratedTimeSeries ts : data) {
+            if (ts.hasOption(TimeSeriesOption.STACKED)) {
+                singleStacked = true;
+                break;
+            }
+        }
+
+        //todo: optimize
+        if (singleStacked) {
+            sortStacked();
+        }
+
+        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) && !secondYAxis) {
+            double[] total = new double[data.get(0).getValues().length];
+
+            for(DecoratedTimeSeries ts : data) {
+                if (ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) continue;
+
+                ts.setOption(TimeSeriesOption.STACKED, true);
+                for(int i = 0; i < ts.getValues().length; i++) {
+                    if (ts.getValues()[i] != null) {
+                        double original = ts.getValues()[i];
+                        ts.getValues()[i] += total[i];
+                        total[i] += original;
+                    }
+                }
+            }
+        } else if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.FIRST)) {
+            data.get(0).setOption(TimeSeriesOption.STACKED, true);
+        } else if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.ALL)) {
+            for(DecoratedTimeSeries ts : data) {
+                if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
+                    ts.setOption(TimeSeriesOption.STACKED, true);
+                }
+            }
+        }
+
+        //todo: I'm here
+    }
+
+    private void sortStacked() {
+        List<DecoratedTimeSeries> newData = new ArrayList<>();
+
+        for(DecoratedTimeSeries ts : data) {
+            if (ts.hasOption(TimeSeriesOption.STACKED)) {
+                newData.add(ts);
+            }
+        }
+        for(DecoratedTimeSeries ts : data) {
+            if (!ts.hasOption(TimeSeriesOption.STACKED)) {
+                newData.add(ts);
+            }
+        }
+
+        data = newData;
+    }
 
     private int getYCoordRight(double value) {
         double highestValue = Collections.max(yLabelValuesR);
