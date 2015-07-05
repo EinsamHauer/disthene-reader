@@ -2,6 +2,10 @@ package net.iponweb.disthene.reader.graph;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
+import net.iponweb.disthene.reader.utils.ListUtils;
+
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -63,6 +67,38 @@ public class DecoratedTimeSeries {
 
     public void setOption(TimeSeriesOption option, Object value) {
         timeSeries.setOption(option, value);
+    }
+
+    //todo: implement in a more reasonable way
+    public Double[] getConsolidatedValues() {
+        if (valuesPerPoint <= 1) return timeSeries.getValues();
+
+        List<Double> consolidated = new ArrayList<>();
+        List<Double> buffer = new ArrayList<>();
+
+        for(Double value : timeSeries.getValues()) {
+            buffer.add(value);
+            if (buffer.size() == valuesPerPoint) {
+                buffer.removeAll(Collections.singleton((Double) null));
+                if (buffer.size() > 0 ) {
+                    consolidated.add(ListUtils.average(buffer));
+                } else {
+                    consolidated.add(null);
+                }
+                buffer.clear();
+            }
+        }
+
+        buffer.removeAll(Collections.singleton((Double) null));
+        if (buffer.size() > 0 ) {
+            consolidated.add(ListUtils.average(buffer));
+        } else {
+            consolidated.add(null);
+        }
+
+
+        Double[] result = new Double[consolidated.size()];
+        return consolidated.toArray(result);
     }
 
 }

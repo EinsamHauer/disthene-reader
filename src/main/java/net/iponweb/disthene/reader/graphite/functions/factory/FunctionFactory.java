@@ -1,10 +1,7 @@
 package net.iponweb.disthene.reader.graphite.functions.factory;
 
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
-import net.iponweb.disthene.reader.graphite.functions.AverageFunction;
-import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
-import net.iponweb.disthene.reader.graphite.functions.SecondYAxisFunction;
-import net.iponweb.disthene.reader.graphite.functions.SumFunction;
+import net.iponweb.disthene.reader.graphite.functions.*;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -18,8 +15,9 @@ public class FunctionFactory {
     private static final Map<String, Class<? extends DistheneFunction>> registry = new HashMap<>();
 
     static {
-        registry.put("sumSeries", SumFunction.class);
+        registry.put("sumSeries", SumSeriesFunction.class);
         registry.put("averageSeries", AverageFunction.class);
+        registry.put("divideSeries", DivideSeriesFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
     }
 

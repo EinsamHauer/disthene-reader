@@ -15,10 +15,10 @@ import java.util.List;
 /**
  * @author Andrei Ivanov
  */
-public class SumFunction extends DistheneFunction {
+public class SumSeriesFunction extends DistheneFunction {
 
 
-    public SumFunction(String text) {
+    public SumSeriesFunction(String text) {
         super(text);
     }
 
