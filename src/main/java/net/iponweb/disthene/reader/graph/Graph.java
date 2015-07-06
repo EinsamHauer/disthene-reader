@@ -17,6 +17,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
 
@@ -1287,12 +1288,7 @@ public abstract class Graph {
         value = tmpValue;
 
         if (value < 0.1) {
-            int decimalPlaces = 2 - (int) Math.log10(value);
-            logger.debug("Value: " + value);
-            logger.debug("Log(Value): " + Math.log10(value));
-            logger.debug("Decimal places: " + decimalPlaces);
-            logger.debug("Format: " + "%." + decimalPlaces + "f %s");
-            return String.format("%." + decimalPlaces + "f %s", value, prefix);
+            return value + " " + prefix;
         } else if (value < 1.0) {
             return String.format("%.2f %s", value, prefix);
         }
@@ -1331,6 +1327,12 @@ public abstract class Graph {
     }
 
     private double formatUnitValue(double value, double step, ImageParameters.UnitSystem system) {
+        // Firstly, round the value a bit
+        if (value > 0 && value < 1.0) {
+            value = new BigDecimal(value).setScale(2 - (int) Math.log10(value), BigDecimal.ROUND_HALF_DOWN).doubleValue();
+        }
+
+
         for (Map.Entry<String, Double> entry : imageParameters.getyUnitSystem().getPrefixMap().entrySet()) {
             if (Math.abs(value) >= entry.getValue() && step >= entry.getValue()) {
                 double v2 = value / entry.getValue();
