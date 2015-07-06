@@ -18,10 +18,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Andrei Ivanov
@@ -233,7 +231,12 @@ public abstract class Graph {
         // Check if there's enough room to use two columns
         boolean rightSideLabels = false;
         int padding = 5;
-        String longestLegend = Collections.max(legends);
+        String longestLegend = Collections.max(legends, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return s1.length() - s2.length();
+            }
+        });
         // Double it to check if there's enough room for 2 columns
         String testSizeName = longestLegend + " " + longestLegend;
         int testBoxSize = fontMetrics.getHeight() - 1;
@@ -402,17 +405,23 @@ public abstract class Graph {
             }
         }
 
+        yMaxValueL = GraphUtils.safeMax(dataLeft);
+        yMaxValueR = GraphUtils.safeMax(dataRight);
+/*
         if (getStackedData(dataLeft).size() > 0) {
             yMaxValueL = GraphUtils.maxSum(dataLeft);
         } else {
             yMaxValueL = GraphUtils.safeMax(dataLeft);
         }
+*/
 
+/*
         if (getStackedData(dataRight).size() > 0) {
             yMaxValueR = GraphUtils.maxSum(dataRight);
         } else {
             yMaxValueR = GraphUtils.safeMax(dataRight);
         }
+*/
 
         if (yMinValueL == Double.POSITIVE_INFINITY) {
             yMinValueL = 0.0;
@@ -584,11 +593,14 @@ public abstract class Graph {
 
 
         double yMaxValue;
+        yMaxValue = GraphUtils.safeMax(data);
+/*
         if (getStackedData(data).size() > 0) {
             yMaxValue = GraphUtils.maxSum(data);
         } else {
             yMaxValue = GraphUtils.safeMax(data);
         }
+*/
 
         if (yMaxValue < 0 && imageParameters.isDrawNullAsZero() && seriesWithMissingValues.size() > 0) {
             yMaxValue = 0;
@@ -621,19 +633,8 @@ public abstract class Graph {
         order = Math.log10(yVariance);
         orderFactor = Math.pow(10, Math.floor(order));
 
-/*
-        if (imageParameters.getyUnitSystem().equals(ImageParameters.UnitSystem.BINARY)) {
-            order = Math.log(yVariance) / Math.log(2);
-            orderFactor = Math.pow(2, Math.floor(order));
-        } else {
-            order = Math.log10(yVariance);
-            orderFactor = Math.pow(10, Math.floor(order));
-        }
-*/
-
         double v = yVariance / orderFactor;
 
-        // todo: verify - it's not a pure translation
         double distance = Double.POSITIVE_INFINITY;
         double prettyValue = PRETTY_VALUES[0];
         for (int i = 0; i < imageParameters.getyDivisors().size(); i++) {
@@ -776,7 +777,7 @@ public abstract class Graph {
             labelDelta = (long) xAxisConfig.getLabelStep();
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.MIN) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
-            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour((int) (tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getLabelStep()))).getMillis() / 1000;
+            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getLabelStep())).getMillis() / 1000;
             labelDelta = (long) xAxisConfig.getLabelStep() * 60;
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.HOUR) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
@@ -897,7 +898,7 @@ public abstract class Graph {
             majorDelta = (long) xAxisConfig.getMajorGridStep() * 60;
         } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.HOUR) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
-            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay((int) (tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getMajorGridStep()))).getMillis() / 1000;
+            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay(tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getMajorGridStep())).getMillis() / 1000;
             majorDelta = (long) xAxisConfig.getMajorGridStep() * 60 * 60;
         } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.DAY) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
@@ -932,24 +933,20 @@ public abstract class Graph {
             double x = xMin;
             double previousX = xMin;
             int y;
-            int previousY =  -1;
+            int previousY = -1;
             Double[] values = ts.getConsolidatedValues();
             int consecutiveNulls = 0;
             boolean allNullsSoFar = true;
 
             for (Double value : values) {
-                double adjustedValue;
+                Double adjustedValue = value;
+
+                if (adjustedValue == null && imageParameters.isDrawNullAsZero()) adjustedValue = 0.;
 
                 if (value == null) {
-                    if (imageParameters.isDrawNullAsZero()) {
-                        adjustedValue = 0;
-                    } else {
-                        x += ts.getxStep();
-                        consecutiveNulls++;
-                        continue;
-                    }
-                } else {
-                    adjustedValue = value;
+                    x += ts.getxStep();
+                    consecutiveNulls++;
+                    continue;
                 }
 
                 if (secondYAxis) {
@@ -1011,39 +1008,8 @@ public abstract class Graph {
     private void drawStacked(List<DecoratedTimeSeries> timeSeriesList) {
         if (timeSeriesList.size() == 0) return;
 
-        // first modify data to be stacked one by one
-        int length = timeSeriesList.get(0).getValues().length;
-        double[] total = new double[length];
-        for(DecoratedTimeSeries ts : timeSeriesList) {
-            for (int i = 0; i < length; i++) {
-                if (ts.getValues()[i] != null) {
-                    double original = ts.getValues()[i];
-                    ts.getValues()[i] += total[i];
-                    total[i] += original;
-                }
-            }
-        }
-
-/*
-        GeneralPath previousGraphPath = new GeneralPath();
-        previousGraphPath.moveTo(xMin, yMax);
-        previousGraphPath.lineTo(xMax, yMax);
-        previousGraphPath.lineTo(xMax, yMax - 100);
-*/
-/*
-        previousGraphPath.lineTo(xMin, yMax);
-        previousGraphPath.lineTo(xMax, yMax);
-        previousGraphPath.lineTo(xMax, yMin);
-*//*
-
-//        previousGraphPath.lineTo(xMin, yMin);
-        previousGraphPath.closePath();
-        g2d.setPaint(Color.cyan);
-        g2d.fill(previousGraphPath);
-*/
-
-
-
+        Shape savedClip = g2d.getClip();
+        g2d.clip(new Rectangle(xMin, yMin, xMax - xMin, yMax - yMin));
 
 
         for (DecoratedTimeSeries ts : timeSeriesList) {
@@ -1054,301 +1020,127 @@ public abstract class Graph {
             g2d.setPaint(getColor(ts));
 
             double x = xMin;
-            int y;
+            double startX = x;
+            int y = yMin;
             Double[] values = ts.getConsolidatedValues();
             int consecutiveNulls = 0;
+            boolean allNullsSoFar = true;
 
             for (Double value : values) {
-                double adjustedValue;
-                System.out.println(value);
-                if (value == null) {
-                    if (imageParameters.isDrawNullAsZero()) {
-                        adjustedValue = 0;
+                Double adjustedValue = value;
+
+                if (value == null && imageParameters.isDrawNullAsZero()) adjustedValue = 0.;
+
+                if (adjustedValue == null) {
+                    if (consecutiveNulls == 0) {
+                        path.lineTo(x, y);
+                        if (secondYAxis) {
+                            if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
+                                fillAreaAndClip(path, x, startX, getYCoordRight(0));
+                            } else {
+                                fillAreaAndClip(path, x, startX, getYCoordLeft(0));
+                            }
+                        } else {
+                            fillAreaAndClip(path, x, startX, getYCoord(0));
+                        }
+                    }
+
+                    x += ts.getxStep();
+                    consecutiveNulls++;
+                } else {
+                    if (secondYAxis) {
+                        if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
+                            y = getYCoordRight(adjustedValue);
+                        } else {
+                            y = getYCoordLeft(adjustedValue);
+                        }
                     } else {
+                        y = getYCoord(adjustedValue);
+                    }
+
+                    y = y < 0 ? 0 : y;
+
+                    if (consecutiveNulls > 0) startX = x;
+
+                    if (imageParameters.getLineMode().equals(ImageParameters.LineMode.STAIRCASE)) {
+                        if (consecutiveNulls > 0) {
+                            path.moveTo(x, y);
+                        } else {
+                            path.lineTo(x, y);
+                        }
+
                         x += ts.getxStep();
-                        consecutiveNulls++;
-                        continue;
+                        path.lineTo(x, y);
+                    } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.SLOPE)) {
+                        if (consecutiveNulls > 0) {
+                            path.moveTo(x, y);
+                        }
+
+                        path.lineTo(x, y);
+                        x += ts.getxStep();
+                    } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.CONNECTED)) {
+                        if (consecutiveNulls > imageParameters.getConnectedLimit() || allNullsSoFar) {
+                            path.moveTo(x, y);
+                            allNullsSoFar = false;
+                        }
+
+                        path.lineTo(x, y);
+                        x += ts.getxStep();
                     }
-                } else {
-                    adjustedValue = value;
+
+                    consecutiveNulls = 0;
                 }
-
-                if (secondYAxis) {
-                    if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
-                        y = getYCoordRight(adjustedValue);
-                    } else {
-                        y = getYCoordLeft(adjustedValue);
-                    }
-                } else {
-                    y = getYCoord(adjustedValue);
-                }
-
-                y = y < 0 ? 0 : y;
-
-                if (consecutiveNulls > 0) {
-                    path.moveTo(x, y);
-                }
-
-                path.lineTo((int) x, y);
-
-                consecutiveNulls = 0;
-
-                x += ts.getxStep();
             }
-            path.lineTo(xMax, yMax);
-            path.lineTo(xMin, yMax);
-            path.closePath();
-            g2d.fill(path);
+            double xPos;
+            if (imageParameters.getLineMode().equals(ImageParameters.LineMode.STAIRCASE)) {
+                xPos = x;
+            } else {
+                xPos = x - ts.getxStep();
+            }
+
+            if (secondYAxis) {
+                if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
+                    fillAreaAndClip(path, xPos, startX, getYCoordRight(0));
+                } else {
+                    fillAreaAndClip(path, xPos, startX, getYCoordLeft(0));
+                }
+            } else {
+                fillAreaAndClip(path, xPos, startX, getYCoord(0));
+            }
         }
 
+        g2d.setClip(savedClip);
+    }
+
+    protected void fillAreaAndClip(GeneralPath path, double x, double startX, int yTo) {
+        GeneralPath pattern = new GeneralPath(path);
+
+        path.lineTo(x, yTo);
+        path.lineTo(startX, yTo);
+        path.closePath();
+        g2d.fill(path);
+
+        pattern.lineTo(x, yTo);
+        pattern.lineTo(xMax, yTo);
+        pattern.lineTo(xMax, yMin);
+        pattern.lineTo(xMin, yMin);
+        pattern.lineTo(startX, yTo);
+
+        pattern.lineTo(x, yTo);
+        pattern.lineTo(xMax, yTo);
+        pattern.lineTo(xMax, yMax);
+        pattern.lineTo(xMin, yMax);
+        pattern.lineTo(xMin, yTo);
+        pattern.lineTo(startX, yTo);
+        pattern.closePath();
+
+        g2d.clip(pattern);
     }
 
     protected void drawData() {
 
         drawStacked(getStackedData(data));
         drawLines(getLineData(data));
-
-
-/*
-        boolean singleStacked = false;
-
-        for (DecoratedTimeSeries ts : data) {
-            if (ts.hasOption(TimeSeriesOption.STACKED)) {
-                singleStacked = true;
-                break;
-            }
-        }
-*/
-
-/*        //todo: optimize
-        if (singleStacked) {
-            sortStacked();
-        }*/
-
-        //todo: every option is set already - we just need to stack values
-/*
-        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) && !secondYAxis) {
-            double[] total = new double[data.get(0).getValues().length];
-
-            for (DecoratedTimeSeries ts : data) {
-                if (ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) continue;
-
-                ts.setOption(TimeSeriesOption.STACKED, true);
-                for (int i = 0; i < ts.getValues().length; i++) {
-                    if (ts.getValues()[i] != null) {
-                        double original = ts.getValues()[i];
-                        ts.getValues()[i] += total[i];
-                        total[i] += original;
-                    }
-                }
-            }
-        } else if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.FIRST)) {
-            data.get(0).setOption(TimeSeriesOption.STACKED, true);
-        } else if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.ALL)) {
-            for (DecoratedTimeSeries ts : data) {
-                if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
-                    ts.setOption(TimeSeriesOption.STACKED, true);
-                }
-            }
-        }
-*/
-
-        //todo: implement this stuff. I'm really not happy about creating new series, putting strokes there, etc
-/*
-    # apply alpha channel and create separate stroke series
-    if self.params.get('areaAlpha'):
-      try:
-        alpha = float(self.params['areaAlpha'])
-      except ValueError:
-        alpha = 0.5
-        pass
-
-      strokeSeries = []
-      for series in self.data:
-        if 'stacked' in series.options:
-          series.options['alpha'] = alpha
-
-          newSeries = TimeSeries(series.name, series.start, series.end, series.step*series.valuesPerPoint, [x for x in series])
-          newSeries.xStep = series.xStep
-          newSeries.color = series.color
-          if 'secondYAxis' in series.options:
-            newSeries.options['secondYAxis'] = True
-          strokeSeries.append(newSeries)
-      self.data += strokeSeries
-
-    # setup the clip region
-    self.ctx.set_line_width(1.0)
-    self.ctx.rectangle(self.area['xmin'], self.area['ymin'], self.area['xmax'] - self.area['xmin'], self.area['ymax'] - self.area['ymin'])
-    self.ctx.clip()
-    self.ctx.set_line_width(originalWidth)
-
-    # save clip to restore once stacked areas are drawn
-    self.ctx.save()
-    clipRestored = False
-         */
-
-/*        for (DecoratedTimeSeries ts : data) {
-            //todo: implement this stuff
-            *//*
-              if 'stacked' not in series.options:
-                # stacked areas are always drawn first. if this series is not stacked, we finished stacking.
-                # reset the clip region so lines can show up on top of the stacked areas.
-                if not clipRestored:
-                  clipRestored = True
-                  self.ctx.restore()
-             *//*
-
-            g2d.setStroke(getStroke(ts));
-
-            //todo: is there a better way to apply alpha?
-            if (ts.hasOption(TimeSeriesOption.INVISIBLE)) {
-                g2d.setColor(new Color(0, 0, 0, 0));
-            } else {
-                Color c = (Color) ts.getOption(TimeSeriesOption.COLOR);
-                g2d.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), ts.hasOption(TimeSeriesOption.ALPHA) ? (int) ((Float) ts.getOption(TimeSeriesOption.ALPHA) * 255) : 255));
-            }
-
-            double x = xMin;
-            double previousX = xMin;
-            int y;
-            int previousY =  -1;
-            Double[] values = ts.getConsolidatedValues();
-            int consecutiveNulls = 0;
-
-
-            for (int index = 0; index < values.length; index++) {
-                double value;
-
-                if (values[index] == null) {
-                    if (imageParameters.isDrawNullAsZero()) {
-                        value = 0;
-                    } else {
-                        x += ts.getxStep();
-                        consecutiveNulls++;
-                        continue;
-                    }
-                } else {
-                    value = values[index];
-                }
-
-                if (secondYAxis) {
-                    if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
-                        y = getYCoordRight(value);
-                    } else {
-                        y = getYCoordLeft(value);
-                    }
-                } else {
-                    y = getYCoord(value);
-                }
-
-                y = y < 0 ? 0 : y;
-
-                if (ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE) && value > 0) {
-                    g2d.drawLine((int) x, yMax, (int) x, yMin);
-                    x += ts.getxStep();
-                    continue;
-                }
-
-                // todo: implement this
-                *//*
-                  if consecutiveNones > 0:
-                    startX = x
-
-                  if self.lineMode == 'staircase':
-                    if consecutiveNones > 0:
-                      self.ctx.move_to(x, y)
-                    else:
-                      self.ctx.line_to(x, y)
-
-                    x += series.xStep
-                    self.ctx.line_to(x, y)
-
-                  elif self.lineMode == 'slope':
-                    if consecutiveNones > 0:
-                      self.ctx.move_to(x, y)
-
-                    self.ctx.line_to(x, y)
-                    x += series.xStep
-
-                  elif self.lineMode == 'connected':
-                    # If if the gap is larger than the connectedLimit or if this is the
-                    # first non-None datapoint in the series, start drawing from that datapoint.
-                    if consecutiveNones > self.connectedLimit or consecutiveNones == index:
-                       self.ctx.move_to(x, y)
-
-                    self.ctx.line_to(x, y)
-                    x += series.xStep
-
-                 *//*
-
-                previousX = previousX < 0 ? x : previousX;
-                previousY = previousY < 0 ? y : previousY;
-
-                if (imageParameters.getLineMode().equals(ImageParameters.LineMode.SLOPE)) {
-                    if (consecutiveNulls > 0) {
-                        previousX = x;
-                        previousY = y;
-                    }
-
-                    g2d.drawLine((int) previousX, previousY, (int) x, y);
-                }
-
-                // todo: implement this??
-                *//*
-        if value is None:
-          if consecutiveNones == 0:
-            self.ctx.line_to(x, y)
-            if 'stacked' in series.options: #Close off and fill area before unknown interval
-              if self.secondYAxis:
-                if 'secondYAxis' in series.options:
-                  self.fillAreaAndClip(x, y, startX, self.getYCoord(0, "right"))
-                else:
-                  self.fillAreaAndClip(x, y, startX, self.getYCoord(0, "left"))
-              else:
-                self.fillAreaAndClip(x, y, startX, self.getYCoord(0))
-
-          x += series.xStep
-          consecutiveNones += 1
-
-
-                                 *//*
-
-                consecutiveNulls = 0;
-                previousX = x;
-                previousY = y;
-
-                x += ts.getxStep();
-            }
-
-            //todo: check if this is needed
-            *//*
-      if 'stacked' in series.options:
-        if self.lineMode == 'staircase':
-          xPos = x
-        else:
-          xPos = x-series.xStep
-        if self.secondYAxis:
-          if 'secondYAxis' in series.options:
-            areaYFrom = self.getYCoord(0, "right")
-          else:
-            areaYFrom = self.getYCoord(0, "left")
-        else:
-          areaYFrom = self.getYCoord(0)
-
-        self.fillAreaAndClip(xPos, y, startX, areaYFrom)
-
-      else:
-        self.ctx.stroke()
-
-      self.ctx.set_line_width(originalWidth) # return to the original line width
-      if 'dash' in series.options: # if we changed the dash setting before, change it back now
-        if dash:
-          self.ctx.set_dash(dash,1)
-        else:
-          self.ctx.set_dash([],0)
-                         *//*
-
-        }*/
     }
 
 
@@ -1364,7 +1156,7 @@ public abstract class Graph {
         return result;
     }
 
-    private List<DecoratedTimeSeries> getStackedData(List<DecoratedTimeSeries> data) {
+    protected List<DecoratedTimeSeries> getStackedData(List<DecoratedTimeSeries> data) {
         List<DecoratedTimeSeries> result = new ArrayList<>();
 
         for (DecoratedTimeSeries ts : data) {

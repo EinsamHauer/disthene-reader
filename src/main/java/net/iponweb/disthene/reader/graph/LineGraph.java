@@ -15,10 +15,6 @@ import java.util.List;
  */
 public class LineGraph extends Graph {
 
-    private double lineWidth = 1.2;
-
-
-
     public LineGraph(RenderParameters renderParameters, List<TimeSeries> data) {
         super(renderParameters, data);
     }
@@ -55,6 +51,19 @@ public class LineGraph extends Graph {
                 data.get(0).setOption(TimeSeriesOption.STACKED, true);
             }
         }
+
+        int length = data.get(0).getValues().length;
+        double[] total = new double[length];
+        for(DecoratedTimeSeries ts : getStackedData(data)) {
+            for (int i = 0; i < length; i++) {
+                if (ts.getValues()[i] != null) {
+                    double original = ts.getValues()[i];
+                    ts.getValues()[i] += total[i];
+                    total[i] += original;
+                }
+            }
+        }
+
 
 
         if (imageParameters.isGraphOnly()) {
