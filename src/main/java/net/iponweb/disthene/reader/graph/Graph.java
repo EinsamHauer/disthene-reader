@@ -1287,7 +1287,9 @@ public abstract class Graph {
         value = tmpValue;
 
         if (value < 0.1) {
-            return value + prefix;
+            int decimalPlaces = 2 - (int) Math.log10(value);
+
+            return String.format("%." + decimalPlaces + "f %s", value, prefix);
         } else if (value < 1.0) {
             return String.format("%.2f %s", value, prefix);
         }
