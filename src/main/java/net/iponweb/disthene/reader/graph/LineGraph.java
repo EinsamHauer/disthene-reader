@@ -39,8 +39,23 @@ public class LineGraph extends Graph {
             } else {
                 dataLeft.add(ts);
             }
-
         }
+
+        // Set stacked options where needed right away
+        if ((imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) || imageParameters.getAreaMode().equals(ImageParameters.AreaMode.ALL)) && !secondYAxis) {
+            for (DecoratedTimeSeries ts : data) {
+                if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
+                    ts.setOption(TimeSeriesOption.STACKED, true);
+
+                }
+
+            }
+        } else if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.FIRST) && !secondYAxis) {
+            if (data.size() > 0) {
+                data.get(0).setOption(TimeSeriesOption.STACKED, true);
+            }
+        }
+
 
         if (imageParameters.isGraphOnly()) {
             imageParameters.setHideLegend(true);
@@ -148,7 +163,7 @@ public class LineGraph extends Graph {
             }
         }
 
-        drawLines();
+        drawData();
 
         return getBytes();
     }

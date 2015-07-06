@@ -19,6 +19,8 @@ public class FunctionFactory {
         registry.put("averageSeries", AverageFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
+        registry.put("stacked", StackedFunction.class);
+        registry.put("dashed", DashedFunction.class);
     }
 
     public static DistheneFunction getFunction(String name) throws InvalidFunctionException {

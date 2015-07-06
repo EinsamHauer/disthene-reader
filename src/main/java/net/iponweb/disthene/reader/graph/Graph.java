@@ -7,19 +7,21 @@ import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormat;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrei Ivanov
@@ -352,10 +354,6 @@ public abstract class Graph {
     }
 
     protected void setupTwoYAxes() throws LogarithmicScaleNotAllowed {
-        List<DecoratedTimeSeries> lData = new ArrayList<>();
-        List<DecoratedTimeSeries> rData = new ArrayList<>();
-        lData.addAll(dataLeft);
-        rData.addAll(dataRight);
         List<DecoratedTimeSeries> seriesWithMissingValuesL = new ArrayList<>();
         List<DecoratedTimeSeries> seriesWithMissingValuesR = new ArrayList<>();
 
@@ -404,11 +402,15 @@ public abstract class Graph {
             }
         }
 
-        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED)) {
+        if (getStackedData(dataLeft).size() > 0) {
             yMaxValueL = GraphUtils.maxSum(dataLeft);
-            yMaxValueR = GraphUtils.maxSum(dataRight);
         } else {
             yMaxValueL = GraphUtils.safeMax(dataLeft);
+        }
+
+        if (getStackedData(dataRight).size() > 0) {
+            yMaxValueR = GraphUtils.maxSum(dataRight);
+        } else {
             yMaxValueR = GraphUtils.safeMax(dataRight);
         }
 
@@ -582,7 +584,7 @@ public abstract class Graph {
 
 
         double yMaxValue;
-        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED)) {
+        if (getStackedData(data).size() > 0) {
             yMaxValue = GraphUtils.maxSum(data);
         } else {
             yMaxValue = GraphUtils.safeMax(data);
@@ -770,7 +772,7 @@ public abstract class Graph {
         long labelDt = 0;
         long labelDelta = 1;
         if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.SEC) {
-            labelDt = startTime - (long) (startTime % xAxisConfig.getLabelStep());
+            labelDt = startTime - startTime % xAxisConfig.getLabelStep();
             labelDelta = (long) xAxisConfig.getLabelStep();
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.MIN) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
@@ -778,7 +780,7 @@ public abstract class Graph {
             labelDelta = (long) xAxisConfig.getLabelStep() * 60;
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.HOUR) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
-            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay((int) (tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getLabelStep()))).getMillis() / 1000;
+            labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(0).withHourOfDay(tdt.getHourOfDay() - (tdt.getHourOfDay() % xAxisConfig.getLabelStep())).getMillis() / 1000;
             labelDelta = (long) xAxisConfig.getLabelStep() * 60 * 60;
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.DAY) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
@@ -887,7 +889,7 @@ public abstract class Graph {
         long majorDelta = 1;
 
         if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.SEC) {
-            majorDt = startTime - (long) (startTime % xAxisConfig.getMajorGridStep());
+            majorDt = startTime - startTime % xAxisConfig.getMajorGridStep();
             majorDelta = (long) xAxisConfig.getMajorGridStep();
         } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.MIN) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
@@ -922,12 +924,192 @@ public abstract class Graph {
         g2d.drawLine(xMin, bottom, xMin, top);
     }
 
-    protected void drawLines() {
-        int width = (int) imageParameters.getLineWidth();
-        g2d.setStroke(new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+    private void drawLines(List<DecoratedTimeSeries> timeSeriesList) {
+        for (DecoratedTimeSeries ts : timeSeriesList) {
+            g2d.setStroke(getStroke(ts));
+            g2d.setColor(getColor(ts));
 
-        int originalWidth = width;
+            double x = xMin;
+            double previousX = xMin;
+            int y;
+            int previousY =  -1;
+            Double[] values = ts.getConsolidatedValues();
+            int consecutiveNulls = 0;
+            boolean allNullsSoFar = true;
 
+            for (Double value : values) {
+                double adjustedValue;
+
+                if (value == null) {
+                    if (imageParameters.isDrawNullAsZero()) {
+                        adjustedValue = 0;
+                    } else {
+                        x += ts.getxStep();
+                        consecutiveNulls++;
+                        continue;
+                    }
+                } else {
+                    adjustedValue = value;
+                }
+
+                if (secondYAxis) {
+                    if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
+                        y = getYCoordRight(adjustedValue);
+                    } else {
+                        y = getYCoordLeft(adjustedValue);
+                    }
+                } else {
+                    y = getYCoord(adjustedValue);
+                }
+
+                y = y < 0 ? 0 : y;
+
+                if (ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE) && adjustedValue > 0) {
+                    g2d.drawLine((int) x, yMax, (int) x, yMin);
+                    x += ts.getxStep();
+                    continue;
+                }
+
+                previousX = previousX < 0 ? x : previousX;
+                previousY = previousY < 0 ? y : previousY;
+
+                if (imageParameters.getLineMode().equals(ImageParameters.LineMode.SLOPE)) {
+                    if (consecutiveNulls > 0) {
+                        previousX = x;
+                        previousY = y;
+                    }
+
+                    g2d.drawLine((int) previousX, previousY, (int) x, y);
+                } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.STAIRCASE)) {
+                    if (consecutiveNulls > 0) {
+                        previousX = x;
+                        previousY = y;
+                    }
+                    g2d.drawLine((int) previousX, previousY, (int) x, previousY);
+                    g2d.drawLine((int) x, previousY, (int) x, y);
+
+                } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.CONNECTED)) {
+                    if (consecutiveNulls > imageParameters.getConnectedLimit() || allNullsSoFar) {
+                        previousX = x;
+                        previousY = y;
+                        allNullsSoFar = false;
+                    }
+
+                    g2d.drawLine((int) previousX, previousY, (int) x, y);
+                }
+
+                consecutiveNulls = 0;
+                previousX = x;
+                previousY = y;
+
+                x += ts.getxStep();
+            }
+        }
+
+    }
+
+    private void drawStacked(List<DecoratedTimeSeries> timeSeriesList) {
+        if (timeSeriesList.size() == 0) return;
+
+        // first modify data to be stacked one by one
+        int length = timeSeriesList.get(0).getValues().length;
+        double[] total = new double[length];
+        for(DecoratedTimeSeries ts : timeSeriesList) {
+            for (int i = 0; i < length; i++) {
+                if (ts.getValues()[i] != null) {
+                    double original = ts.getValues()[i];
+                    ts.getValues()[i] += total[i];
+                    total[i] += original;
+                }
+            }
+        }
+
+/*
+        GeneralPath previousGraphPath = new GeneralPath();
+        previousGraphPath.moveTo(xMin, yMax);
+        previousGraphPath.lineTo(xMax, yMax);
+        previousGraphPath.lineTo(xMax, yMax - 100);
+*/
+/*
+        previousGraphPath.lineTo(xMin, yMax);
+        previousGraphPath.lineTo(xMax, yMax);
+        previousGraphPath.lineTo(xMax, yMin);
+*//*
+
+//        previousGraphPath.lineTo(xMin, yMin);
+        previousGraphPath.closePath();
+        g2d.setPaint(Color.cyan);
+        g2d.fill(previousGraphPath);
+*/
+
+
+
+
+
+        for (DecoratedTimeSeries ts : timeSeriesList) {
+            // We will be constructing general path for each time series
+            GeneralPath path = new GeneralPath();
+            path.moveTo(xMin, yMax);
+
+            g2d.setPaint(getColor(ts));
+
+            double x = xMin;
+            int y;
+            Double[] values = ts.getConsolidatedValues();
+            int consecutiveNulls = 0;
+
+            for (Double value : values) {
+                double adjustedValue;
+                System.out.println(value);
+                if (value == null) {
+                    if (imageParameters.isDrawNullAsZero()) {
+                        adjustedValue = 0;
+                    } else {
+                        x += ts.getxStep();
+                        consecutiveNulls++;
+                        continue;
+                    }
+                } else {
+                    adjustedValue = value;
+                }
+
+                if (secondYAxis) {
+                    if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
+                        y = getYCoordRight(adjustedValue);
+                    } else {
+                        y = getYCoordLeft(adjustedValue);
+                    }
+                } else {
+                    y = getYCoord(adjustedValue);
+                }
+
+                y = y < 0 ? 0 : y;
+
+                if (consecutiveNulls > 0) {
+                    path.moveTo(x, y);
+                }
+
+                path.lineTo((int) x, y);
+
+                consecutiveNulls = 0;
+
+                x += ts.getxStep();
+            }
+            path.lineTo(xMax, yMax);
+            path.lineTo(xMin, yMax);
+            path.closePath();
+            g2d.fill(path);
+        }
+
+    }
+
+    protected void drawData() {
+
+        drawStacked(getStackedData(data));
+        drawLines(getLineData(data));
+
+
+/*
         boolean singleStacked = false;
 
         for (DecoratedTimeSeries ts : data) {
@@ -936,12 +1118,15 @@ public abstract class Graph {
                 break;
             }
         }
+*/
 
-        //todo: optimize
+/*        //todo: optimize
         if (singleStacked) {
             sortStacked();
-        }
+        }*/
 
+        //todo: every option is set already - we just need to stack values
+/*
         if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) && !secondYAxis) {
             double[] total = new double[data.get(0).getValues().length];
 
@@ -966,6 +1151,7 @@ public abstract class Graph {
                 }
             }
         }
+*/
 
         //todo: implement this stuff. I'm really not happy about creating new series, putting strokes there, etc
 /*
@@ -1001,39 +1187,19 @@ public abstract class Graph {
     clipRestored = False
          */
 
-        for (DecoratedTimeSeries ts : data) {
+/*        for (DecoratedTimeSeries ts : data) {
             //todo: implement this stuff
-            /*
+            *//*
               if 'stacked' not in series.options:
                 # stacked areas are always drawn first. if this series is not stacked, we finished stacking.
                 # reset the clip region so lines can show up on top of the stacked areas.
                 if not clipRestored:
                   clipRestored = True
                   self.ctx.restore()
-             */
+             *//*
 
-            if (ts.hasOption(TimeSeriesOption.LINE_WIDTH)) {
-                g2d.setStroke(new BasicStroke((Float) ts.getOption(TimeSeriesOption.LINE_WIDTH)));
-            }
+            g2d.setStroke(getStroke(ts));
 
-/*
-            if 'dashed' in series.options:
-                self.ctx.set_dash([ series.options['dashed'] ], 1)
-            else:
-                self.ctx.set_dash([], 0)
-*/
-
-            //todo: most probably we don't need this stuff - we are aligned by construction
-/*
-          # Shift the beginning of drawing area to the start of the series if the
-          # graph itself has a larger range
-          missingPoints = (series.start - self.startTime) / series.step
-          startShift = series.xStep * (missingPoints / series.valuesPerPoint)
-          x = float(self.area['xmin']) + startShift + (self.lineWidth / 2.0)
-          y = float(self.area['ymin'])
-
-          startX = x
- */
             //todo: is there a better way to apply alpha?
             if (ts.hasOption(TimeSeriesOption.INVISIBLE)) {
                 g2d.setColor(new Color(0, 0, 0, 0));
@@ -1044,7 +1210,7 @@ public abstract class Graph {
 
             double x = xMin;
             double previousX = xMin;
-            int y = -1;
+            int y;
             int previousY =  -1;
             Double[] values = ts.getConsolidatedValues();
             int consecutiveNulls = 0;
@@ -1084,7 +1250,7 @@ public abstract class Graph {
                 }
 
                 // todo: implement this
-                /*
+                *//*
                   if consecutiveNones > 0:
                     startX = x
 
@@ -1113,7 +1279,7 @@ public abstract class Graph {
                     self.ctx.line_to(x, y)
                     x += series.xStep
 
-                 */
+                 *//*
 
                 previousX = previousX < 0 ? x : previousX;
                 previousY = previousY < 0 ? y : previousY;
@@ -1128,7 +1294,7 @@ public abstract class Graph {
                 }
 
                 // todo: implement this??
-                /*
+                *//*
         if value is None:
           if consecutiveNones == 0:
             self.ctx.line_to(x, y)
@@ -1145,7 +1311,7 @@ public abstract class Graph {
           consecutiveNones += 1
 
 
-                                 */
+                                 *//*
 
                 consecutiveNulls = 0;
                 previousX = x;
@@ -1155,7 +1321,7 @@ public abstract class Graph {
             }
 
             //todo: check if this is needed
-            /*
+            *//*
       if 'stacked' in series.options:
         if self.lineMode == 'staircase':
           xPos = x
@@ -1180,26 +1346,34 @@ public abstract class Graph {
           self.ctx.set_dash(dash,1)
         else:
           self.ctx.set_dash([],0)
-                         */
+                         *//*
 
-        }
+        }*/
     }
 
-    private void sortStacked() {
-        List<DecoratedTimeSeries> newData = new ArrayList<>();
+
+    private List<DecoratedTimeSeries> getLineData(List<DecoratedTimeSeries> data) {
+        List<DecoratedTimeSeries> result = new ArrayList<>();
+
+        for (DecoratedTimeSeries ts : data) {
+            if (!ts.hasOption(TimeSeriesOption.STACKED)) {
+                result.add(ts);
+            }
+        }
+
+        return result;
+    }
+
+    private List<DecoratedTimeSeries> getStackedData(List<DecoratedTimeSeries> data) {
+        List<DecoratedTimeSeries> result = new ArrayList<>();
 
         for (DecoratedTimeSeries ts : data) {
             if (ts.hasOption(TimeSeriesOption.STACKED)) {
-                newData.add(ts);
-            }
-        }
-        for (DecoratedTimeSeries ts : data) {
-            if (!ts.hasOption(TimeSeriesOption.STACKED)) {
-                newData.add(ts);
+                result.add(ts);
             }
         }
 
-        data = newData;
+        return result;
     }
 
     private int getYCoordRight(double value) {
@@ -1279,11 +1453,11 @@ public abstract class Graph {
     }
 
     protected String makeLabel(double value, double step, double span) {
-        double tmpValue = formatUnitValue(value, step, imageParameters.getyUnitSystem());
-        String prefix = formatUnitPrefix(value, step, imageParameters.getyUnitSystem());
+        double tmpValue = formatUnitValue(value, step);
+        String prefix = formatUnitPrefix(value, step);
 
-        double ySpan = formatUnitValue(span, step, imageParameters.getyUnitSystem());
-        String spanPrefix = formatUnitPrefix(span, step, imageParameters.getyUnitSystem());
+        double ySpan = formatUnitValue(span, step);
+        String spanPrefix = formatUnitPrefix(span, step);
 
         value = tmpValue;
 
@@ -1295,13 +1469,6 @@ public abstract class Graph {
 
         if (ySpan > 10 || !spanPrefix.equals(prefix)) {
             return String.format("%.1f %s", value, prefix);
-/*
-            if (value != Math.floor(value)) {
-                return String.format("%.1f %s", value, prefix);
-            } else {
-                return String.format("%d %s", (int) value, prefix);
-            }
-*/
         } else if (ySpan > 3) {
             return String.format("%.1f %s", value, prefix);
         } else if (ySpan > 0.1) {
@@ -1315,7 +1482,7 @@ public abstract class Graph {
         return makeLabel(value, yStep, ySpan);
     }
 
-    private String formatUnitPrefix(double value, double step, ImageParameters.UnitSystem system) {
+    private String formatUnitPrefix(double value, double step) {
         for (Map.Entry<String, Double> entry : imageParameters.getyUnitSystem().getPrefixMap().entrySet()) {
             if (Math.abs(value) >= entry.getValue() && step >= entry.getValue()) {
                 return entry.getKey();
@@ -1326,7 +1493,7 @@ public abstract class Graph {
         return "";
     }
 
-    private double formatUnitValue(double value, double step, ImageParameters.UnitSystem system) {
+    private double formatUnitValue(double value, double step) {
         // Firstly, round the value a bit
         if (value > 0 && value < 1.0) {
             value = new BigDecimal(value).setScale(2 - (int) Math.log10(value), BigDecimal.ROUND_HALF_DOWN).doubleValue();
@@ -1384,11 +1551,41 @@ public abstract class Graph {
         return result;
     }
 
+    private Color getColor(DecoratedTimeSeries timeSeries) {
+        if (timeSeries.hasOption(TimeSeriesOption.INVISIBLE)) {
+            return new Color(0, 0, 0, 0);
+        }
+
+        Color c = (Color) timeSeries.getOption(TimeSeriesOption.COLOR);
+        return new Color(c.getRed(), c.getGreen(), c.getBlue(), timeSeries.hasOption(TimeSeriesOption.ALPHA) ? (int) ((Float) timeSeries.getOption(TimeSeriesOption.ALPHA) * 255) : 255);
+    }
+
+    private Stroke getStroke(DecoratedTimeSeries timeSeries) {
+        float lineWidth = 0;
+        if (timeSeries.hasOption(TimeSeriesOption.LINE_WIDTH)) {
+            lineWidth = (float) timeSeries.getOption(TimeSeriesOption.LINE_WIDTH);
+        }
+
+
+        boolean isDashed = false;
+        float dashLength = 0f;
+        if (timeSeries.hasOption(TimeSeriesOption.DASHED)) {
+            isDashed = true;
+            dashLength = (float) timeSeries.getOption(TimeSeriesOption.DASHED);
+        }
+
+        if (isDashed) {
+            return new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{dashLength}, 0.0f);
+        } else {
+            return new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+        }
+    }
+
     protected enum HorizontalAlign {
-        LEFT, CENTER, RIGHT;
+        LEFT, CENTER, RIGHT
     }
 
     protected enum VerticalAlign {
-        TOP, MIDDLE, BOTTOM, BASELINE;
+        TOP, MIDDLE, BOTTOM, BASELINE
     }
 }

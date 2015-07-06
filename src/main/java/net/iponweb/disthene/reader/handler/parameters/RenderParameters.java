@@ -191,6 +191,22 @@ public class RenderParameters {
             }
         }
 
+        if (queryStringDecoder.parameters().get("lineMode") != null) {
+            try {
+                parameters.getImageParameters().setLineMode(ImageParameters.LineMode.valueOf(queryStringDecoder.parameters().get("lineMode").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown line mode : " + queryStringDecoder.parameters().get("lineMode").get(0).toUpperCase());
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("connectedLimit") != null) {
+            try {
+                parameters.getImageParameters().setConnectedLimit(Integer.valueOf(queryStringDecoder.parameters().get("connectedLimit").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("ConnectedLimit format : " + queryStringDecoder.parameters().get("connectedLimit").get(0));
+            }
+        }
+
         return parameters;
     }
 

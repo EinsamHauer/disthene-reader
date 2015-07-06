@@ -423,6 +423,8 @@ public class ImageParameters {
         this.areaAlpha = areaAlpha;
     }
 
+
+
     public enum Side {
         LEFT, RIGHT;
     }
