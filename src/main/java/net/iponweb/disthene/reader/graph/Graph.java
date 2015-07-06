@@ -1288,7 +1288,8 @@ public abstract class Graph {
 
         if (value < 0.1) {
             int decimalPlaces = 2 - (int) Math.log10(value);
-
+            logger.debug("Decimal places: " + decimalPlaces);
+            logger.debug("Format: " + "%." + decimalPlaces + "f %s");
             return String.format("%." + decimalPlaces + "f %s", value, prefix);
         } else if (value < 1.0) {
             return String.format("%.2f %s", value, prefix);
