@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.graphite.functions;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.MultipleDivisorsException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
@@ -11,6 +12,7 @@ import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Andrei Ivanov
@@ -18,37 +20,24 @@ import java.util.List;
 public class DivideSeriesFunction extends DistheneFunction {
 
     public DivideSeriesFunction(String text) {
-        super(text);
-    }
-
-    //todo: check arguments as a whole
-    @Override
-    protected boolean checkArgument(int position, Object argument) {
-        return argument instanceof Target;
+        super(text, "divideSeries");
     }
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        // The logic here is:
-        // All arguments but first are dividends
-        // The last one is divisor
-
         List<TimeSeries> dividends = new ArrayList<>();
-        for(int i = 0; i < arguments.size() - 1; i++) {
-            dividends.addAll(evaluator.eval((Target) arguments.get(i)));
-        }
-        List<TimeSeries> divisors = evaluator.eval((Target) arguments.get(arguments.size() - 1));
+        dividends.addAll(evaluator.eval((Target) arguments.get(0)));
 
-        if (divisors.size() > 1) {
-            throw new MultipleDivisorsException();
-        }
+        if (dividends.size() == 0) return new ArrayList<>();
 
+        List<TimeSeries> divisors = evaluator.eval((Target) arguments.get(1));
+        if (divisors.size() != 1) throw new MultipleDivisorsException();
         TimeSeries divisor = divisors.get(0);
+
 
         List<TimeSeries> tmp = new ArrayList<>();
         tmp.addAll(dividends);
         tmp.add(divisor);
-        // check that all aligned
         if (!TimeSeriesUtils.checkAlignment(tmp)) {
             throw new TimeSeriesNotAlignedException();
         }
@@ -61,7 +50,7 @@ public class DivideSeriesFunction extends DistheneFunction {
 
         for (TimeSeries ts : dividends) {
             Double[] values = new Double[length];
-            TimeSeries resultTimeSeries = new TimeSeries("divideSeries(" + ts.getName() + "," + divisor.getName() + ")", from, to, step);
+            TimeSeries resultTimeSeries = new TimeSeries(getText(), from, to, step);
 
             for (int i = 0; i < length; i++) {
 
@@ -77,5 +66,14 @@ public class DivideSeriesFunction extends DistheneFunction {
         }
 
         return result;
+    }
+
+    @Override
+    public void checkArguments() throws InvalidArgumentException {
+        if (arguments.size() > 2 || arguments.size() < 1) throw new InvalidArgumentException("divideSeries: number of arguments is " + arguments.size() + ". Must be 2.");
+
+        for(Object argument : arguments) {
+            if (!(argument instanceof Target)) throw new InvalidArgumentException("divideSeries: argument is " + argument.getClass().getName() + ". Must be series");
+        }
     }
 }

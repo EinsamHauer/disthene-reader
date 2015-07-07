@@ -1,4 +1,4 @@
-package net.iponweb.disthene.reader.graphite.functions.factory;
+package net.iponweb.disthene.reader.graphite.functions.registry;
 
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
 import net.iponweb.disthene.reader.graphite.functions.*;
@@ -10,17 +10,21 @@ import java.util.Map;
 /**
  * @author Andrei Ivanov
  */
-public class FunctionFactory {
+public class FunctionRegistry {
 
     private static final Map<String, Class<? extends DistheneFunction>> registry = new HashMap<>();
 
     static {
-        registry.put("sumSeries", SumSeriesFunction.class);
-        registry.put("averageSeries", AverageFunction.class);
+        registry.put("absolute", AbsoluteFunction.class);
+        registry.put("averageSeries", AverageSeriesFunction.class);
+        registry.put("avg", AverageSeriesFunction.class);
+        registry.put("dashed", DashedFunction.class);
+        registry.put("diffSeries", DiffSeriesFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
         registry.put("stacked", StackedFunction.class);
-        registry.put("dashed", DashedFunction.class);
+        registry.put("sumSeries", SumSeriesFunction.class);
+        registry.put("sum", SumSeriesFunction.class);
     }
 
     public static DistheneFunction getFunction(String name) throws InvalidFunctionException {

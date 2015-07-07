@@ -3,8 +3,11 @@ package net.iponweb.disthene.reader.graphite.functions;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
+import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
+import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +18,7 @@ import java.util.List;
 public class DashedFunction extends DistheneFunction {
 
     public DashedFunction(String text) {
-        super(text);
-    }
-
-    @Override
-    protected boolean checkArgument(int position, Object argument) {
-        if (position == 0) return argument instanceof Target;
-        if (position == 1) return argument instanceof Double;
-
-        return false;
+        super(text, "stacked");
     }
 
     @Override
@@ -33,11 +28,24 @@ public class DashedFunction extends DistheneFunction {
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
+        if (!TimeSeriesUtils.checkAlignment(processedArguments)) {
+            throw new TimeSeriesNotAlignedException();
+        }
+
         for (TimeSeries ts : processedArguments) {
             ts.setOption(TimeSeriesOption.DASHED, arguments.size() == 1 ? new Float(5) : new Float((Double) arguments.get(1)));
-            ts.setName("dashed(" + ts.getName() + ")");
+            setResultingName(ts);
         }
 
         return processedArguments;
+    }
+
+    @Override
+    public void checkArguments() throws InvalidArgumentException {
+        if (arguments.size() > 2 || arguments.size() == 0) throw new InvalidArgumentException("dashed: number of arguments is " + arguments.size() + ". Must be one or two.");
+
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("dashed: 1st argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+        if (arguments.size() > 1 && !(arguments.get(1) instanceof Double))  throw new InvalidArgumentException("dashed: 2ns argument is " + arguments.get(0).getClass().getName() + ". Must be a float number");
+
     }
 }

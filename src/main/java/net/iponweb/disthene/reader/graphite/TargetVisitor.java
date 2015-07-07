@@ -3,7 +3,7 @@ package net.iponweb.disthene.reader.graphite;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
 import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
-import net.iponweb.disthene.reader.graphite.functions.factory.FunctionFactory;
+import net.iponweb.disthene.reader.graphite.functions.registry.FunctionRegistry;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteBaseVisitor;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -32,7 +32,7 @@ public class TargetVisitor extends GraphiteBaseVisitor<Target> {
     public Target visitExpressionCall(GraphiteParser.ExpressionCallContext ctx) {
         GraphiteParser.CallContext call = ctx.call();
         try {
-            DistheneFunction function = FunctionFactory.getFunction(call.FunctionName().getText());
+            DistheneFunction function = FunctionRegistry.getFunction(call.FunctionName().getText());
             function.setText(ctx.getText());
 
             for(GraphiteParser.ArgContext arg : call.args().arg()) {
@@ -46,6 +46,8 @@ public class TargetVisitor extends GraphiteBaseVisitor<Target> {
                     function.addArg(arg.getText());
                 }
             }
+
+            function.checkArguments();
 
             return function;
         } catch (InvalidFunctionException | InvalidArgumentException e) {

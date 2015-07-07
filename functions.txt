@@ -1,0 +1,142 @@
+IMPLEMENTED
+========================================================================================================================
+  # Combine functions
+  'averageSeries' : averageSeries,
+  'sumSeries' : sumSeries,
+
+  # Transform functions
+  'absolute' : absolute,
+
+  # Calculate functions
+  'divideSeries' : divideSeries,
+  'diffSeries' : diffSeries,
+
+  # Special functions
+  'stacked' : stacked,
+  'dashed' : dashed,
+  'secondYAxis': secondYAxis,
+
+NOT IMPLEMENTED
+========================================================================================================================
+  # Combine functions
+  'sum' : sumSeries,
+  'multiplySeries' : multiplySeries,
+  'stddevSeries' : stddevSeries,
+  'avg' : averageSeries,
+  'sumSeriesWithWildcards': sumSeriesWithWildcards,
+  'averageSeriesWithWildcards': averageSeriesWithWildcards,
+  'multiplySeriesWithWildcards': multiplySeriesWithWildcards,
+  'minSeries' : minSeries,
+  'maxSeries' : maxSeries,
+  'rangeOfSeries': rangeOfSeries,
+  'percentileOfSeries': percentileOfSeries,
+  'countSeries': countSeries,
+  'weightedAverage': weightedAverage,
+
+  # Transform functions
+  'scale' : scale,
+  'scaleToSeconds' : scaleToSeconds,
+  'offset' : offset,
+  'offsetToZero' : offsetToZero,
+  'derivative' : derivative,
+  'squareRoot' : squareRoot,
+  'pow' : pow,
+  'perSecond' : perSecond,
+  'integral' : integral,
+  'percentileOfSeries': percentileOfSeries,
+  'nonNegativeDerivative' : nonNegativeDerivative,
+  'log' : logarithm,
+  'invert' : invert,
+  'timeStack': timeStack,
+  'timeShift': timeShift,
+  'timeSlice': timeSlice,
+  'summarize' : summarize,
+  'smartSummarize' : smartSummarize,
+  'hitcount'  : hitcount,
+
+  # Calculate functions
+  'movingAverage' : movingAverage,
+  'movingMedian' : movingMedian,
+  'stdev' : stdev,
+  'holtWintersForecast': holtWintersForecast,
+  'holtWintersConfidenceBands': holtWintersConfidenceBands,
+  'holtWintersConfidenceArea': holtWintersConfidenceArea,
+  'holtWintersAberration': holtWintersAberration,
+  'asPercent' : asPercent,
+  'pct' : asPercent,
+
+  # Series Filter functions
+  'fallbackSeries' : fallbackSeries,
+  'mostDeviant' : mostDeviant,
+  'highestCurrent' : highestCurrent,
+  'lowestCurrent' : lowestCurrent,
+  'highestMax' : highestMax,
+  'currentAbove' : currentAbove,
+  'currentBelow' : currentBelow,
+  'highestAverage' : highestAverage,
+  'lowestAverage' : lowestAverage,
+  'averageAbove' : averageAbove,
+  'averageBelow' : averageBelow,
+  'maximumAbove' : maximumAbove,
+  'minimumAbove' : minimumAbove,
+  'maximumBelow' : maximumBelow,
+  'minimumBelow' : minimumBelow,
+  'nPercentile' : nPercentile,
+  'limit' : limit,
+  'sortByTotal'  : sortByTotal,
+  'sortByName' : sortByName,
+  'averageOutsidePercentile' : averageOutsidePercentile,
+  'removeBetweenPercentile' : removeBetweenPercentile,
+  'sortByMaxima' : sortByMaxima,
+  'sortByMinima' : sortByMinima,
+  'useSeriesAbove': useSeriesAbove,
+  'exclude' : exclude,
+  'grep' : grep,
+  'removeEmptySeries' : removeEmptySeries,
+
+  # Data Filter functions
+  'removeAbovePercentile' : removeAbovePercentile,
+  'removeAboveValue' : removeAboveValue,
+  'removeBelowPercentile' : removeBelowPercentile,
+  'removeBelowValue' : removeBelowValue,
+
+  # Special functions
+  'legendValue' : legendValue,
+  'alias' : alias,
+  'aliasSub' : aliasSub,
+  'aliasByNode' : aliasByNode,
+  'aliasByMetric' : aliasByMetric,
+  'cactiStyle' : cactiStyle,
+  'color' : color,
+  'alpha' : alpha,
+  'cumulative' : cumulative,
+  'consolidateBy' : consolidateBy,
+  'keepLastValue' : keepLastValue,
+  'changed' : changed,
+  'drawAsInfinite' : drawAsInfinite,
+  'lineWidth' : lineWidth,
+  'substr' : substr,
+  'group' : group,
+  'map': mapSeries,
+  'mapSeries': mapSeries,
+  'reduce': reduceSeries,
+  'reduceSeries': reduceSeries,
+  'groupByNode' : groupByNode,
+  'constantLine' : constantLine,
+  'areaBetween' : areaBetween,
+  'threshold' : threshold,
+  'transformNull' : transformNull,
+  'isNonNull' : isNonNull,
+  'identity': identity,
+  'aggregateLine' : aggregateLine,
+
+  # test functions
+  'time': timeFunction,
+  "sin": sinFunction,
+  "randomWalk": randomWalkFunction,
+  'timeFunction': timeFunction,
+  "sinFunction": sinFunction,
+  "randomWalkFunction": randomWalkFunction,
+
+  #events
+  'events': events,

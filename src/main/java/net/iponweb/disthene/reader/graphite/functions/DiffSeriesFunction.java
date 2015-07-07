@@ -1,6 +1,5 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
-import com.google.common.base.Joiner;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
@@ -16,11 +15,11 @@ import java.util.List;
 /**
  * @author Andrei Ivanov
  */
-public class SumSeriesFunction extends DistheneFunction {
+public class DiffSeriesFunction extends DistheneFunction {
 
 
-    public SumSeriesFunction(String text) {
-        super(text, "sumSeries");
+    public DiffSeriesFunction(String text) {
+        super(text, "diffSeries");
     }
 
     @Override
@@ -31,38 +30,42 @@ public class SumSeriesFunction extends DistheneFunction {
         }
 
         if (processedArguments.size() == 0) return new ArrayList<>();
+        if (processedArguments.size() == 1) return processedArguments;
 
         if (!TimeSeriesUtils.checkAlignment(processedArguments)) {
             throw new TimeSeriesNotAlignedException();
         }
 
+        TimeSeries minuend = processedArguments.get(0);
+        List<TimeSeries> subtrahends = processedArguments.subList(1, processedArguments.size());
 
-        long from = processedArguments.get(0).getFrom();
-        long to = processedArguments.get(0).getTo();
-        int step = processedArguments.get(0).getStep();
-        int length = processedArguments.get(0).getValues().length;
+        int length = minuend.getValues().length;
+        long from = minuend.getFrom();
+        long to = minuend.getTo();
+        int step = minuend.getStep();
 
         TimeSeries resultTimeSeries = new TimeSeries(getText(), from, to, step);
-        Double[] values = new Double[length];
+        Double[] values = minuend.getValues();
 
-        for (int i = 0; i < length; i++) {
-            values[i] = 0.;
-            for(TimeSeries ts : processedArguments) {
-                values[i] += ts.getValues()[i] != null ? ts.getValues()[i] : 0.;
+
+        for (TimeSeries ts : subtrahends) {
+            for (int i = 0; i < length; i++) {
+                if (values[i] != null && ts.getValues()[i] != null) {
+                    values[i] -= ts.getValues()[i];
+                }
             }
         }
 
         resultTimeSeries.setValues(values);
-
         return Collections.singletonList(resultTimeSeries);
     }
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("sumSeries: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() < 2) throw new InvalidArgumentException("diffSeries: number of arguments is " + arguments.size() + ". Must be at least 2.");
 
         for(Object argument : arguments) {
-            if (!(argument instanceof Target)) throw new InvalidArgumentException("sumSeries: argument is " + argument.getClass().getName() + ". Must be series");
+            if (!(argument instanceof Target)) throw new InvalidArgumentException("diffSeries: argument is " + argument.getClass().getName() + ". Must be series");
         }
     }
 }
