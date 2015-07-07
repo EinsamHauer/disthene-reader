@@ -19,10 +19,13 @@ IMPLEMENTED
   'offsetToZero' : offsetToZero,
   'integral' : integral,
   'log' : logarithm,
+  'timeShift': timeShift,
 
   # Calculate functions
   'divideSeries' : divideSeries,
   'diffSeries' : diffSeries,
+  'asPercent' : asPercent,
+  'pct' : asPercent,
 
   # Special functions
   'stacked' : stacked,
@@ -48,7 +51,6 @@ NOT IMPLEMENTED
   'nonNegativeDerivative' : nonNegativeDerivative,
   'invert' : invert,
   'timeStack': timeStack,
-  'timeShift': timeShift,
   'timeSlice': timeSlice,
   'summarize' : summarize,
   'smartSummarize' : smartSummarize,
@@ -62,11 +64,8 @@ NOT IMPLEMENTED
   'holtWintersConfidenceBands': holtWintersConfidenceBands,
   'holtWintersConfidenceArea': holtWintersConfidenceArea,
   'holtWintersAberration': holtWintersAberration,
-  'asPercent' : asPercent,
-  'pct' : asPercent,
 
   # Series Filter functions
-  'fallbackSeries' : fallbackSeries,
   'mostDeviant' : mostDeviant,
   'highestCurrent' : highestCurrent,
   'lowestCurrent' : lowestCurrent,
@@ -129,6 +128,13 @@ NOT IMPLEMENTED
   'isNonNull' : isNonNull,
   'identity': identity,
   'aggregateLine' : aggregateLine,
+
+
+WILL NOT BE IMPLEMENTED???
+========================================================================================================================
+  # Series Filter functions
+  'fallbackSeries' : fallbackSeries,
+
 
   # test functions
   'time': timeFunction,

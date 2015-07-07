@@ -36,6 +36,14 @@ public class PathTarget extends Target {
         return from;
     }
 
+    public void setFrom(Long from) {
+        this.from = from;
+    }
+
+    public void setTo(Long to) {
+        this.to = to;
+    }
+
     public Long getTo() {
         return to;
     }

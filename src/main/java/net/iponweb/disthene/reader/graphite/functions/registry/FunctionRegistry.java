@@ -1,7 +1,7 @@
 package net.iponweb.disthene.reader.graphite.functions.registry;
 
-import javafx.scene.transform.Scale;
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
+import net.iponweb.disthene.reader.graphite.functions.TimeShiftFunction;
 import net.iponweb.disthene.reader.graphite.functions.*;
 
 import java.lang.reflect.Constructor;
@@ -17,6 +17,8 @@ public class FunctionRegistry {
 
     static {
         registry.put("absolute", AbsoluteFunction.class);
+        registry.put("asPercent", AsPercentFunction.class);
+        registry.put("pct", AsPercentFunction.class);
         registry.put("averageSeries", AverageSeriesFunction.class);
         registry.put("avg", AverageSeriesFunction.class);
         registry.put("countSeries", CountSeriesFunction.class);
@@ -38,6 +40,7 @@ public class FunctionRegistry {
         registry.put("stacked", StackedFunction.class);
         registry.put("sumSeries", SumSeriesFunction.class);
         registry.put("sum", SumSeriesFunction.class);
+        registry.put("timeShift", TimeShiftFunction.class);
     }
 
     public static DistheneFunction getFunction(String name) throws InvalidFunctionException {
