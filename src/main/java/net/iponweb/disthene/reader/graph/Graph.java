@@ -1275,9 +1275,9 @@ public abstract class Graph {
     }
 
     private String formatUnitPrefix(double value, double step) {
-        for (Map.Entry<String, Double> entry : imageParameters.getyUnitSystem().getPrefixMap().entrySet()) {
-            if (Math.abs(value) >= entry.getValue() && step >= entry.getValue()) {
-                return entry.getKey();
+        for (ImageParameters.Unit unit : imageParameters.getyUnitSystem().getPrefixes()) {
+            if (Math.abs(value) >= unit.getValue() && step >= unit.getValue()) {
+                return unit.getPrefix();
             }
 
         }
@@ -1292,9 +1292,9 @@ public abstract class Graph {
         }
 
 
-        for (Map.Entry<String, Double> entry : imageParameters.getyUnitSystem().getPrefixMap().entrySet()) {
-            if (Math.abs(value) >= entry.getValue() && step >= entry.getValue()) {
-                double v2 = value / entry.getValue();
+        for (ImageParameters.Unit unit : imageParameters.getyUnitSystem().getPrefixes()) {
+            if (Math.abs(value) >= unit.getValue() && step >= unit.getValue()) {
+                double v2 = value / unit.getValue();
                 if (v2 - Math.floor(v2) < 0.00000000001 && value > 1) {
                     v2 = Math.floor(v2);
                 }

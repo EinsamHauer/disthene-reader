@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.graphite.functions.registry;
 
+import javafx.scene.transform.Scale;
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
 import net.iponweb.disthene.reader.graphite.functions.*;
 
@@ -18,9 +19,21 @@ public class FunctionRegistry {
         registry.put("absolute", AbsoluteFunction.class);
         registry.put("averageSeries", AverageSeriesFunction.class);
         registry.put("avg", AverageSeriesFunction.class);
+        registry.put("countSeries", CountSeriesFunction.class);
         registry.put("dashed", DashedFunction.class);
         registry.put("diffSeries", DiffSeriesFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
+        registry.put("integral", IntegralFunction.class);
+        registry.put("logarithm", LogarithmFunction.class);
+        registry.put("log", LogarithmFunction.class);
+        registry.put("maxSeries", MaxSeriesFunction.class);
+        registry.put("minSeries", MinSeriesFunction.class);
+        registry.put("multiplySeries", MultiplySeriesFunction.class);
+        registry.put("offset", OffsetFunction.class);
+        registry.put("offsetToZero", OffsetToZeroFunction.class);
+        registry.put("rangeOfSeries", RangeOfSeriesFunction.class);
+        registry.put("scale", ScaleFunction.class);
+        registry.put("scaleToSeconds", ScaleToSecondsFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
         registry.put("stacked", StackedFunction.class);
         registry.put("sumSeries", SumSeriesFunction.class);

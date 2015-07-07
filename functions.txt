@@ -2,10 +2,23 @@ IMPLEMENTED
 ========================================================================================================================
   # Combine functions
   'averageSeries' : averageSeries,
+  'avg' : averageSeries,
   'sumSeries' : sumSeries,
+  'sum' : sumSeries,
+  'multiplySeries' : multiplySeries,
+  'countSeries': countSeries,
+  'minSeries' : minSeries,
+  'maxSeries' : maxSeries,
+  'rangeOfSeries': rangeOfSeries,
 
   # Transform functions
   'absolute' : absolute,
+  'scale' : scale,
+  'scaleToSeconds' : scaleToSeconds,
+  'offset' : offset,
+  'offsetToZero' : offsetToZero,
+  'integral' : integral,
+  'log' : logarithm,
 
   # Calculate functions
   'divideSeries' : divideSeries,
@@ -19,33 +32,20 @@ IMPLEMENTED
 NOT IMPLEMENTED
 ========================================================================================================================
   # Combine functions
-  'sum' : sumSeries,
-  'multiplySeries' : multiplySeries,
   'stddevSeries' : stddevSeries,
-  'avg' : averageSeries,
   'sumSeriesWithWildcards': sumSeriesWithWildcards,
   'averageSeriesWithWildcards': averageSeriesWithWildcards,
   'multiplySeriesWithWildcards': multiplySeriesWithWildcards,
-  'minSeries' : minSeries,
-  'maxSeries' : maxSeries,
-  'rangeOfSeries': rangeOfSeries,
   'percentileOfSeries': percentileOfSeries,
-  'countSeries': countSeries,
   'weightedAverage': weightedAverage,
 
   # Transform functions
-  'scale' : scale,
-  'scaleToSeconds' : scaleToSeconds,
-  'offset' : offset,
-  'offsetToZero' : offsetToZero,
   'derivative' : derivative,
   'squareRoot' : squareRoot,
   'pow' : pow,
   'perSecond' : perSecond,
-  'integral' : integral,
   'percentileOfSeries': percentileOfSeries,
   'nonNegativeDerivative' : nonNegativeDerivative,
-  'log' : logarithm,
   'invert' : invert,
   'timeStack': timeStack,
   'timeShift': timeShift,
