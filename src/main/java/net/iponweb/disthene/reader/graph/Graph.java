@@ -938,8 +938,6 @@ public abstract class Graph {
             int consecutiveNulls = 0;
             boolean allNullsSoFar = true;
 
-            int counter = 0;
-
             for (Double value : values) {
                 Double adjustedValue = value;
 
@@ -979,7 +977,6 @@ public abstract class Graph {
                     }
 
                     g2d.drawLine((int) previousX, previousY, (int) x, y);
-                    counter++;
                 } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.STAIRCASE)) {
                     if (consecutiveNulls > 0) {
                         previousX = x;
@@ -1003,8 +1000,6 @@ public abstract class Graph {
                 previousY = y;
 
                 x += ts.getxStep();
-
-//                if (counter > 10) break;
             }
         }
 
