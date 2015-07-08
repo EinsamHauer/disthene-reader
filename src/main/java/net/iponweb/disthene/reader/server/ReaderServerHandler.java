@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
@@ -20,9 +21,9 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
     final static Logger logger = Logger.getLogger(ReaderServerHandler.class);
 
-    private Map<String, DistheneReaderHandler> handlers = new HashMap<>();
+    private Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
 
-    public ReaderServerHandler(Map<String, DistheneReaderHandler> handlers) {
+    public ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
         this.handlers = handlers;
     }
 
@@ -40,12 +41,21 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             }
 
             String path = new QueryStringDecoder(((HttpRequest) message).getUri()).path();
-            DistheneReaderHandler handler = handlers.get(path);
+
+            DistheneReaderHandler handler = null;
+            for(Map.Entry<Pattern,DistheneReaderHandler> entry : handlers.entrySet()) {
+                if (entry.getKey().matcher(path).matches()) {
+                    handler = entry.getValue();
+                    break;
+                }
+            }
+
 
             if (handler != null) {
                 response = handler.handle(request);
             } else {
                 response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
             }
 
             if (keepAlive) {

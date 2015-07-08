@@ -29,10 +29,10 @@ public class DistheneReader {
     private static final String DEFAULT_CONFIG_LOCATION = "/etc/disthene-reader/disthene-reader.yaml";
     private static final String DEFAULT_LOG_CONFIG_LOCATION = "/etc/disthene-reader/disthene-reader-log4j.xml";
 
-    private static final String METRICS_PATH = "/metrics";
-    private static final String PATHS_PATH = "/paths";
-    private static final String PING_PATH = "/ping";
-    private static final String RENDER_PATH = "/render";
+    private static final String METRICS_PATH = "^/metrics\\/?$";
+    private static final String PATHS_PATH = "^/paths\\/?$";
+    private static final String PING_PATH = "^/ping\\/?$";
+    private static final String RENDER_PATH = "^/render\\/?$";
 
     private static Logger logger;
 
