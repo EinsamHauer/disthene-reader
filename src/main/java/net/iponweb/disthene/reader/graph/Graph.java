@@ -938,6 +938,8 @@ public abstract class Graph {
             int consecutiveNulls = 0;
             boolean allNullsSoFar = true;
 
+            int counter = 0;
+
             for (Double value : values) {
                 Double adjustedValue = value;
 
@@ -977,6 +979,7 @@ public abstract class Graph {
                     }
 
                     g2d.drawLine((int) previousX, previousY, (int) x, y);
+                    counter++;
                 } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.STAIRCASE)) {
                     if (consecutiveNulls > 0) {
                         previousX = x;
@@ -1000,6 +1003,8 @@ public abstract class Graph {
                 previousY = y;
 
                 x += ts.getxStep();
+
+//                if (counter > 10) break;
             }
         }
 
@@ -1138,6 +1143,8 @@ public abstract class Graph {
     }
 
     protected void drawData() {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
         drawStacked(getStackedData(data));
         drawLines(getLineData(data));
@@ -1353,7 +1360,7 @@ public abstract class Graph {
     }
 
     private Stroke getStroke(DecoratedTimeSeries timeSeries) {
-        float lineWidth = 0;
+        float lineWidth = 1.2f;
         if (timeSeries.hasOption(TimeSeriesOption.LINE_WIDTH)) {
             lineWidth = (float) timeSeries.getOption(TimeSeriesOption.LINE_WIDTH);
         }

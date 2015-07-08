@@ -56,7 +56,8 @@ public class ImageParameters {
 
     private double logBase = 0;
 
-    private Color majorGridLineColor = new Color(96, 79, 96);
+//    private Color majorGridLineColor = new Color(96, 79, 96);
+    private Color majorGridLineColor = new Color(114,114,114);
     private Color minorGridLineColor = new Color(52, 52, 52);
     private int minorY = 1;
 
