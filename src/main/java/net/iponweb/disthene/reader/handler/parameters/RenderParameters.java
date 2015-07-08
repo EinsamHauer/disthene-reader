@@ -134,8 +134,6 @@ public class RenderParameters {
             for (String path : queryStringDecoder.parameters().get("target")) {
                 parameters.getTargets().add(path);
             }
-        } else {
-            throw new MissingParameterException("Target parameter is missing");
         }
 
         // First decode tz and default to UTC
