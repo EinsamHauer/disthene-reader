@@ -41,6 +41,7 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             }
 
             logger.debug("Got request: " + ((HttpRequest) message).getMethod() + " " + ((HttpRequest) message).getUri());
+            logger.debug("Request content: " + new String(((HttpContent) message).content().array()));
 
             String path = new QueryStringDecoder(((HttpRequest) message).getUri()).path();
 
