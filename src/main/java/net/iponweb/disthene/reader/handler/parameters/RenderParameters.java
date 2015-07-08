@@ -1,5 +1,7 @@
 package net.iponweb.disthene.reader.handler.parameters;
 
+import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
@@ -105,7 +107,16 @@ public class RenderParameters {
     }
 
     public static RenderParameters parse(HttpRequest request) throws ParameterParsingException {
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+        //todo: do it in some beautiful way
+        String parameterString;
+        if (request.getMethod().equals(HttpMethod.POST)) {
+            byte[] bytes = new byte[((HttpContent) request).content().readableBytes()];
+            ((HttpContent) request).content().readBytes(bytes);
+            parameterString = new String(bytes);
+        } else {
+            parameterString = request.getUri();
+        }
+        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(parameterString);
 
         RenderParameters parameters = new RenderParameters();
 
