@@ -56,6 +56,7 @@ public class PathsHandler implements DistheneReaderHandler {
 
             return parameters;
         } else if (request.getMethod().equals(HttpMethod.POST)) {
+            ((HttpContent) request).content().resetReaderIndex();
             PathsParameters parameters = new Gson().fromJson(((HttpContent) request).content().toString(Charset.defaultCharset()), PathsParameters.class);
             if (parameters.getTenant() == null) {
                 throw new MissingParameterException("Tenant parameter is missing");
