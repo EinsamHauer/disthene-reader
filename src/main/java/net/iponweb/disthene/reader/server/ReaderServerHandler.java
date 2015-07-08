@@ -40,6 +40,8 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
             }
 
+            logger.debug("Got request: " + ((HttpRequest) message).getUri());
+
             String path = new QueryStringDecoder(((HttpRequest) message).getUri()).path();
 
             DistheneReaderHandler handler = null;
