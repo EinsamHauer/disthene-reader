@@ -14,7 +14,7 @@ import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
-import net.iponweb.disthene.reader.utils.ListUtils;
+import net.iponweb.disthene.reader.utils.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -224,7 +224,7 @@ public class MetricService {
             Double values[] = new Double[length];
             for (Row row : resultSet) {
                 values[timestampIndices.get(row.getLong("time"))] =
-                        isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+                        isSumMetric(path) ? CollectionUtils.sum(row.getList("data", Double.class)) : CollectionUtils.average(row.getList("data", Double.class));
             }
 
             json = new Gson().toJson(values);
@@ -235,7 +235,7 @@ public class MetricService {
                 values = new Double[length];
                 for (Row row : resultSet) {
                     values[timestampIndices.get(row.getLong("time"))] =
-                            isSumMetric(path) ? ListUtils.sum(row.getList("data", Double.class)) : ListUtils.average(row.getList("data", Double.class));
+                            isSumMetric(path) ? CollectionUtils.sum(row.getList("data", Double.class)) : CollectionUtils.average(row.getList("data", Double.class));
                 }
             }
         }

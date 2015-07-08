@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 public class DateTimeUtils {
 
-    private static Pattern timeOffsetPattern = Pattern.compile("^([+-]?)(\\d+)(s|min|h|d|w|mon|y)$");
+    private static Pattern timeOffsetPattern = Pattern.compile("^([+-]?)(\\d+)([a-z]+)$");
 
     /**
      * Parses time offset from string (Examples: "-1d", "+1mon")
@@ -24,30 +24,29 @@ public class DateTimeUtils {
         if (!matcher.matches()) return 0L;
 
         int sign = matcher.group(1).equals("+") ? 1 : -1;
-        long offset = Integer.parseInt(matcher.group(2));
-
-        switch (matcher.group(3)) {
-            case "min":
-                offset *= 60;
-                break;
-            case "h":
-                offset *= 3600;
-                break;
-            case "d":
-                offset *= 86400;
-                break;
-            case "w":
-                offset *= 604800;
-                break;
-            case "mon":
-                offset *= 18144000;
-                break;
-            case "y":
-                offset *= 31536000;
-                break;
-        }
+        long offset = Integer.parseInt(matcher.group(2)) * getUnitValue(matcher.group(3));
 
         return offset * sign;
+    }
+
+    private static long getUnitValue(String s) {
+        if (s.startsWith("s")) {
+            return 1;
+        } else if (s.startsWith("min")) {
+            return 60;
+        } else if (s.startsWith("h")) {
+            return 3600;
+        } else if (s.startsWith("d")) {
+            return 86400;
+        } else if (s.startsWith("w")) {
+            return 604800;
+        } else if (s.startsWith("mon")) {
+            return 18144000;
+        } else if (s.startsWith("y")) {
+            return 31536000;
+        } else {
+            return 0;
+        }
     }
 
     public static boolean testTimeOffset(String s) {

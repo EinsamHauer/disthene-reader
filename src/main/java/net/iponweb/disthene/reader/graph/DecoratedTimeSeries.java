@@ -2,9 +2,8 @@ package net.iponweb.disthene.reader.graph;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
-import net.iponweb.disthene.reader.utils.ListUtils;
+import net.iponweb.disthene.reader.utils.CollectionUtils;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -81,7 +80,7 @@ public class DecoratedTimeSeries {
             if (buffer.size() == valuesPerPoint) {
                 buffer.removeAll(Collections.singleton((Double) null));
                 if (buffer.size() > 0 ) {
-                    consolidated.add(ListUtils.average(buffer));
+                    consolidated.add(CollectionUtils.average(buffer));
                 } else {
                     consolidated.add(null);
                 }
@@ -91,7 +90,7 @@ public class DecoratedTimeSeries {
 
         buffer.removeAll(Collections.singleton((Double) null));
         if (buffer.size() > 0 ) {
-            consolidated.add(ListUtils.average(buffer));
+            consolidated.add(CollectionUtils.average(buffer));
         } else {
             consolidated.add(null);
         }

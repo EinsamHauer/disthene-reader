@@ -26,6 +26,8 @@ IMPLEMENTED
   'diffSeries' : diffSeries,
   'asPercent' : asPercent,
   'pct' : asPercent,
+  'movingAverage' : movingAverage,  ***MODIFIED***
+  'movingMedian' : movingMedian,    ***MODIFIED***
 
   # Special functions
   'stacked' : stacked,
@@ -57,8 +59,6 @@ NOT IMPLEMENTED
   'hitcount'  : hitcount,
 
   # Calculate functions
-  'movingAverage' : movingAverage,
-  'movingMedian' : movingMedian,
   'stdev' : stdev,
   'holtWintersForecast': holtWintersForecast,
   'holtWintersConfidenceBands': holtWintersConfidenceBands,

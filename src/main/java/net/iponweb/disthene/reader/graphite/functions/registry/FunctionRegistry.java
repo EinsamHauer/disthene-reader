@@ -30,6 +30,8 @@ public class FunctionRegistry {
         registry.put("log", LogarithmFunction.class);
         registry.put("maxSeries", MaxSeriesFunction.class);
         registry.put("minSeries", MinSeriesFunction.class);
+        registry.put("movingAverage", MovingAverageFunction.class);
+        registry.put("movingMedian", MovingMedianFunction.class);
         registry.put("multiplySeries", MultiplySeriesFunction.class);
         registry.put("offset", OffsetFunction.class);
         registry.put("offsetToZero", OffsetToZeroFunction.class);
@@ -38,6 +40,7 @@ public class FunctionRegistry {
         registry.put("scaleToSeconds", ScaleToSecondsFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
         registry.put("stacked", StackedFunction.class);
+        registry.put("stdev", StdevFunction.class);
         registry.put("sumSeries", SumSeriesFunction.class);
         registry.put("sum", SumSeriesFunction.class);
         registry.put("timeShift", TimeShiftFunction.class);
