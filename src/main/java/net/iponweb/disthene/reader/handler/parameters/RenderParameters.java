@@ -110,6 +110,7 @@ public class RenderParameters {
         //todo: do it in some beautiful way
         String parameterString;
         if (request.getMethod().equals(HttpMethod.POST)) {
+            ((HttpContent) request).content().resetReaderIndex();
             byte[] bytes = new byte[((HttpContent) request).content().readableBytes()];
             ((HttpContent) request).content().readBytes(bytes);
             parameterString = "/render/?" + new String(bytes);
