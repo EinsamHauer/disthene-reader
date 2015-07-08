@@ -112,10 +112,11 @@ public class RenderParameters {
         if (request.getMethod().equals(HttpMethod.POST)) {
             byte[] bytes = new byte[((HttpContent) request).content().readableBytes()];
             ((HttpContent) request).content().readBytes(bytes);
-            parameterString = new String(bytes);
+            parameterString = "/render/?" + new String(bytes);
         } else {
             parameterString = request.getUri();
         }
+        logger.debug(parameterString);
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(parameterString);
 
         RenderParameters parameters = new RenderParameters();
