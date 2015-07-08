@@ -23,6 +23,7 @@ public class FunctionRegistry {
         registry.put("avg", AverageSeriesFunction.class);
         registry.put("countSeries", CountSeriesFunction.class);
         registry.put("dashed", DashedFunction.class);
+        registry.put("derivative", DerivativeFunction.class);
         registry.put("diffSeries", DiffSeriesFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
         registry.put("integral", IntegralFunction.class);
@@ -35,10 +36,13 @@ public class FunctionRegistry {
         registry.put("multiplySeries", MultiplySeriesFunction.class);
         registry.put("offset", OffsetFunction.class);
         registry.put("offsetToZero", OffsetToZeroFunction.class);
+        registry.put("perSecond", PerSecondFunction.class);
+        registry.put("pow", PowFunction.class);
         registry.put("rangeOfSeries", RangeOfSeriesFunction.class);
         registry.put("scale", ScaleFunction.class);
         registry.put("scaleToSeconds", ScaleToSecondsFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
+        registry.put("squareRoot", SquareRootFunction.class);
         registry.put("stacked", StackedFunction.class);
         registry.put("stdev", StdevFunction.class);
         registry.put("sumSeries", SumSeriesFunction.class);

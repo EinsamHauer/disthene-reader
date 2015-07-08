@@ -20,6 +20,10 @@ IMPLEMENTED
   'integral' : integral,
   'log' : logarithm,
   'timeShift': timeShift,
+  'derivative' : derivative,
+  'squareRoot' : squareRoot,
+  'pow' : pow,
+  'perSecond' : perSecond,
 
   # Calculate functions
   'divideSeries' : divideSeries,
@@ -28,6 +32,7 @@ IMPLEMENTED
   'pct' : asPercent,
   'movingAverage' : movingAverage,  ***MODIFIED***
   'movingMedian' : movingMedian,    ***MODIFIED***
+  'stdev' : stdev,
 
   # Special functions
   'stacked' : stacked,
@@ -45,10 +50,6 @@ NOT IMPLEMENTED
   'weightedAverage': weightedAverage,
 
   # Transform functions
-  'derivative' : derivative,
-  'squareRoot' : squareRoot,
-  'pow' : pow,
-  'perSecond' : perSecond,
   'percentileOfSeries': percentileOfSeries,
   'nonNegativeDerivative' : nonNegativeDerivative,
   'invert' : invert,
@@ -59,7 +60,6 @@ NOT IMPLEMENTED
   'hitcount'  : hitcount,
 
   # Calculate functions
-  'stdev' : stdev,
   'holtWintersForecast': holtWintersForecast,
   'holtWintersConfidenceBands': holtWintersConfidenceBands,
   'holtWintersConfidenceArea': holtWintersConfidenceArea,

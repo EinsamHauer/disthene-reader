@@ -67,7 +67,7 @@ public class CollectionUtils {
             variance += (value - average) * (value - average);
         }
 
-        return Math.sqrt(variance);
+        return Math.sqrt(variance) / filteredValues.size();
     }
 
 }
