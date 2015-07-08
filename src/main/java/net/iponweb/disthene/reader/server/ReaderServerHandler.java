@@ -4,6 +4,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.string.StringDecoder;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
 import org.apache.log4j.Logger;
 
@@ -41,7 +42,9 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             }
 
             logger.debug("Got request: " + ((HttpRequest) message).getMethod() + " " + ((HttpRequest) message).getUri());
-            logger.debug("Request content: " + new String(((HttpContent) message).content().array()));
+            byte[] bytes = new byte[((HttpContent) message).content().readableBytes()];
+            ((HttpContent) message).content().readBytes(bytes);
+            logger.debug("Request content: " + new String(bytes));
 
             String path = new QueryStringDecoder(((HttpRequest) message).getUri()).path();
 
