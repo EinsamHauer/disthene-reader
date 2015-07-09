@@ -929,10 +929,11 @@ public abstract class Graph {
         for (DecoratedTimeSeries ts : timeSeriesList) {
             g2d.setStroke(getStroke(ts));
             g2d.setColor(getColor(ts));
+            GeneralPath path = new GeneralPath();
 
             double x = xMin;
             double previousX = xMin;
-            int y;
+            int y = yMin;
             int previousY = -1;
             Double[] values = ts.getConsolidatedValues();
             int consecutiveNulls = 0;
@@ -944,6 +945,9 @@ public abstract class Graph {
                 if (adjustedValue == null && imageParameters.isDrawNullAsZero()) adjustedValue = 0.;
 
                 if (value == null) {
+                    if (consecutiveNulls == 0) {
+                        path.lineTo(x, y);
+                    }
                     x += ts.getxStep();
                     consecutiveNulls++;
                     continue;
@@ -961,8 +965,14 @@ public abstract class Graph {
 
                 y = y < 0 ? 0 : y;
 
+                if (path.getCurrentPoint() == null) {
+                    path.moveTo(x, y);
+                }
+
                 if (ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE) && adjustedValue > 0) {
-                    g2d.drawLine((int) x, yMax, (int) x, yMin);
+                    path.moveTo((int) x, yMax);
+                    path.lineTo((int) x, yMin);
+//                    g2d.drawLine((int) x, yMax, (int) x, yMin);
                     x += ts.getxStep();
                     continue;
                 }
@@ -972,27 +982,25 @@ public abstract class Graph {
 
                 if (imageParameters.getLineMode().equals(ImageParameters.LineMode.SLOPE)) {
                     if (consecutiveNulls > 0) {
-                        previousX = x;
-                        previousY = y;
+                        path.moveTo(x, y);
                     }
 
-                    g2d.drawLine((int) previousX, previousY, (int) x, y);
+                    path.lineTo(x, y);
                 } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.STAIRCASE)) {
                     if (consecutiveNulls > 0) {
-                        previousX = x;
-                        previousY = y;
+                        path.moveTo(x, y);
+                    } else {
+                        path.lineTo(x, y);
                     }
-                    g2d.drawLine((int) previousX, previousY, (int) x, previousY);
-                    g2d.drawLine((int) x, previousY, (int) x, y);
 
+                    path.lineTo(x + ts.getxStep(), y);
                 } else if (imageParameters.getLineMode().equals(ImageParameters.LineMode.CONNECTED)) {
                     if (consecutiveNulls > imageParameters.getConnectedLimit() || allNullsSoFar) {
-                        previousX = x;
-                        previousY = y;
+                        path.moveTo(x, y);
                         allNullsSoFar = false;
                     }
 
-                    g2d.drawLine((int) previousX, previousY, (int) x, y);
+                    path.lineTo((int) x, y);
                 }
 
                 consecutiveNulls = 0;
@@ -1001,6 +1009,8 @@ public abstract class Graph {
 
                 x += ts.getxStep();
             }
+
+            g2d.draw(path);
         }
 
     }
@@ -1368,7 +1378,6 @@ public abstract class Graph {
             dashLength = (float) timeSeries.getOption(TimeSeriesOption.DASHED);
         }
 
-        //todo: fix dashed lines
         if (isDashed) {
             return new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{dashLength, dashLength}, 0.0f);
         } else {
