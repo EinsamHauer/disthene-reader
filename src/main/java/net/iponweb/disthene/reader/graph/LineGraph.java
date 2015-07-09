@@ -181,11 +181,11 @@ public class LineGraph extends Graph {
         int x = imageParameters.getWidth() / 2;
         int y = imageParameters.getHeight() / 2;
 
-        g2d.setPaint(Color.RED);
+        g2d.setPaint(ColorTable.RED);
         Font font = new Font(imageParameters.getFont().getName(), imageParameters.getFont().getStyle(),
                 (int) Math.log(imageParameters.getHeight() * imageParameters.getWidth()));
 
-        drawText(x, y, "No Data", font, Color.RED, HorizontalAlign.CENTER, VerticalAlign.TOP);
+        drawText(x, y, "No Data", font, ColorTable.RED, HorizontalAlign.CENTER, VerticalAlign.TOP);
 
         return getBytes();
     }

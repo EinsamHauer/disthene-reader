@@ -63,11 +63,16 @@ IMPLEMENTED
   # Data Filter functions
   'removeAboveValue' : removeAboveValue,
   'removeBelowValue' : removeBelowValue,
+  'removeAbovePercentile' : removeAbovePercentile,
+  'removeBelowPercentile' : removeBelowPercentile,
 
   # Special functions
   'stacked' : stacked,
   'dashed' : dashed,
   'secondYAxis': secondYAxis,
+  'alias' : alias,
+  'alpha' : alpha,
+  'color' : color,
 
 NOT IMPLEMENTED
 ========================================================================================================================
@@ -96,18 +101,13 @@ NOT IMPLEMENTED
 
 
   # Data Filter functions
-  'removeAbovePercentile' : removeAbovePercentile,
-  'removeBelowPercentile' : removeBelowPercentile,
 
   # Special functions
   'legendValue' : legendValue,
-  'alias' : alias,
   'aliasSub' : aliasSub,
   'aliasByNode' : aliasByNode,
   'aliasByMetric' : aliasByMetric,
   'cactiStyle' : cactiStyle,
-  'color' : color,
-  'alpha' : alpha,
   'cumulative' : cumulative,
   'consolidateBy' : consolidateBy,
   'keepLastValue' : keepLastValue,

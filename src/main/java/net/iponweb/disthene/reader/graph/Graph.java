@@ -108,6 +108,7 @@ public abstract class Graph {
 
         image = new BufferedImage(imageParameters.getWidth(), imageParameters.getHeight(), BufferedImage.TYPE_INT_ARGB);
         g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         g2d.setPaint(imageParameters.getBackgroundColor());
         g2d.fillRect(0, 0, imageParameters.getWidth(), imageParameters.getHeight());
     }
@@ -272,7 +273,7 @@ public abstract class Graph {
                 if (secondYAxes.get(i)) {
                     nRight++;
                     g2d.fillRect(xRight - padding, yRight, boxSize, boxSize);
-                    g2d.setPaint(new Color(111, 111, 111));
+                    g2d.setPaint(ColorTable.DARK_GRAY);
                     g2d.drawRect(xRight - padding, yRight, boxSize, boxSize);
                     drawText(xRight - boxSize, yRight, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.RIGHT, VerticalAlign.TOP);
                     xRight -= labelWidth;
@@ -284,7 +285,7 @@ public abstract class Graph {
                 } else {
                     n++;
                     g2d.fillRect(x, y, boxSize, boxSize);
-                    g2d.setPaint(new Color(111, 111, 111));
+                    g2d.setPaint(ColorTable.DARK_GRAY);
                     g2d.drawRect(x, y, boxSize, boxSize);
                     drawText(x + boxSize + padding, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.LEFT, VerticalAlign.TOP);
                     x += labelWidth;
@@ -314,15 +315,14 @@ public abstract class Graph {
                 if (secondYAxes.get(i)) {
                     g2d.setPaint(colors.get(i));
                     g2d.fillRect(x + labelWidth + padding, y, boxSize, boxSize);
-                    g2d.setPaint(new Color(111, 111, 111));
+                    g2d.setPaint(ColorTable.DARK_GRAY);
                     g2d.drawRect(x + labelWidth + padding, y, boxSize, boxSize);
                     drawText(x + labelWidth, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.RIGHT, VerticalAlign.TOP);
                     x += labelWidth;
                 } else {
                     g2d.setPaint(colors.get(i));
                     g2d.fillRect(x, y, boxSize, boxSize);
-                    // todo; use color dictionary
-                    g2d.setPaint(new Color(111, 111, 111));
+                    g2d.setPaint(ColorTable.DARK_GRAY);
                     g2d.drawRect(x, y, boxSize, boxSize);
                     drawText(x + boxSize + padding, y, legends.get(i), imageParameters.getFont(), imageParameters.getForegroundColor(), HorizontalAlign.LEFT, VerticalAlign.TOP);
                     x += labelWidth;
@@ -894,7 +894,7 @@ public abstract class Graph {
             majorDelta = (long) xAxisConfig.getMajorGridStep();
         } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.MIN) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
-            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour((int) (tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getMajorGridStep()))).getMillis() / 1000;
+            majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour(tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getMajorGridStep())).getMillis() / 1000;
             majorDelta = (long) xAxisConfig.getMajorGridStep() * 60;
         } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.HOUR) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
@@ -1347,7 +1347,7 @@ public abstract class Graph {
 
     private Color getColor(DecoratedTimeSeries timeSeries) {
         if (timeSeries.hasOption(TimeSeriesOption.INVISIBLE)) {
-            return new Color(0, 0, 0, 0);
+            return ColorTable.INVISIBLE;
         }
 
         Color c = (Color) timeSeries.getOption(TimeSeriesOption.COLOR);
@@ -1368,8 +1368,9 @@ public abstract class Graph {
             dashLength = (float) timeSeries.getOption(TimeSeriesOption.DASHED);
         }
 
+        //todo: fix dashed lines
         if (isDashed) {
-            return new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{dashLength}, 0.0f);
+            return new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{dashLength, dashLength}, 0.0f);
         } else {
             return new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         }

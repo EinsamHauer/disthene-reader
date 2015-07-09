@@ -4,6 +4,7 @@ import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
 import net.iponweb.disthene.reader.graphite.functions.TimeShiftFunction;
 import net.iponweb.disthene.reader.graphite.functions.*;
 
+import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class FunctionRegistry {
 
     static {
         registry.put("absolute", AbsoluteFunction.class);
+        registry.put("alias", AliasFunction.class);
+        registry.put("alpha", AlphaFunction.class);
         registry.put("asPercent", AsPercentFunction.class);
         registry.put("averageOutsidePercentile", AverageOutsidePercentileFunction.class);
         registry.put("pct", AsPercentFunction.class);
@@ -24,6 +27,7 @@ public class FunctionRegistry {
         registry.put("averageBelow", AverageBelowFunction.class);
         registry.put("averageSeries", AverageSeriesFunction.class);
         registry.put("avg", AverageSeriesFunction.class);
+        registry.put("color", ColorFunction.class);
         registry.put("countSeries", CountSeriesFunction.class);
         registry.put("currentAbove", CurrentAboveFunction.class);
         registry.put("currentBelow", CurrentBelowFunction.class);
@@ -59,7 +63,9 @@ public class FunctionRegistry {
         registry.put("perSecond", PerSecondFunction.class);
         registry.put("pow", PowFunction.class);
         registry.put("rangeOfSeries", RangeOfSeriesFunction.class);
+        registry.put("removeAbovePercentile", RemoveAbovePercentileFunction.class);
         registry.put("removeAboveValue", RemoveAboveValueFunction.class);
+        registry.put("removeBelowPercentile", RemoveBelowPercentileFunction.class);
         registry.put("removeBelowValue", RemoveBelowValueFunction.class);
         registry.put("scale", ScaleFunction.class);
         registry.put("scaleToSeconds", ScaleToSecondsFunction.class);

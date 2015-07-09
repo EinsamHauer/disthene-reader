@@ -1,5 +1,7 @@
 package net.iponweb.disthene.reader.handler.parameters;
 
+import net.iponweb.disthene.reader.graph.ColorTable;
+
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -12,8 +14,8 @@ public class ImageParameters {
     private int width = 600;
     private int height = 300;
     private int margin = 10;
-    private Color backgroundColor = Color.BLACK;
-    private Color foregroundColor = Color.WHITE;
+    private Color backgroundColor = ColorTable.BLACK;
+    private Color foregroundColor = ColorTable.WHITE;
 
     private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
     private boolean graphOnly = false;
@@ -50,7 +52,7 @@ public class ImageParameters {
 
     private boolean drawNullAsZero = false;
 
-    private List<Color> colorList = new ArrayList<>();
+    private List<Color> colorList = ColorTable.getColorRotationList();
 
     private List<Integer> yDivisors = new ArrayList<>();
 
@@ -64,22 +66,6 @@ public class ImageParameters {
     private double areaAlpha = -1;
 
     public ImageParameters() {
-        // init colors
-//        colorList.add(Color.BLUE);
-        colorList.add(new Color(100, 100, 255)); // blue
-//        colorList.add(Color.GREEN);
-        colorList.add(new Color(0, 200, 0)); // green
-        colorList.add(Color.RED);
-        colorList.add(new Color(200, 100, 255)); // purple
-        colorList.add(new Color(150, 100, 50)); // brown
-        colorList.add(Color.YELLOW);
-        colorList.add(new Color(0, 150, 150)); // aqua
-        colorList.add(new Color(175, 175, 175)); // grey
-        colorList.add(new Color(255, 0, 255)); // magenta
-        colorList.add(new Color(255, 100, 100)); // pink
-        colorList.add(new Color(200, 200, 0)); // gold
-        colorList.add(new Color(200, 150, 200)); // rose
-
 
         yDivisors.add(4);
         yDivisors.add(5);
