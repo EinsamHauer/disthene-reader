@@ -73,6 +73,8 @@ IMPLEMENTED
   'alias' : alias,
   'alpha' : alpha,
   'color' : color,
+  'aliasByNode' : aliasByNode,
+  'aliasByMetric' : aliasByMetric,
 
 NOT IMPLEMENTED
 ========================================================================================================================
@@ -105,8 +107,6 @@ NOT IMPLEMENTED
   # Special functions
   'legendValue' : legendValue,
   'aliasSub' : aliasSub,
-  'aliasByNode' : aliasByNode,
-  'aliasByMetric' : aliasByMetric,
   'cactiStyle' : cactiStyle,
   'cumulative' : cumulative,
   'consolidateBy' : consolidateBy,

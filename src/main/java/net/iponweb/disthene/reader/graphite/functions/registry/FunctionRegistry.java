@@ -19,6 +19,8 @@ public class FunctionRegistry {
     static {
         registry.put("absolute", AbsoluteFunction.class);
         registry.put("alias", AliasFunction.class);
+        registry.put("aliasByNode", AliasByNodeFunction.class);
+        registry.put("aliasByMetric", AliasByMetricFunction.class);
         registry.put("alpha", AlphaFunction.class);
         registry.put("asPercent", AsPercentFunction.class);
         registry.put("averageOutsidePercentile", AverageOutsidePercentileFunction.class);
