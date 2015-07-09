@@ -14,10 +14,10 @@ import java.util.List;
 /**
  * @author Andrei Ivanov
  */
-public class PerSecondFunction extends DistheneFunction {
+public class NonNegativeDerivativeFunction extends DistheneFunction {
 
-    public PerSecondFunction(String text) {
-        super(text, "perSecond");
+    public NonNegativeDerivativeFunction(String text) {
+        super(text, "nonNegativeDerivative");
     }
 
     //todo: this implementation comes from graphite, but it doesn't seem right. Why cut at zero??
@@ -41,7 +41,7 @@ public class PerSecondFunction extends DistheneFunction {
             Double previous = null;
             for (int i = 0; i < length; i++) {
                 if (previous != null && ts.getValues()[i] != null && (ts.getValues()[i] - previous > 0)) {
-                    values[i] = (ts.getValues()[i] - previous) / ts.getStep();
+                    values[i] = (ts.getValues()[i] - previous);
                 } else if (previous != null && ts.getValues()[i]!= null && maxValue != null && maxValue >= ts.getValues()[i]) {
                     values[i] = (maxValue - previous + ts.getValues()[i] + 1) / ts.getStep();
                 }
@@ -51,7 +51,7 @@ public class PerSecondFunction extends DistheneFunction {
 
             ts.setValues(values);
             if (maxValue != null) {
-                ts.setName("perSecond(" + ts.getName() + "," + maxValue + ")");
+                ts.setName("nonNegativeDerivative(" + ts.getName() + "," + maxValue + ")");
             } else {
                 setResultingName(ts);
             }
@@ -62,8 +62,8 @@ public class PerSecondFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() > 2 || arguments.size() < 1) throw new InvalidArgumentException("perSecond: number of arguments is " + arguments.size() + ". Must be two.");
-        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("perSecond: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (arguments.size()> 1 && !(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("perSecond: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+        if (arguments.size() > 2 || arguments.size() < 1) throw new InvalidArgumentException("nonNegativeDerivative: number of arguments is " + arguments.size() + ". Must be two.");
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("nonNegativeDerivative: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+        if (arguments.size()> 1 && !(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("nonNegativeDerivative: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
     }
 }

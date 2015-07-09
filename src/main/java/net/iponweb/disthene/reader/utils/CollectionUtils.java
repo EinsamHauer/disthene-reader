@@ -11,23 +11,19 @@ import java.util.List;
 public class CollectionUtils {
 
     public static Double average(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
+        if (filteredValues.size() == 0) return null;
+
         double sum = 0;
-        double count = 0;
-        for(Double value : values) {
-            if (value != null) {
+        for(Double value : filteredValues) {
                 sum += value;
-                count++;
-            }
         }
 
-        return count != 0 ?  sum / count : 0;
+        return sum / filteredValues.size();
     }
 
     public static Double median(Collection<Double> values) {
-        List<Double> filteredValues = new ArrayList<>();
-        for(Double value : values) {
-            if (value != null) filteredValues.add(value);
-        }
+        List<Double> filteredValues = filterNulls(values);
 
         if (filteredValues.size() == 0) return 0.;
         if (filteredValues.size() == 1) return filteredValues.get(0);
@@ -42,25 +38,20 @@ public class CollectionUtils {
     }
 
     public static Double sum(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
         double sum = 0;
-        for(Double value : values) {
-            if (value != null) {
-                sum += value;
-            }
+        for(Double value : filteredValues) {
+            sum += value;
         }
-
         return sum;
     }
 
     public static Double stdev(Collection<Double> values) {
-        List<Double> filteredValues = new ArrayList<>();
-        for(Double value : values) {
-            if (value != null) filteredValues.add(value);
-        }
+        List<Double> filteredValues = filterNulls(values);
+        if (filteredValues.size() < 2) return null;
 
-        if (filteredValues.size() < 2) return 0.;
-
-        double average = average(filteredValues);
+        Double average = average(filteredValues);
+        if (average == null) return null;
         double variance = 0;
 
         for(Double value : filteredValues) {
@@ -68,6 +59,66 @@ public class CollectionUtils {
         }
 
         return Math.sqrt(variance) / filteredValues.size();
+    }
+
+    public static Double percentile(Collection<Double> values, double percentile, boolean interpolate) {
+        List<Double> filteredValues = filterNulls(values);
+        Collections.sort(filteredValues);
+
+        if (filteredValues.size() == 0) return null;
+
+        double fractionalRank = (percentile / 100.0) * (filteredValues.size() + 1);
+        int rank = (int) fractionalRank;
+        double rankFraction = fractionalRank - rank;
+
+        double result;
+
+        if (!interpolate) {
+            rank += (int) Math.ceil(rankFraction);
+        }
+
+        if (rank == 0) {
+            result = filteredValues.get(0);
+        } else if (rank == filteredValues.size() + 1) {
+            result = filteredValues.get(filteredValues.size() - 1);
+        } else {
+            result = filteredValues.get(rank - 1);
+        }
+
+        if (interpolate && rank != filteredValues.size()) {
+            result = result + rankFraction * (filteredValues.get(rank) - result);
+        }
+
+        return result;
+    }
+
+    public static Double last(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
+
+        return filteredValues.size() > 0 ? filteredValues.get(filteredValues.size() - 1) : null;
+    }
+
+    public static Double max(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
+        if (filteredValues.size() == 0) return null;
+
+        return Collections.max(filteredValues);
+    }
+
+    public static Double min(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
+        if (filteredValues.size() == 0) return null;
+
+        return Collections.min(filteredValues);
+    }
+
+    private static List<Double> filterNulls(Collection<Double> values) {
+        List<Double> result = new ArrayList<>();
+        for(Double value : values) {
+            if (value != null) result.add(value);
+        }
+
+        return result;
     }
 
 }

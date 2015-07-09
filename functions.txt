@@ -24,6 +24,10 @@ IMPLEMENTED
   'squareRoot' : squareRoot,
   'pow' : pow,
   'perSecond' : perSecond,
+  'invert' : invert,
+  'nonNegativeDerivative' : nonNegativeDerivative,
+  'percentileOfSeries': percentileOfSeries,
+  'highestMax' : highestMax,
 
   # Calculate functions
   'divideSeries' : divideSeries,
@@ -33,6 +37,32 @@ IMPLEMENTED
   'movingAverage' : movingAverage,  ***MODIFIED***
   'movingMedian' : movingMedian,    ***MODIFIED***
   'stdev' : stdev,
+
+  # Series Filter functions
+  'mostDeviant' : mostDeviant,
+  'highestCurrent' : highestCurrent,
+  'highestAverage' : highestAverage,
+  'lowestCurrent' : lowestCurrent,
+  'lowestAverage' : lowestAverage,
+  'currentAbove' : currentAbove,
+  'currentBelow' : currentBelow,
+  'averageAbove' : averageAbove,
+  'averageBelow' : averageBelow,
+  'maximumAbove' : maximumAbove,
+  'minimumAbove' : minimumAbove,
+  'maximumBelow' : maximumBelow,
+  'minimumBelow' : minimumBelow,
+  'nPercentile' : nPercentile,
+  'limit' : limit,
+  'sortByTotal'  : sortByTotal,
+  'sortByName' : sortByName,
+  'sortByMaxima' : sortByMaxima,
+  'sortByMinima' : sortByMinima,
+  'averageOutsidePercentile' : averageOutsidePercentile,
+
+  # Data Filter functions
+  'removeAboveValue' : removeAboveValue,
+  'removeBelowValue' : removeBelowValue,
 
   # Special functions
   'stacked' : stacked,
@@ -50,9 +80,6 @@ NOT IMPLEMENTED
   'weightedAverage': weightedAverage,
 
   # Transform functions
-  'percentileOfSeries': percentileOfSeries,
-  'nonNegativeDerivative' : nonNegativeDerivative,
-  'invert' : invert,
   'timeStack': timeStack,
   'timeSlice': timeSlice,
   'summarize' : summarize,
@@ -66,38 +93,11 @@ NOT IMPLEMENTED
   'holtWintersAberration': holtWintersAberration,
 
   # Series Filter functions
-  'mostDeviant' : mostDeviant,
-  'highestCurrent' : highestCurrent,
-  'lowestCurrent' : lowestCurrent,
-  'highestMax' : highestMax,
-  'currentAbove' : currentAbove,
-  'currentBelow' : currentBelow,
-  'highestAverage' : highestAverage,
-  'lowestAverage' : lowestAverage,
-  'averageAbove' : averageAbove,
-  'averageBelow' : averageBelow,
-  'maximumAbove' : maximumAbove,
-  'minimumAbove' : minimumAbove,
-  'maximumBelow' : maximumBelow,
-  'minimumBelow' : minimumBelow,
-  'nPercentile' : nPercentile,
-  'limit' : limit,
-  'sortByTotal'  : sortByTotal,
-  'sortByName' : sortByName,
-  'averageOutsidePercentile' : averageOutsidePercentile,
-  'removeBetweenPercentile' : removeBetweenPercentile,
-  'sortByMaxima' : sortByMaxima,
-  'sortByMinima' : sortByMinima,
-  'useSeriesAbove': useSeriesAbove,
-  'exclude' : exclude,
-  'grep' : grep,
-  'removeEmptySeries' : removeEmptySeries,
+
 
   # Data Filter functions
   'removeAbovePercentile' : removeAbovePercentile,
-  'removeAboveValue' : removeAboveValue,
   'removeBelowPercentile' : removeBelowPercentile,
-  'removeBelowValue' : removeBelowValue,
 
   # Special functions
   'legendValue' : legendValue,
@@ -134,7 +134,11 @@ WILL NOT BE IMPLEMENTED???
 ========================================================================================================================
   # Series Filter functions
   'fallbackSeries' : fallbackSeries,
-
+  'removeBetweenPercentile' : removeBetweenPercentile,
+  'useSeriesAbove': useSeriesAbove,
+  'exclude' : exclude,
+  'grep' : grep,
+  'removeEmptySeries' : removeEmptySeries,
 
   # test functions
   'time': timeFunction,
