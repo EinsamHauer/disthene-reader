@@ -186,6 +186,18 @@ public class RenderParameters {
         //*************************************************************************************************************
         // Image parameters
         //*************************************************************************************************************
+        if (queryStringDecoder.parameters().get("areaAlpha") != null) {
+            try {
+                Float areaAlpha = Float.valueOf(queryStringDecoder.parameters().get("areaAlpha").get(0));
+                if (areaAlpha < 0.) areaAlpha = 0f;
+                if (areaAlpha > 1.) areaAlpha = 1f;
+                parameters.getImageParameters().setAreaAlpha(areaAlpha);
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("AreaAlpha format : " + queryStringDecoder.parameters().get("areaAlpha").get(0));
+            }
+        }
+
+
         if (queryStringDecoder.parameters().get("width") != null) {
             try {
                 parameters.getImageParameters().setWidth(Integer.valueOf(queryStringDecoder.parameters().get("width").get(0)));

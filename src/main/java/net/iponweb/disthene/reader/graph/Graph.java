@@ -945,9 +945,11 @@ public abstract class Graph {
                 if (adjustedValue == null && imageParameters.isDrawNullAsZero()) adjustedValue = 0.;
 
                 if (value == null) {
+/*
                     if (consecutiveNulls == 0) {
                         path.lineTo(x, y);
                     }
+*/
                     x += ts.getxStep();
                     consecutiveNulls++;
                     continue;
