@@ -1033,7 +1033,7 @@ public abstract class Graph {
 
             double x = xMin;
             double startX = x;
-            int y = yMin;
+            int y = yMax;
             Double[] values = ts.getConsolidatedValues();
             int consecutiveNulls = 0;
             boolean allNullsSoFar = true;
@@ -1136,6 +1136,7 @@ public abstract class Graph {
         pattern.lineTo(xMax, yTo);
         pattern.lineTo(xMax, yMin);
         pattern.lineTo(xMin, yMin);
+        pattern.lineTo(xMin, yTo);
         pattern.lineTo(startX, yTo);
 
         pattern.lineTo(x, yTo);
