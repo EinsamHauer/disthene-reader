@@ -15,7 +15,7 @@ public class ImageParameters {
     private int height = 300;
     private int margin = 10;
     private Color backgroundColor = ColorTable.BLACK;
-    private Color foregroundColor = ColorTable.WHITE;
+    private Color foregroundColor = Color.WHITE;
 
     private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
     private boolean graphOnly = false;
@@ -27,6 +27,7 @@ public class ImageParameters {
     private Side yAxisSide = Side.LEFT;
     private String title = "";
     private String verticalTitle = "";
+    private String verticalTitleRight = "";
     private double yMin = Double.NEGATIVE_INFINITY;
     private double yMax = Double.POSITIVE_INFINITY;
     private double yStep = Double.POSITIVE_INFINITY;
@@ -41,14 +42,17 @@ public class ImageParameters {
     private int connectedLimit = Integer.MAX_VALUE;
     private AreaMode areaMode = AreaMode.NONE;
 
-    private int rightWidth = 1;
-    private int rightDashed = 0;
-    private int leftWidth = 1;
-    private int leftDashed = 0;
+    private Color leftColor = null;
+    private Color rightColor = null;
+
+    private Double rightWidth = null;
+    private Boolean rightDashed = false;
+    private Double leftWidth = null;
+    private Boolean leftDashed = false;
 
     private boolean uniqueLegend = false;
     private int minXStep = 1;
-    private double lineWidth = 1.2;
+    private Double lineWidth = 1.2;
 
     private boolean drawNullAsZero = false;
 
@@ -176,6 +180,14 @@ public class ImageParameters {
         this.verticalTitle = verticalTitle;
     }
 
+    public String getVerticalTitleRight() {
+        return verticalTitleRight;
+    }
+
+    public void setVerticalTitleRight(String verticalTitleRight) {
+        this.verticalTitleRight = verticalTitleRight;
+    }
+
     public double getyMin() {
         return yMin;
     }
@@ -224,35 +236,35 @@ public class ImageParameters {
         this.areaMode = areaMode;
     }
 
-    public int getRightWidth() {
+    public Double getRightWidth() {
         return rightWidth;
     }
 
-    public void setRightWidth(int rightWidth) {
+    public void setRightWidth(Double rightWidth) {
         this.rightWidth = rightWidth;
     }
 
-    public int getRightDashed() {
+    public Boolean getRightDashed() {
         return rightDashed;
     }
 
-    public void setRightDashed(int rightDashed) {
+    public void setRightDashed(Boolean rightDashed) {
         this.rightDashed = rightDashed;
     }
 
-    public int getLeftWidth() {
+    public Double getLeftWidth() {
         return leftWidth;
     }
 
-    public void setLeftWidth(int leftWidth) {
+    public void setLeftWidth(Double leftWidth) {
         this.leftWidth = leftWidth;
     }
 
-    public int getLeftDashed() {
+    public Boolean getLeftDashed() {
         return leftDashed;
     }
 
-    public void setLeftDashed(int leftDashed) {
+    public void setLeftDashed(Boolean leftDashed) {
         this.leftDashed = leftDashed;
     }
 
@@ -288,11 +300,11 @@ public class ImageParameters {
         this.minXStep = minXStep;
     }
 
-    public double getLineWidth() {
+    public Double getLineWidth() {
         return lineWidth;
     }
 
-    public void setLineWidth(double lineWidth) {
+    public void setLineWidth(Double lineWidth) {
         this.lineWidth = lineWidth;
     }
 
@@ -408,10 +420,24 @@ public class ImageParameters {
         this.areaAlpha = areaAlpha;
     }
 
+    public Color getLeftColor() {
+        return leftColor;
+    }
 
+    public void setLeftColor(Color leftColor) {
+        this.leftColor = leftColor;
+    }
+
+    public Color getRightColor() {
+        return rightColor;
+    }
+
+    public void setRightColor(Color rightColor) {
+        this.rightColor = rightColor;
+    }
 
     public enum Side {
-        LEFT, RIGHT;
+        LEFT, RIGHT
     }
 
     public static class Unit {
@@ -468,11 +494,11 @@ public class ImageParameters {
     }
 
     public enum LineMode {
-        STAIRCASE, SLOPE, CONNECTED;
+        STAIRCASE, SLOPE, CONNECTED
     }
 
     public enum AreaMode {
-        NONE, FIRST, ALL, STACKED;
+        NONE, FIRST, ALL, STACKED
     }
 
 }

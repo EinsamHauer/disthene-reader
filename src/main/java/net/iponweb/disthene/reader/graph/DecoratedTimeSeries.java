@@ -68,6 +68,11 @@ public class DecoratedTimeSeries {
         timeSeries.setOption(option, value);
     }
 
+    public void addOption(TimeSeriesOption option) {
+        timeSeries.addOption(option);
+    }
+
+
     //todo: implement in a more reasonable way
     public Double[] getConsolidatedValues() {
         if (valuesPerPoint <= 1) return timeSeries.getValues();

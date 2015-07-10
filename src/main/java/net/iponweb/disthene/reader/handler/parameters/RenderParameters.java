@@ -5,29 +5,25 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
-import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.format.Format;
+import net.iponweb.disthene.reader.graph.ColorTable;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Andrei Ivanov
  */
-// For now we absolutely need:
-// tz, target, tenant, height, width, from, until (in timestamp format)
-// let's stick to this bare minimum
-
-// todo: support full set of render API parameters
 public class RenderParameters {
     final static Logger logger = Logger.getLogger(RenderParameters.class);
 
     private String tenant;
-    private List<String> targets = new ArrayList<>();;
+    private List<String> targets = new ArrayList<>();
     private Long from;
     private Long until;
     private Format format;
@@ -46,10 +42,6 @@ public class RenderParameters {
 
     public List<String> getTargets() {
         return targets;
-    }
-
-    public void setTargets(List<String> targets) {
-        this.targets = targets;
     }
 
     public Long getFrom() {
@@ -86,10 +78,6 @@ public class RenderParameters {
 
     public ImageParameters getImageParameters() {
         return imageParameters;
-    }
-
-    public void setImageParameters(ImageParameters imageParameters) {
-        this.imageParameters = imageParameters;
     }
 
 
@@ -197,13 +185,60 @@ public class RenderParameters {
             }
         }
 
-
-        if (queryStringDecoder.parameters().get("width") != null) {
+        if (queryStringDecoder.parameters().get("areaMode") != null) {
             try {
-                parameters.getImageParameters().setWidth(Integer.valueOf(queryStringDecoder.parameters().get("width").get(0)));
-            } catch (NumberFormatException e) {
-                throw new InvalidParameterValueException("Width format : " + queryStringDecoder.parameters().get("width").get(0));
+                parameters.getImageParameters().setAreaMode(ImageParameters.AreaMode.valueOf(queryStringDecoder.parameters().get("areaMode").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown area mode : " + queryStringDecoder.parameters().get("areaMode").get(0).toUpperCase());
             }
+        }
+
+        if (queryStringDecoder.parameters().get("bgcolor") != null) {
+            Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("bgcolor").get(0).replaceAll("^\"|\"$", ""));
+            if (color != null) parameters.getImageParameters().setBackgroundColor(color);
+        }
+
+        if (queryStringDecoder.parameters().get("colorList") != null) {
+            String colorsString = queryStringDecoder.parameters().get("colorList").get(0).replaceAll("^\"|\"$", "");
+            String[] split = colorsString.split(",");
+            List<Color> colors = new ArrayList<>();
+            for (String c : split) {
+                Color color = ColorTable.getColorByName(c);
+                if (color != null) colors.add(color);
+            }
+
+            if (colors.size() > 0) {
+                parameters.getImageParameters().setColorList(colors);
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("drawNullAsZero") != null) {
+            parameters.getImageParameters().setDrawNullAsZero(Boolean.parseBoolean(queryStringDecoder.parameters().get("drawNullAsZero").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("fgcolor") != null) {
+            Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("fgcolor").get(0).replaceAll("^\"|\"$", ""));
+            if (color != null) parameters.getImageParameters().setForegroundColor(color);
+        }
+
+        if (queryStringDecoder.parameters().get("graphOnly") != null) {
+            parameters.getImageParameters().setGraphOnly(Boolean.parseBoolean(queryStringDecoder.parameters().get("graphOnly").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("hideLegend") != null) {
+            parameters.getImageParameters().setHideLegend(Boolean.parseBoolean(queryStringDecoder.parameters().get("hideLegend").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("hideAxes") != null) {
+            parameters.getImageParameters().setHideAxes(Boolean.parseBoolean(queryStringDecoder.parameters().get("hideAxes").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("hideYAxes") != null) {
+            parameters.getImageParameters().setHideYAxis(Boolean.parseBoolean(queryStringDecoder.parameters().get("hideYAxes").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("hideGrid") != null) {
+            parameters.getImageParameters().setHideGrid(Boolean.parseBoolean(queryStringDecoder.parameters().get("hideGrid").get(0)));
         }
 
         if (queryStringDecoder.parameters().get("height") != null) {
@@ -214,6 +249,23 @@ public class RenderParameters {
             }
         }
 
+        if (queryStringDecoder.parameters().get("leftColor") != null) {
+            Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("leftColor").get(0).replaceAll("^\"|\"$", ""));
+            if (color != null) parameters.getImageParameters().setLeftColor(color);
+        }
+
+        if (queryStringDecoder.parameters().get("leftDashed") != null) {
+            parameters.getImageParameters().setLeftDashed(Boolean.parseBoolean(queryStringDecoder.parameters().get("leftDashed").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("leftWidth") != null) {
+            try {
+                parameters.getImageParameters().setLeftWidth(Double.valueOf(queryStringDecoder.parameters().get("leftWidth").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("leftWidth format : " + queryStringDecoder.parameters().get("leftWidth").get(0));
+            }
+        }
+
         if (queryStringDecoder.parameters().get("lineMode") != null) {
             try {
                 parameters.getImageParameters().setLineMode(ImageParameters.LineMode.valueOf(queryStringDecoder.parameters().get("lineMode").get(0).toUpperCase()));
@@ -221,6 +273,199 @@ public class RenderParameters {
                 throw new InvalidParameterValueException("Unknown line mode : " + queryStringDecoder.parameters().get("lineMode").get(0).toUpperCase());
             }
         }
+
+        if (queryStringDecoder.parameters().get("lineWidth") != null) {
+            try {
+                parameters.getImageParameters().setLineWidth(Double.valueOf(queryStringDecoder.parameters().get("lineWidth").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("lineWidth format : " + queryStringDecoder.parameters().get("lineWidth").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("logBase") != null) {
+            try {
+                Double logBase = Double.valueOf(queryStringDecoder.parameters().get("logBase").get(0));
+                if (logBase > 0 && logBase != 1) {
+                    parameters.getImageParameters().setLogBase(logBase);
+                }
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("lineWidth format : " + queryStringDecoder.parameters().get("lineWidth").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("majorGridLineColor") != null) {
+            Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("majorGridLineColor").get(0).replaceAll("^\"|\"$", ""));
+            if (color != null) parameters.getImageParameters().setMajorGridLineColor(color);
+        }
+
+        if (queryStringDecoder.parameters().get("margin") != null) {
+            try {
+                Double margin = Double.valueOf(queryStringDecoder.parameters().get("margin").get(0));
+                if (margin > 0) {
+                    parameters.getImageParameters().setMargin(margin.intValue());
+                }
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("margin format : " + queryStringDecoder.parameters().get("margin").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("minorGridLineColor") != null) {
+            Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("minorGridLineColor").get(0).replaceAll("^\"|\"$", ""));
+            if (color != null) parameters.getImageParameters().setMinorGridLineColor(color);
+        }
+
+        if (queryStringDecoder.parameters().get("minorY") != null) {
+            try {
+                Double minorY = Double.valueOf(queryStringDecoder.parameters().get("minorY").get(0));
+                if (minorY >= 0) {
+                    parameters.getImageParameters().setMinorY(minorY.intValue());
+                }
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("minorY format : " + queryStringDecoder.parameters().get("minorY").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("minXStep") != null) {
+            try {
+                Double minXStep = Double.valueOf(queryStringDecoder.parameters().get("minXStep").get(0));
+                if (minXStep >= 0) {
+                    parameters.getImageParameters().setMinXStep(minXStep.intValue());
+                }
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("minXStep format : " + queryStringDecoder.parameters().get("minXStep").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("rightColor") != null) {
+            Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("rightColor").get(0).replaceAll("^\"|\"$", ""));
+            if (color != null) parameters.getImageParameters().setRightColor(color);
+        }
+
+        if (queryStringDecoder.parameters().get("rightDashed") != null) {
+            parameters.getImageParameters().setRightDashed(Boolean.parseBoolean(queryStringDecoder.parameters().get("rightDashed").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("rightWidth") != null) {
+            try {
+                parameters.getImageParameters().setRightWidth(Double.valueOf(queryStringDecoder.parameters().get("rightWidth").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("rightWidth format : " + queryStringDecoder.parameters().get("rightWidth").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("title") != null) {
+            parameters.getImageParameters().setTitle(queryStringDecoder.parameters().get("title").get(0).replaceAll("^\"|\"$", ""));
+        }
+
+        if (queryStringDecoder.parameters().get("uniqueLegend") != null) {
+            parameters.getImageParameters().setUniqueLegend(Boolean.parseBoolean(queryStringDecoder.parameters().get("uniqueLegend").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("vtitle") != null) {
+            parameters.getImageParameters().setVerticalTitle(queryStringDecoder.parameters().get("vtitle").get(0).replaceAll("^\"|\"$", ""));
+        }
+
+        if (queryStringDecoder.parameters().get("vtitleRight") != null) {
+            parameters.getImageParameters().setVerticalTitleRight(queryStringDecoder.parameters().get("vtitleRight").get(0).replaceAll("^\"|\"$", ""));
+        }
+
+        if (queryStringDecoder.parameters().get("width") != null) {
+            try {
+                parameters.getImageParameters().setWidth(Integer.valueOf(queryStringDecoder.parameters().get("width").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("Width format : " + queryStringDecoder.parameters().get("width").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yAxisSide") != null) {
+            try {
+                parameters.getImageParameters().setyAxisSide(ImageParameters.Side.valueOf(queryStringDecoder.parameters().get("yAxisSide").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown y axis side : " + queryStringDecoder.parameters().get("yAxisSide").get(0).toUpperCase());
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yMax") != null) {
+            try {
+                parameters.getImageParameters().setyMax(Double.valueOf(queryStringDecoder.parameters().get("yMax").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yMax format : " + queryStringDecoder.parameters().get("yMax").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yMaxLeft") != null) {
+            try {
+                parameters.getImageParameters().setyMaxLeft(Double.valueOf(queryStringDecoder.parameters().get("yMaxLeft").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yMaxLeft format : " + queryStringDecoder.parameters().get("yMaxLeft").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yMaxRight") != null) {
+            try {
+                parameters.getImageParameters().setyMaxRight(Double.valueOf(queryStringDecoder.parameters().get("yMaxRight").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yMaxRight format : " + queryStringDecoder.parameters().get("yMaxRight").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yMin") != null) {
+            try {
+                parameters.getImageParameters().setyMin(Double.valueOf(queryStringDecoder.parameters().get("yMin").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yMin format : " + queryStringDecoder.parameters().get("yMin").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yMinLeft") != null) {
+            try {
+                parameters.getImageParameters().setyMinLeft(Double.valueOf(queryStringDecoder.parameters().get("yMinLeft").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yMinLeft format : " + queryStringDecoder.parameters().get("yMinLeft").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yMinRight") != null) {
+            try {
+                parameters.getImageParameters().setyMinRight(Double.valueOf(queryStringDecoder.parameters().get("yMinRight").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yMinRight format : " + queryStringDecoder.parameters().get("yMinRight").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yStep") != null) {
+            try {
+                parameters.getImageParameters().setyStep(Double.valueOf(queryStringDecoder.parameters().get("yStep").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yStep format : " + queryStringDecoder.parameters().get("yStep").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yStepLeft") != null) {
+            try {
+                parameters.getImageParameters().setyStepLeft(Double.valueOf(queryStringDecoder.parameters().get("yStepLeft").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yStepLeft format : " + queryStringDecoder.parameters().get("yStepLeft").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yStepRight") != null) {
+            try {
+                parameters.getImageParameters().setyStepRight(Double.valueOf(queryStringDecoder.parameters().get("yStepRight").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("yStepRight format : " + queryStringDecoder.parameters().get("yStepRight").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("yUnitSystem") != null) {
+            try {
+                parameters.getImageParameters().setyUnitSystem(ImageParameters.UnitSystem.valueOf(queryStringDecoder.parameters().get("yUnitSystem").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown yUnitSystem : " + queryStringDecoder.parameters().get("yUnitSystem").get(0).toUpperCase());
+            }
+        }
+
+
 
         if (queryStringDecoder.parameters().get("connectedLimit") != null) {
             try {

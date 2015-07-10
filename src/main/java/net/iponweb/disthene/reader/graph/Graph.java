@@ -180,6 +180,38 @@ public abstract class Graph {
 
     }
 
+    protected void drawVerticalTitle(Boolean alignRight) {
+        Font font = new Font(imageParameters.getFont().getName(), imageParameters.getFont().getStyle(),
+                (int) (imageParameters.getFont().getSize() + Math.log(imageParameters.getFont().getSize())));
+
+        FontMetrics fontMetrics = g2d.getFontMetrics(font);
+        int lineHeight = fontMetrics.getHeight();
+
+        if (alignRight) {
+            int x = xMax - lineHeight;
+            int y = imageParameters.getHeight() / 2;
+
+            String[] split = imageParameters.getVerticalTitle().split("\n");
+            for (String line : split) {
+                drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.BASELINE, 90);
+                x -= lineHeight;
+            }
+
+            xMax = x - imageParameters.getMargin() - lineHeight;
+        } else {
+            int x = xMin + lineHeight;
+            int y = imageParameters.getHeight() / 2;
+
+            String[] split = imageParameters.getVerticalTitle().split("\n");
+            for (String line : split) {
+                drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.BASELINE, 90);
+                x += lineHeight;
+            }
+
+            xMin = x + imageParameters.getMargin() + lineHeight;
+        }
+    }
+
     protected void drawTitle() {
         int y = yMin;
         int x = imageParameters.getWidth() / 2;
@@ -926,15 +958,16 @@ public abstract class Graph {
     }
 
     private void drawLines(List<DecoratedTimeSeries> timeSeriesList) {
+        Rectangle rectangle = new Rectangle(xMin, yMin, xMax - xMin, yMax - yMin);
+        g2d.clip(rectangle);
+
         for (DecoratedTimeSeries ts : timeSeriesList) {
             g2d.setStroke(getStroke(ts));
             g2d.setColor(getColor(ts));
             GeneralPath path = new GeneralPath();
 
             double x = xMin;
-            double previousX = xMin;
-            int y = yMin;
-            int previousY = -1;
+            int y;
             Double[] values = ts.getConsolidatedValues();
             int consecutiveNulls = 0;
             boolean allNullsSoFar = true;
@@ -944,7 +977,7 @@ public abstract class Graph {
 
                 if (adjustedValue == null && imageParameters.isDrawNullAsZero()) adjustedValue = 0.;
 
-                if (value == null) {
+                if (adjustedValue == null) {
 /*
                     if (consecutiveNulls == 0) {
                         path.lineTo(x, y);
@@ -974,13 +1007,9 @@ public abstract class Graph {
                 if (ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE) && adjustedValue > 0) {
                     path.moveTo((int) x, yMax);
                     path.lineTo((int) x, yMin);
-//                    g2d.drawLine((int) x, yMax, (int) x, yMin);
                     x += ts.getxStep();
                     continue;
                 }
-
-                previousX = previousX < 0 ? x : previousX;
-                previousY = previousY < 0 ? y : previousY;
 
                 if (imageParameters.getLineMode().equals(ImageParameters.LineMode.SLOPE)) {
                     if (consecutiveNulls > 0) {
@@ -1006,8 +1035,6 @@ public abstract class Graph {
                 }
 
                 consecutiveNulls = 0;
-                previousX = x;
-                previousY = y;
 
                 x += ts.getxStep();
             }
@@ -1029,7 +1056,7 @@ public abstract class Graph {
             GeneralPath path = new GeneralPath();
             path.moveTo(xMin, yMax);
 
-            g2d.setPaint(getColor(ts));
+            g2d.setPaint(getPaint(ts));
 
             double x = xMin;
             double startX = x;
@@ -1184,8 +1211,8 @@ public abstract class Graph {
     }
 
     private int getYCoordRight(double value) {
-        double highestValue = Collections.max(yLabelValuesR);
-        double lowestValue = Collections.min(yLabelValuesR);
+        double highestValue = yLabelValuesR.size() > 0 ? Collections.max(yLabelValuesR) : yTopR;
+        double lowestValue = yLabelValuesR.size() > 0 ? Collections.min(yLabelValuesR) : yBottomR;
         int pixelRange = yMax - yMin;
 
         double relativeValue = value - lowestValue;
@@ -1207,8 +1234,8 @@ public abstract class Graph {
 
 
     private int getYCoordLeft(double value) {
-        double highestValue = Collections.max(yLabelValuesL);
-        double lowestValue = Collections.min(yLabelValuesL);
+        double highestValue = yLabelValuesL.size() > 0 ? Collections.max(yLabelValuesL) : yTopL;
+        double lowestValue = yLabelValuesL.size() > 0 ? Collections.min(yLabelValuesL) : yBottomL;
         int pixelRange = yMax - yMin;
 
         double relativeValue = value - lowestValue;
@@ -1229,8 +1256,8 @@ public abstract class Graph {
     }
 
     private int getYCoord(double value) {
-        double highestValue = Collections.max(yLabelValues);
-        double lowestValue = Collections.min(yLabelValues);
+        double highestValue = yLabelValues.size() > 0 ? Collections.max(yLabelValues) : yTop;
+        double lowestValue = yLabelValues.size() > 0 ? Collections.min(yLabelValues) : yBottom;
         int pixelRange = yMax - yMin;
 
         double relativeValue = value - lowestValue;
@@ -1367,10 +1394,21 @@ public abstract class Graph {
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), timeSeries.hasOption(TimeSeriesOption.ALPHA) ? (int) ((Float) timeSeries.getOption(TimeSeriesOption.ALPHA) * 255) : 255);
     }
 
+    private Color getPaint(DecoratedTimeSeries timeSeries) {
+        if (timeSeries.hasOption(TimeSeriesOption.INVISIBLE)) {
+            return ColorTable.INVISIBLE;
+        }
+
+        Color c = (Color) timeSeries.getOption(TimeSeriesOption.COLOR);
+        return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)((float) (imageParameters.getAreaAlpha() * 255)));
+    }
+
     private Stroke getStroke(DecoratedTimeSeries timeSeries) {
         float lineWidth = 1.2f;
         if (timeSeries.hasOption(TimeSeriesOption.LINE_WIDTH)) {
             lineWidth = (float) timeSeries.getOption(TimeSeriesOption.LINE_WIDTH);
+        } else {
+            lineWidth = imageParameters.getLineWidth().floatValue();
         }
 
 

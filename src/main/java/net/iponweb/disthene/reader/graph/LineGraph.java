@@ -25,15 +25,23 @@ public class LineGraph extends Graph {
             return drawNoData();
         }
 
-        for(DecoratedTimeSeries ts : data) {
+        for (DecoratedTimeSeries ts : data) {
             startTime = Math.min(startTime, ts.getFrom());
             endTime = Math.max(endTime, ts.getTo());
 
             if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
                 secondYAxis = true;
                 dataRight.add(ts);
+                if (imageParameters.getRightColor() != null) ts.setOption(TimeSeriesOption.COLOR, imageParameters.getRightColor());
+                //todo dash length constant
+                if (imageParameters.getRightDashed()) ts.setOption(TimeSeriesOption.DASHED, (float) 5);
+                if (imageParameters.getRightWidth() != null) ts.setOption(TimeSeriesOption.LINE_WIDTH, imageParameters.getRightWidth().floatValue());
             } else {
                 dataLeft.add(ts);
+                if (imageParameters.getLeftColor() != null) ts.setOption(TimeSeriesOption.COLOR, imageParameters.getLeftColor());
+                //todo dash length constant
+                if (imageParameters.getLeftDashed()) ts.setOption(TimeSeriesOption.DASHED, (float) 5);
+                if (imageParameters.getLeftWidth() != null) ts.setOption(TimeSeriesOption.LINE_WIDTH, imageParameters.getLeftWidth().floatValue());
             }
         }
 
@@ -41,20 +49,18 @@ public class LineGraph extends Graph {
         if ((imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) || imageParameters.getAreaMode().equals(ImageParameters.AreaMode.ALL)) && !secondYAxis) {
             for (DecoratedTimeSeries ts : data) {
                 if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
-                    ts.setOption(TimeSeriesOption.STACKED, true);
-
+                    ts.addOption(TimeSeriesOption.STACKED);
                 }
-
             }
         } else if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.FIRST) && !secondYAxis) {
             if (data.size() > 0) {
-                data.get(0).setOption(TimeSeriesOption.STACKED, true);
+                data.get(0).addOption(TimeSeriesOption.STACKED);
             }
         }
 
         int length = data.get(0).getValues().length;
         double[] total = new double[length];
-        for(DecoratedTimeSeries ts : getStackedData(data)) {
+        for (DecoratedTimeSeries ts : getStackedData(data)) {
             for (int i = 0; i < length; i++) {
                 if (ts.getValues()[i] != null) {
                     double original = ts.getValues()[i];
@@ -63,7 +69,6 @@ public class LineGraph extends Graph {
                 }
             }
         }
-
 
 
         if (imageParameters.isGraphOnly()) {
@@ -98,7 +103,7 @@ public class LineGraph extends Graph {
 
         //assign colors
         int i = 0;
-        for(DecoratedTimeSeries ts : data) {
+        for (DecoratedTimeSeries ts : data) {
             if (!ts.hasOption(TimeSeriesOption.COLOR)) {
                 ts.setOption(TimeSeriesOption.COLOR, imageParameters.getColorList().get(i % imageParameters.getColorList().size()));
                 i++;
@@ -109,16 +114,13 @@ public class LineGraph extends Graph {
             drawTitle();
         }
 
-        //todo:
-/*
         if (!imageParameters.getVerticalTitle().isEmpty()) {
-            drawVerticalTitle();
+            drawVerticalTitle(false);
         }
 
-    if self.secondYAxis and params.get('vtitleRight'):
-      self.drawVTitle( str(params['vtitleRight']), rightAlign=True )
-    self.setFont()
-*/
+        if (secondYAxis && !imageParameters.getVerticalTitleRight().isEmpty()) {
+            drawVerticalTitle(true);
+        }
 
         //todo: config legend max items
         if (!imageParameters.isHideLegend() && (data.size() <= 10)) {
@@ -126,7 +128,7 @@ public class LineGraph extends Graph {
             List<Color> colors = new ArrayList<>();
             List<Boolean> secondYAxes = new ArrayList<>();
 
-            for(DecoratedTimeSeries ts : data) {
+            for (DecoratedTimeSeries ts : data) {
                 legends.add(ts.getName());
                 colors.add((Color) ts.getOption(TimeSeriesOption.COLOR));
                 secondYAxes.add(ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS));

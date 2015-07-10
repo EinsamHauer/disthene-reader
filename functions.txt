@@ -152,8 +152,27 @@ WILL NOT BE IMPLEMENTED???
   'events': events,
 
 
+PARAMS NOT IMPLEMENTED
+========================================================================================================================
+fontBold
+fontItalic
+fontName
+fontSize
+graphType ***need to implement pie graphs first***
+jsonp
+localOnly ***makes no sense***
+maxDataPoints ***makes little sense***
+noCache ***makes little sense***
+pieMode ***need to implement pie graphs first***
+template ***not sure if it's needed***
+xFormat ***not sure if it's needed***
+yDivisor ***not sure if it's needed***
+
+vtitle ***not working as expected***
+vtitleRight ***not working as expected***
+yAxisSide ***not working as expected***
+
 
 
 BUGS
 ========================================================================================================================
-stacked(sum.requests.*)

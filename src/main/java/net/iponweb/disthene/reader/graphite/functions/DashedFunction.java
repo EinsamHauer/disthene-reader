@@ -32,6 +32,7 @@ public class DashedFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
+        //todo dash length constant
         for (TimeSeries ts : processedArguments) {
             ts.setOption(TimeSeriesOption.DASHED, arguments.size() == 1 ? new Float(5) : new Float((Double) arguments.get(1)));
             setResultingName(ts);
