@@ -33,8 +33,8 @@ Integer: '-'* DIGIT+;
 Float: '-'* DIGIT+ '.' DIGIT+;
 Scientific: (Integer | Float) ('e' | 'E') Integer;
 QoutedString: DoubleQuotedString | SingleQuotedString;
-DoubleQuotedString: '"' ~[\r\n]* '"';
-SingleQuotedString: '\'' ~[\r\n]* '\'';
+DoubleQuotedString: '"' ~[\r\n]*? '"';
+SingleQuotedString: '\'' ~[\r\n]*? '\'';
 FunctionName: [a-zA-Z_]+ [a-zA-Z_0-9]*;
 EscapedChar: BACKSLASH SYMBOL;
 
