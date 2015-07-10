@@ -20,7 +20,7 @@ public class ImageParameters {
     private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
     private boolean graphOnly = false;
 
-    private boolean hideLegend = false;
+    private boolean hideLegend = true;
     private boolean hideGrid = false;
     private boolean hideAxes = false;
     private boolean hideYAxis = false;
