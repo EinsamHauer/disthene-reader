@@ -70,7 +70,7 @@ public class MovingAverageFunction extends DistheneFunction {
     @Override
     public void checkArguments() throws InvalidArgumentException {
         if (arguments.size() != 2) throw new InvalidArgumentException("movingAverage: number of arguments is " + arguments.size() + ". Must be two.");
-        if (!(arguments.get(0) instanceof PathTarget)) throw new InvalidArgumentException("movingAverage: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("movingAverage: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
         if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("movingAverage: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
     }
 }
