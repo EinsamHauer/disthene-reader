@@ -17,10 +17,7 @@ import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +43,7 @@ public class MetricService {
 
     public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
+        Collections.sort(paths);
 
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
@@ -107,9 +105,9 @@ public class MetricService {
 
     }
 
-    //todo: get paths sorted!
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
+        Collections.sort(paths);
 
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
@@ -171,7 +169,7 @@ public class MetricService {
         return timeSeries;
     }
 
-    private Rollup getRollup(long from, long to) {
+    public Rollup getRollup(long from, long to) {
         long timeDelta = to -from;
         long now = System.currentTimeMillis() / 1000L ;
 

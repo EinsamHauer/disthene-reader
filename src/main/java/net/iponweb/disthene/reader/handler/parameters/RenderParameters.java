@@ -8,6 +8,7 @@ import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.format.Format;
 import net.iponweb.disthene.reader.graph.ColorTable;
+import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -459,7 +460,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yUnitSystem") != null) {
             try {
-                parameters.getImageParameters().setyUnitSystem(ImageParameters.UnitSystem.valueOf(queryStringDecoder.parameters().get("yUnitSystem").get(0).toUpperCase()));
+                parameters.getImageParameters().setyUnitSystem(UnitSystem.valueOf(queryStringDecoder.parameters().get("yUnitSystem").get(0).toUpperCase()));
             } catch (IllegalArgumentException e) {
                 throw new InvalidParameterValueException("Unknown yUnitSystem : " + queryStringDecoder.parameters().get("yUnitSystem").get(0).toUpperCase());
             }

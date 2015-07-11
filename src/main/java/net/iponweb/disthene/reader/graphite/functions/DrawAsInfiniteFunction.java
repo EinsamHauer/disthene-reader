@@ -15,10 +15,10 @@ import java.util.List;
 /**
  * @author Andrei Ivanov
  */
-public class ScaleFunction extends DistheneFunction {
+public class DrawAsInfiniteFunction extends DistheneFunction {
 
-    public ScaleFunction(String text) {
-        super(text, "scale");
+    public DrawAsInfiniteFunction(String text) {
+        super(text, "drawAsInfinite");
     }
 
     @Override
@@ -32,17 +32,9 @@ public class ScaleFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        Double scaleFactor = (Double) arguments.get(1);
-
-        int length = processedArguments.get(0).getValues().length;
-
-        for (TimeSeries ts : processedArguments) {
-            for (int i = 0; i < length; i++) {
-                if (ts.getValues()[i] != null) {
-                    ts.getValues()[i] *= scaleFactor;
-                }
-            }
-            ts.setName("scale(" + ts.getName() + "," + scaleFactor + ")");
+        for(TimeSeries ts : processedArguments) {
+            ts.addOption(TimeSeriesOption.DRAW_AS_INFINITE);
+            setResultingName(ts);
         }
 
         return processedArguments;
@@ -50,8 +42,8 @@ public class ScaleFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() != 2) throw new InvalidArgumentException("scale: number of arguments is " + arguments.size() + ". Must be two.");
-        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("scale: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("scale: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+        if (arguments.size() != 1) throw new InvalidArgumentException("drawAsInfinite: number of arguments is " + arguments.size() + ". Must be one.");
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("drawAsInfinite: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+
     }
 }

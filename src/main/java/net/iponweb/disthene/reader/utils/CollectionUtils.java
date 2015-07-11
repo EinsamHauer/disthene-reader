@@ -112,6 +112,12 @@ public class CollectionUtils {
         return Collections.min(filteredValues);
     }
 
+    public static void constant(Double[] values, Double constant) {
+        for (int i = 0; i < values.length; i++) {
+            values[i] = constant;
+        }
+    }
+
     private static List<Double> filterNulls(Collection<Double> values) {
         List<Double> result = new ArrayList<>();
         for(Double value : values) {

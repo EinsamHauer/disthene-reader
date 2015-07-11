@@ -75,6 +75,16 @@ IMPLEMENTED
   'color' : color,
   'aliasByNode' : aliasByNode,
   'aliasByMetric' : aliasByMetric,
+  'constantLine' : constantLine,
+  'keepLastValue' : keepLastValue,
+  'isNonNull' : isNonNull,
+  'legendValue' : legendValue,
+  'cactiStyle' : cactiStyle,
+  'transformNull' : transformNull,
+  'lineWidth' : lineWidth,
+  'drawAsInfinite' : drawAsInfinite,
+  'areaBetween' : areaBetween,
+  'aggregateLine' : aggregateLine,
 
 NOT IMPLEMENTED
 ========================================================================================================================
@@ -105,29 +115,6 @@ NOT IMPLEMENTED
   # Data Filter functions
 
   # Special functions
-  'legendValue' : legendValue,
-  'aliasSub' : aliasSub,
-  'cactiStyle' : cactiStyle,
-  'cumulative' : cumulative,
-  'consolidateBy' : consolidateBy,
-  'keepLastValue' : keepLastValue,
-  'changed' : changed,
-  'drawAsInfinite' : drawAsInfinite,
-  'lineWidth' : lineWidth,
-  'substr' : substr,
-  'group' : group,
-  'map': mapSeries,
-  'mapSeries': mapSeries,
-  'reduce': reduceSeries,
-  'reduceSeries': reduceSeries,
-  'groupByNode' : groupByNode,
-  'constantLine' : constantLine,
-  'areaBetween' : areaBetween,
-  'threshold' : threshold,
-  'transformNull' : transformNull,
-  'isNonNull' : isNonNull,
-  'identity': identity,
-  'aggregateLine' : aggregateLine,
 
 
 WILL NOT BE IMPLEMENTED???
@@ -139,6 +126,22 @@ WILL NOT BE IMPLEMENTED???
   'exclude' : exclude,
   'grep' : grep,
   'removeEmptySeries' : removeEmptySeries,
+
+
+  # Special functions
+  'map': mapSeries,                 ***overkill/need to change grammar***
+  'mapSeries': mapSeries,           ***overkill/need to change grammar***
+  'reduce': reduceSeries,           ***overkill/need to change grammar***
+  'reduceSeries': reduceSeries,     ***overkill/need to change grammar***
+  'identity': identity,             ***corner use case***
+  'threshold' : threshold,          ***redundant - constantLine does the same thing combined with legendValue and color***
+  'cumulative' : cumulative,        ***seems to be useful only in some corner cases***
+  'consolidateBy' : consolidateBy,  ***seems to be useful only in some corner cases***
+  'changed' : changed,              ***seems to be useful only in some corner cases***
+  'group' : group,                  ***seems to be useful only in some corner cases***
+  'groupByNode' : groupByNode,      ***seems to be useful only in some corner cases***
+  'aliasSub' : aliasSub,            ***seems to be useful only in some corner cases***
+  'substr' : substr,                ***seems to be useful only in some corner cases***
 
   # test functions
   'time': timeFunction,

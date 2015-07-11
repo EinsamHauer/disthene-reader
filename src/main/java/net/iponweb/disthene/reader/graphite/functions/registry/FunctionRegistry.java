@@ -18,10 +18,12 @@ public class FunctionRegistry {
 
     static {
         registry.put("absolute", AbsoluteFunction.class);
+        registry.put("aggregateLine", AggregateLineFunction.class);
         registry.put("alias", AliasFunction.class);
         registry.put("aliasByNode", AliasByNodeFunction.class);
         registry.put("aliasByMetric", AliasByMetricFunction.class);
         registry.put("alpha", AlphaFunction.class);
+        registry.put("areaBetween", AreaBetweenFunction.class);
         registry.put("asPercent", AsPercentFunction.class);
         registry.put("averageOutsidePercentile", AverageOutsidePercentileFunction.class);
         registry.put("pct", AsPercentFunction.class);
@@ -29,7 +31,9 @@ public class FunctionRegistry {
         registry.put("averageBelow", AverageBelowFunction.class);
         registry.put("averageSeries", AverageSeriesFunction.class);
         registry.put("avg", AverageSeriesFunction.class);
+        registry.put("cactiStyle", CactiStyleFunction.class);
         registry.put("color", ColorFunction.class);
+        registry.put("constantLine", ConstantLineFunction.class);
         registry.put("countSeries", CountSeriesFunction.class);
         registry.put("currentAbove", CurrentAboveFunction.class);
         registry.put("currentBelow", CurrentBelowFunction.class);
@@ -37,12 +41,17 @@ public class FunctionRegistry {
         registry.put("derivative", DerivativeFunction.class);
         registry.put("diffSeries", DiffSeriesFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
+        registry.put("drawAsInfinite", DrawAsInfiniteFunction.class);
         registry.put("highestAverage", HighestAverageFunction.class);
         registry.put("highestCurrent", HighestCurrentFunction.class);
         registry.put("highestMax", HighestMaxFunction.class);
         registry.put("integral", IntegralFunction.class);
         registry.put("invert", InvertFunction.class);
+        registry.put("isNonNull", IsNonNullFunction.class);
+        registry.put("keepLastValue", KeepLastValueFunction.class);
+        registry.put("legendValue", LegendValueFunction.class);
         registry.put("limit", LimitFunction.class);
+        registry.put("lineWidth", LineWidthFunction.class);
         registry.put("logarithm", LogarithmFunction.class);
         registry.put("log", LogarithmFunction.class);
         registry.put("lowestAverage", LowestAverageFunction.class);
@@ -82,16 +91,21 @@ public class FunctionRegistry {
         registry.put("sumSeries", SumSeriesFunction.class);
         registry.put("sum", SumSeriesFunction.class);
         registry.put("timeShift", TimeShiftFunction.class);
+        registry.put("transformNull", TransformNullFunction.class);
     }
 
-    public static DistheneFunction getFunction(String name) throws InvalidFunctionException {
+    //todo: from & to parameters are only because of constantLine function. sort this out?
+    public static DistheneFunction getFunction(String name, long from, long to) throws InvalidFunctionException {
         if (registry.get(name) == null) {
             throw new InvalidFunctionException();
         }
 
         try {
             Constructor<DistheneFunction> constructor = (Constructor<DistheneFunction>) registry.get(name).getConstructor(String.class);
-            return constructor.newInstance(name);
+            DistheneFunction function = constructor.newInstance(name);
+            function.setFrom(from);
+            function.setTo(to);
+            return function;
         } catch (Exception e) {
             throw new InvalidFunctionException();
         }

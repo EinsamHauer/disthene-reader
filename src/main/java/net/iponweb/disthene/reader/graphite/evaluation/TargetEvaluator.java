@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.graphite.evaluation;
 
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.beans.TimeSeries;
+import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
@@ -44,4 +45,21 @@ public class TargetEvaluator {
     public List<TimeSeries> visit(DistheneFunction function) throws EvaluationException {
         return function.evaluate(this);
     }
+
+    //todo: the logic below is duplicated several times - fix it!
+    public TimeSeries getEmptyTimeSeries(long from, long to) {
+        Long now = System.currentTimeMillis() * 1000;
+        Long effectiveTo = Math.min(to, now);
+        Rollup bestRollup = metricService.getRollup(from, effectiveTo);
+        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
+
+        int length = (int) ((effectiveTo - effectiveFrom) / bestRollup.getRollup() + 1);
+
+        TimeSeries ts = new TimeSeries("", from, to, bestRollup.getRollup());
+        ts.setValues(new Double[length]);
+
+        return ts;
+    }
+
 }

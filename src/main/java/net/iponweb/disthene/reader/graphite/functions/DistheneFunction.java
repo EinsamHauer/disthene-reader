@@ -14,6 +14,8 @@ public abstract class DistheneFunction extends Target {
 
     protected List<Object> arguments = new ArrayList<>();
     protected String name;
+    protected Long from;
+    protected Long to;
 
     public DistheneFunction(String text, String name) {
         super(text);
@@ -39,6 +41,22 @@ public abstract class DistheneFunction extends Target {
 
     protected void setResultingName(TimeSeries timeSeries) {
         timeSeries.setName(name + "(" + timeSeries.getName() + ")");
+    }
+
+    public Long getFrom() {
+        return from;
+    }
+
+    public void setFrom(Long from) {
+        this.from = from;
+    }
+
+    public Long getTo() {
+        return to;
+    }
+
+    public void setTo(Long to) {
+        this.to = to;
     }
 
     protected String getResultingName(TimeSeries timeSeries) {

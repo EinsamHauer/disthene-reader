@@ -3,6 +3,8 @@ package net.iponweb.disthene.reader.graph;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
 import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
+import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
+import net.iponweb.disthene.reader.graphite.utils.Unit;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.apache.log4j.Logger;
@@ -958,7 +960,7 @@ public abstract class Graph {
     }
 
     private void drawLines(List<DecoratedTimeSeries> timeSeriesList) {
-        Rectangle rectangle = new Rectangle(xMin, yMin, xMax - xMin, yMax - yMin);
+        Rectangle rectangle = new Rectangle(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
         g2d.clip(rectangle);
 
         for (DecoratedTimeSeries ts : timeSeriesList) {
@@ -1287,11 +1289,11 @@ public abstract class Graph {
     }
 
     protected String makeLabel(double value, double step, double span) {
-        double tmpValue = formatUnitValue(value, step);
-        String prefix = formatUnitPrefix(value, step);
+        double tmpValue = GraphiteUtils.formatUnitValue(value, step, imageParameters.getyUnitSystem());
+        String prefix = GraphiteUtils.formatUnitPrefix(value, step, imageParameters.getyUnitSystem());
 
-        double ySpan = formatUnitValue(span, step);
-        String spanPrefix = formatUnitPrefix(span, step);
+        double ySpan = GraphiteUtils.formatUnitValue(span, step, imageParameters.getyUnitSystem());
+        String spanPrefix = GraphiteUtils.formatUnitPrefix(span, step, imageParameters.getyUnitSystem());
 
         value = tmpValue;
 
@@ -1314,41 +1316,6 @@ public abstract class Graph {
 
     protected String makeLabel(double value) {
         return makeLabel(value, yStep, ySpan);
-    }
-
-    private String formatUnitPrefix(double value, double step) {
-        for (ImageParameters.Unit unit : imageParameters.getyUnitSystem().getPrefixes()) {
-            if (Math.abs(value) >= unit.getValue() && step >= unit.getValue()) {
-                return unit.getPrefix();
-            }
-
-        }
-
-        return "";
-    }
-
-    private double formatUnitValue(double value, double step) {
-        // Firstly, round the value a bit
-        if (value > 0 && value < 1.0) {
-            value = new BigDecimal(value).setScale(2 - (int) Math.log10(value), BigDecimal.ROUND_HALF_DOWN).doubleValue();
-        }
-
-
-        for (ImageParameters.Unit unit : imageParameters.getyUnitSystem().getPrefixes()) {
-            if (Math.abs(value) >= unit.getValue() && step >= unit.getValue()) {
-                double v2 = value / unit.getValue();
-                if (v2 - Math.floor(v2) < 0.00000000001 && value > 1) {
-                    v2 = Math.floor(v2);
-                }
-                return v2;
-            }
-        }
-
-        if (value - Math.floor(value) < 0.00000000001 && value > 1) {
-            return Math.floor(value);
-        }
-
-        return value;
     }
 
     private List<Double> logRange(double base, double min, double max) {

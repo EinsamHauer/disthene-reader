@@ -49,6 +49,6 @@ public class InvertFunction extends DistheneFunction {
     @Override
     public void checkArguments() throws InvalidArgumentException {
         if (arguments.size() != 1) throw new InvalidArgumentException("invert: number of arguments is " + arguments.size() + ". Must be 1.");
-        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("pow: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("invert: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
     }
 }
