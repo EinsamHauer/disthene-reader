@@ -10,6 +10,8 @@ IMPLEMENTED
   'minSeries' : minSeries,
   'maxSeries' : maxSeries,
   'rangeOfSeries': rangeOfSeries,
+  'stddevSeries' : stddevSeries,
+  'percentileOfSeries': percentileOfSeries,
 
   # Transform functions
   'absolute' : absolute,
@@ -85,15 +87,14 @@ IMPLEMENTED
   'drawAsInfinite' : drawAsInfinite,
   'areaBetween' : areaBetween,
   'aggregateLine' : aggregateLine,
+  'group' : group,
 
 NOT IMPLEMENTED
 ========================================================================================================================
   # Combine functions
-  'stddevSeries' : stddevSeries,
   'sumSeriesWithWildcards': sumSeriesWithWildcards,
   'averageSeriesWithWildcards': averageSeriesWithWildcards,
   'multiplySeriesWithWildcards': multiplySeriesWithWildcards,
-  'percentileOfSeries': percentileOfSeries,
   'weightedAverage': weightedAverage,
 
   # Transform functions
@@ -138,7 +139,6 @@ WILL NOT BE IMPLEMENTED???
   'cumulative' : cumulative,        ***seems to be useful only in some corner cases***
   'consolidateBy' : consolidateBy,  ***seems to be useful only in some corner cases***
   'changed' : changed,              ***seems to be useful only in some corner cases***
-  'group' : group,                  ***seems to be useful only in some corner cases***
   'groupByNode' : groupByNode,      ***seems to be useful only in some corner cases***
   'aliasSub' : aliasSub,            ***seems to be useful only in some corner cases***
   'substr' : substr,                ***seems to be useful only in some corner cases***

@@ -42,6 +42,7 @@ public class FunctionRegistry {
         registry.put("diffSeries", DiffSeriesFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
         registry.put("drawAsInfinite", DrawAsInfiniteFunction.class);
+        registry.put("group", GroupFunction.class);
         registry.put("highestAverage", HighestAverageFunction.class);
         registry.put("highestCurrent", HighestCurrentFunction.class);
         registry.put("highestMax", HighestMaxFunction.class);
@@ -88,6 +89,7 @@ public class FunctionRegistry {
         registry.put("squareRoot", SquareRootFunction.class);
         registry.put("stacked", StackedFunction.class);
         registry.put("stdev", StdevFunction.class);
+        registry.put("stddevSeries", StddevSeriesFunction.class);
         registry.put("sumSeries", SumSeriesFunction.class);
         registry.put("sum", SumSeriesFunction.class);
         registry.put("timeShift", TimeShiftFunction.class);

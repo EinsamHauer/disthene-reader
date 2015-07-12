@@ -58,7 +58,7 @@ public class CollectionUtils {
             variance += (value - average) * (value - average);
         }
 
-        return Math.sqrt(variance) / filteredValues.size();
+        return Math.sqrt(variance / filteredValues.size()) ;
     }
 
     public static Double percentile(Collection<Double> values, double percentile, boolean interpolate) {
