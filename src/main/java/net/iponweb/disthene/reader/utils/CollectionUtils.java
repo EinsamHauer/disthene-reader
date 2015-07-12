@@ -46,6 +46,15 @@ public class CollectionUtils {
         return sum;
     }
 
+    public static Double product(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
+        double sum = 1;
+        for(Double value : filteredValues) {
+            sum *= value;
+        }
+        return sum;
+    }
+
     public static Double stdev(Collection<Double> values) {
         List<Double> filteredValues = filterNulls(values);
         if (filteredValues.size() < 2) return null;

@@ -30,6 +30,7 @@ public class FunctionRegistry {
         registry.put("averageAbove", AverageAboveFunction.class);
         registry.put("averageBelow", AverageBelowFunction.class);
         registry.put("averageSeries", AverageSeriesFunction.class);
+        registry.put("averageSeriesWithWildcards", AverageSeriesWithWildcardsFunction.class);
         registry.put("avg", AverageSeriesFunction.class);
         registry.put("cactiStyle", CactiStyleFunction.class);
         registry.put("color", ColorFunction.class);
@@ -67,6 +68,7 @@ public class FunctionRegistry {
         registry.put("movingAverage", MovingAverageFunction.class);
         registry.put("movingMedian", MovingMedianFunction.class);
         registry.put("multiplySeries", MultiplySeriesFunction.class);
+        registry.put("multiplySeriesWithWildcards", MultiplySeriesWithWildcardsFunction.class);
         registry.put("nonNegativeDerivative", NonNegativeDerivativeFunction.class);
         registry.put("nPercentile", NPercentileFunction.class);
         registry.put("offset", OffsetFunction.class);
@@ -91,6 +93,7 @@ public class FunctionRegistry {
         registry.put("stdev", StdevFunction.class);
         registry.put("stddevSeries", StddevSeriesFunction.class);
         registry.put("sumSeries", SumSeriesFunction.class);
+        registry.put("sumSeriesWithWildcards", SumSeriesWithWildcardsFunction.class);
         registry.put("sum", SumSeriesFunction.class);
         registry.put("timeShift", TimeShiftFunction.class);
         registry.put("transformNull", TransformNullFunction.class);

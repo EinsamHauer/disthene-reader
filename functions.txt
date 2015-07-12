@@ -12,6 +12,9 @@ IMPLEMENTED
   'rangeOfSeries': rangeOfSeries,
   'stddevSeries' : stddevSeries,
   'percentileOfSeries': percentileOfSeries,
+  'averageSeriesWithWildcards': averageSeriesWithWildcards,
+  'sumSeriesWithWildcards': sumSeriesWithWildcards,
+  'multiplySeriesWithWildcards': multiplySeriesWithWildcards,
 
   # Transform functions
   'absolute' : absolute,
@@ -92,9 +95,6 @@ IMPLEMENTED
 NOT IMPLEMENTED
 ========================================================================================================================
   # Combine functions
-  'sumSeriesWithWildcards': sumSeriesWithWildcards,
-  'averageSeriesWithWildcards': averageSeriesWithWildcards,
-  'multiplySeriesWithWildcards': multiplySeriesWithWildcards,
   'weightedAverage': weightedAverage,
 
   # Transform functions
