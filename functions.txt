@@ -157,10 +157,6 @@ WILL NOT BE IMPLEMENTED???
 
 PARAMS NOT IMPLEMENTED
 ========================================================================================================================
-fontBold
-fontItalic
-fontName
-fontSize
 graphType ***need to implement pie graphs first***
 jsonp
 localOnly ***makes no sense***

@@ -1,6 +1,7 @@
 package net.iponweb.disthene.reader.handler.parameters;
 
 import net.iponweb.disthene.reader.graph.ColorTable;
+import net.iponweb.disthene.reader.graph.FontTable;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 
 import java.awt.*;
@@ -19,6 +20,11 @@ public class ImageParameters {
     private Color foregroundColor = Color.WHITE;
 
     private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
+    private String fontName = "sans";
+    private boolean fontItalic = false;
+    private boolean fontBold = false;
+    private float fontSize = 10;
+
     private boolean graphOnly = false;
 
     private boolean hideLegend = true;
@@ -71,7 +77,6 @@ public class ImageParameters {
     private double areaAlpha = 1;
 
     public ImageParameters() {
-
         yDivisors.add(4);
         yDivisors.add(5);
         yDivisors.add(6);
@@ -435,6 +440,42 @@ public class ImageParameters {
 
     public void setRightColor(Color rightColor) {
         this.rightColor = rightColor;
+    }
+
+    public void setFontName(String fontName) {
+        this.fontName = fontName;
+
+        font = FontTable.getFont(fontName, getFontStyle(), fontSize);
+    }
+
+    public void setFontItalic(boolean fontItalic) {
+        this.fontItalic = fontItalic;
+
+        font = FontTable.getFont(fontName, getFontStyle(), fontSize);
+    }
+
+    public void setFontBold(boolean fontBold) {
+        this.fontBold = fontBold;
+
+        font = FontTable.getFont(fontName, getFontStyle(), fontSize);
+    }
+
+    public void setFontSize(float fontSize) {
+        this.fontSize = fontSize;
+
+        font = FontTable.getFont(fontName, getFontStyle(), fontSize);
+    }
+
+    private int getFontStyle() {
+        int fontStyle = 0;
+        if (fontBold) {
+            fontStyle = fontStyle | Font.BOLD;
+        }
+        if (fontItalic) {
+            fontStyle = fontStyle | Font.ITALIC;
+        }
+
+        return fontStyle;
     }
 
     public enum Side {

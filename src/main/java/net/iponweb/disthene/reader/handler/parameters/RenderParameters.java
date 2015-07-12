@@ -222,6 +222,26 @@ public class RenderParameters {
             if (color != null) parameters.getImageParameters().setForegroundColor(color);
         }
 
+        if (queryStringDecoder.parameters().get("fontBold") != null) {
+            parameters.getImageParameters().setFontBold(Boolean.parseBoolean(queryStringDecoder.parameters().get("fontBold").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("fontItalic") != null) {
+            parameters.getImageParameters().setFontItalic(Boolean.parseBoolean(queryStringDecoder.parameters().get("fontItalic").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("fontName") != null) {
+            parameters.getImageParameters().setFontName(queryStringDecoder.parameters().get("fontName").get(0).toLowerCase());
+        }
+
+        if (queryStringDecoder.parameters().get("fontSize") != null) {
+            try {
+                parameters.getImageParameters().setFontSize(Float.valueOf(queryStringDecoder.parameters().get("fontSize").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("fontSize format : " + queryStringDecoder.parameters().get("fontSize").get(0));
+            }
+        }
+
         if (queryStringDecoder.parameters().get("graphOnly") != null) {
             parameters.getImageParameters().setGraphOnly(Boolean.parseBoolean(queryStringDecoder.parameters().get("graphOnly").get(0)));
         }
