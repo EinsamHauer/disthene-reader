@@ -81,7 +81,6 @@ public class LineGraph extends Graph {
             imageParameters.setTitle("");
             imageParameters.setVerticalTitle("");
             imageParameters.setMargin(0);
-// todo: ??            params['tz'] = ''
 
             xMin = 0;
             xMax = imageParameters.getWidth();

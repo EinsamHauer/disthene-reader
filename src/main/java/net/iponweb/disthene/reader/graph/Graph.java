@@ -174,7 +174,8 @@ public abstract class Graph {
         double angle = Math.toRadians(rotate);
 
         AffineTransform orig = g2d.getTransform();
-        g2d.rotate(angle, x, y);
+//        g2d.rotate(angle, x, y);
+        g2d.rotate(angle, x - Math.sin(Math.toRadians(angle) * vertical), y + Math.cos(Math.toRadians(angle) * vertical));
 
         g2d.drawString(text, x - horizontal, y + vertical);
 
@@ -195,7 +196,7 @@ public abstract class Graph {
 
             String[] split = imageParameters.getVerticalTitle().split("\n");
             for (String line : split) {
-                drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.BASELINE, 90);
+                drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.BASELINE, -90);
                 x -= lineHeight;
             }
 
@@ -206,7 +207,7 @@ public abstract class Graph {
 
             String[] split = imageParameters.getVerticalTitle().split("\n");
             for (String line : split) {
-                drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.BASELINE, 90);
+                drawText(x, y, line, font, imageParameters.getForegroundColor(), HorizontalAlign.CENTER, VerticalAlign.BASELINE, -90);
                 x += lineHeight;
             }
 
@@ -736,7 +737,7 @@ public abstract class Graph {
                         xMin = xxMin;
                     }
                 } else {
-                    int xxMax = (int) (imageParameters.getMargin() - yLabelWidth * 1.15);
+                    int xxMax = imageParameters.getWidth() - imageParameters.getMargin() - (int) (yLabelWidth * 1.15);
                     if (xMax >= xxMax) {
                         xMax = xxMax;
                     }
