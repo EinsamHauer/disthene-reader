@@ -4,17 +4,12 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
-import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
-import net.iponweb.disthene.reader.utils.DateTimeUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -36,23 +31,29 @@ public class MovingAverageFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
+        int step = processedArguments.get(0).getStep();
+        int length = processedArguments.get(0).getValues().length;
         long window = ((Double) arguments.get(1)).longValue();
 
-        int length = processedArguments.get(0).getValues().length;
+        List<TimeSeries> bootstrapped = evaluator.bootstrap((Target) arguments.get(0), processedArguments, window * step);
+        if (bootstrapped.size() == 0) return new ArrayList<>();
 
-        for (TimeSeries ts : processedArguments) {
+        int bootstrappedLength = bootstrapped.get(0).getValues().length;
+
+        for (int i = 0; i < processedArguments.size(); i++) {
             Queue<Double> queue = new LinkedList<>();
-            Double[] values = new Double[length];
+            Double[] values = new Double[bootstrappedLength];
+            TimeSeries bts = bootstrapped.get(i);
 
-            for (int i = 0; i < length; i++) {
+            for (int j = 0; j < bootstrappedLength; j++) {
                 if (queue.size() == 0) {
-                    values[i] = ts.getValues()[i];
+                    values[j] = bts.getValues()[j];
                 } else {
-                    values[i] = CollectionUtils.average(queue);
+                    values[j] = CollectionUtils.average(queue);
                 }
 
-                if (ts.getValues()[i] != null) {
-                    queue.offer(ts.getValues()[i]);
+                if (bts.getValues()[j] != null) {
+                    queue.offer(bts.getValues()[j]);
                 }
 
                 if (queue.size() > window) {
@@ -60,8 +61,8 @@ public class MovingAverageFunction extends DistheneFunction {
                 }
             }
 
-            ts.setValues(values);
-            ts.setName("movingAverage(" + ts.getName() + "," + window + ")");
+            processedArguments.get(i).setValues(Arrays.copyOfRange(values, bootstrappedLength - length, bootstrappedLength));
+            processedArguments.get(i).setName("movingAverage(" + processedArguments.get(i).getName() + "," + window + ")");
         }
 
         return processedArguments;

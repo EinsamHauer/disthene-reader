@@ -67,6 +67,6 @@ public class PathTarget extends Target {
 
     @Override
     public Target previous(long period) {
-        return new PathTarget(getText(), path, tenant, to - period, to - 1);
+        return new PathTarget(getText(), path, tenant, from - period, from - 1);
     }
 }

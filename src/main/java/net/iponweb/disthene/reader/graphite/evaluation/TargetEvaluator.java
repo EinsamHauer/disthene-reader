@@ -1,13 +1,17 @@
 package net.iponweb.disthene.reader.graphite.evaluation;
 
+import com.google.common.collect.ObjectArrays;
 import com.google.gson.Gson;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.InvalidNumberOfSeriesException;
+import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.service.metric.MetricService;
+import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -62,4 +66,32 @@ public class TargetEvaluator {
         return ts;
     }
 
+    // todo: suboptimal
+    public List<TimeSeries> bootstrap(Target target, List<TimeSeries> original, long period) throws EvaluationException {
+        if (original.size() == 0) return new ArrayList<>();
+
+        List<TimeSeries> bootstrapped = new ArrayList<>();
+        bootstrapped.addAll(eval(target.previous(period)));
+
+        if (bootstrapped.size() != original.size()) throw new InvalidNumberOfSeriesException();
+        if (!TimeSeriesUtils.checkAlignment(bootstrapped)) throw new TimeSeriesNotAlignedException();
+
+        int step = original.get(0).getStep();
+
+        // normalize
+        if (bootstrapped.get(0).getStep() != step) {
+            double ratio = bootstrapped.get(0).getStep() / step;
+            for(TimeSeries ts : bootstrapped) {
+                for (int i = 0; i < ts.getValues().length; i++) {
+                    ts.getValues()[i] = ts.getValues()[i] * ratio;
+                }
+            }
+        }
+
+        for (int i = 0; i < bootstrapped.size(); i++) {
+            bootstrapped.get(i).setValues(ObjectArrays.concat(bootstrapped.get(i).getValues(), original.get(i).getValues(), Double.class));
+        }
+
+        return bootstrapped;
+    }
 }
