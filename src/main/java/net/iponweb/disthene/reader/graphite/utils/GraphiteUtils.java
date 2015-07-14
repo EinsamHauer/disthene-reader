@@ -10,10 +10,7 @@ public class GraphiteUtils {
     private static double THRESHOLD =  0.00000000001;
 
     public static double formatUnitValue(double value, double step, UnitSystem unitSystem) {
-        // Firstly, round the value a bit
-        if (value > 0 && value < 1.0) {
-            value = new BigDecimal(value).setScale(2 - (int) Math.log10(value), BigDecimal.ROUND_HALF_DOWN).doubleValue();
-        }
+        value = magicRound(value);
 
 
         for (Unit unit : unitSystem.getPrefixes()) {
@@ -81,5 +78,13 @@ public class GraphiteUtils {
 
     public static String formatValue(double value, UnitSystem unitSystem) {
         return String.format("%.2f%s", formatUnitValue(value, unitSystem), formatUnitPrefix(value, unitSystem));
+    }
+
+    public static double magicRound(double value) {
+        if (value > -1.0 && value < 1.0) {
+            return new BigDecimal(value).setScale(2 - (int) Math.log10(Math.abs(value)), BigDecimal.ROUND_HALF_DOWN).doubleValue();
+        } else {
+            return value;
+        }
     }
 }

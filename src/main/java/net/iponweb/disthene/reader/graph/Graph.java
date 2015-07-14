@@ -574,6 +574,15 @@ public abstract class Graph {
         yScaleFactorL = graphHeight / ySpanL;
         yScaleFactorR = graphHeight / ySpanR;
 
+        // Round the values a bit
+        yBottomR = GraphiteUtils.magicRound(yBottomR);
+        yTopR = GraphiteUtils.magicRound(yTopR);
+        yStepR = GraphiteUtils.magicRound(yStepR);
+        yBottomL = GraphiteUtils.magicRound(yBottomL);
+        yTopL = GraphiteUtils.magicRound(yTopL);
+        yStepL = GraphiteUtils.magicRound(yStepL);
+
+
         yLabelValuesL = getYLabelValues(yBottomL, yTopL, yStepL);
         yLabelValuesR = getYLabelValues(yBottomR, yTopR, yStepR);
 
@@ -717,6 +726,10 @@ public abstract class Graph {
         graphHeight = yMax - yMin;
         yScaleFactor = graphHeight / ySpan;
 
+        // Round the values a bit
+        yBottom = GraphiteUtils.magicRound(yBottom);
+        yTop = GraphiteUtils.magicRound(yTop);
+        yStep = GraphiteUtils.magicRound(yStep);
 
         if (!imageParameters.isHideAxes()) {
             yLabelValues = getYLabelValues(yBottom, yTop, yStep);
@@ -1345,6 +1358,7 @@ public abstract class Graph {
         while (f <= max) {
             result.add(f);
             f += step;
+            f = GraphiteUtils.magicRound(f);
             if (f == min) {
                 result.add(max);
                 break;
