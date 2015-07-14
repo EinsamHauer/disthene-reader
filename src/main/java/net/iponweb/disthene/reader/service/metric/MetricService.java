@@ -192,6 +192,7 @@ public class MetricService {
             return distheneReaderConfiguration.getReader().getRollups().get(distheneReaderConfiguration.getReader().getRollups().size() - 1);
         }
 
+/*
         Rollup result = survivals.get(0);
 
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
@@ -201,6 +202,8 @@ public class MetricService {
         }
 
         return result;
+*/
+        return survivals.get(0);
     }
 
     private static class SinglePathResult {

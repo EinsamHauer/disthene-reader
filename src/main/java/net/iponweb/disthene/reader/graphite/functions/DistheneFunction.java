@@ -2,7 +2,9 @@ package net.iponweb.disthene.reader.graphite.functions;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
+import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
 import net.iponweb.disthene.reader.graphite.Target;
+import net.iponweb.disthene.reader.graphite.functions.registry.FunctionRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ public abstract class DistheneFunction extends Target {
         this.name = name;
     }
 
-    public void addArg(Object argument) throws InvalidArgumentException {
+    public void addArg(Object argument) {
         arguments.add(argument);
     }
 
@@ -61,5 +63,45 @@ public abstract class DistheneFunction extends Target {
 
     protected String getResultingName(TimeSeries timeSeries) {
         return name + "(" + timeSeries.getName() + ")";
+    }
+
+    @Override
+    public Target shiftBy(long shift) {
+        try {
+            DistheneFunction function = FunctionRegistry.getFunction(name, from - shift, to - shift);
+
+            for (Object argument : arguments) {
+                if (argument instanceof Target) {
+                    function.addArg(((Target) argument).shiftBy(shift));
+                } else {
+                    function.addArg(argument);
+                }
+            }
+
+            return function;
+        } catch (InvalidFunctionException ignored) {
+        }
+
+        return null;
+    }
+
+    @Override
+    public Target previous(long period) {
+        try {
+            DistheneFunction function = FunctionRegistry.getFunction(name, to - period , to - 1);
+
+            for (Object argument : arguments) {
+                if (argument instanceof Target) {
+                    function.addArg(((Target) argument).previous(period));
+                } else {
+                    function.addArg(argument);
+                }
+            }
+
+            return function;
+        } catch (InvalidFunctionException ignored) {
+        }
+
+        return null;
     }
 }

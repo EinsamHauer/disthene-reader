@@ -59,4 +59,14 @@ public class PathTarget extends Target {
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
         return evaluator.visit(this);
     }
+
+    @Override
+    public Target shiftBy(long shift) {
+        return new PathTarget(getText(), path, tenant, from - shift, to - shift);
+    }
+
+    @Override
+    public Target previous(long period) {
+        return new PathTarget(getText(), path, tenant, to - period, to - 1);
+    }
 }

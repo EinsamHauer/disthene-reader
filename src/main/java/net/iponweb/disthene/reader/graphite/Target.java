@@ -26,4 +26,8 @@ public abstract class Target {
     public void setText(String text) {
         this.text = text;
     }
+
+    public abstract Target shiftBy(long shift);
+
+    public abstract Target previous(long period);
 }
