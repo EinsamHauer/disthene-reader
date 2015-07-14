@@ -1,7 +1,5 @@
 package net.iponweb.disthene.reader.graphite.utils;
 
-import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
-
 import java.math.BigDecimal;
 
 /**

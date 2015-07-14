@@ -107,7 +107,6 @@ public class MetricService {
 
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
-        Collections.sort(paths);
 
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
@@ -166,6 +165,13 @@ public class MetricService {
             }
         }
 
+        // sort it by path
+        Collections.sort(timeSeries, new Comparator<TimeSeries>() {
+            @Override
+            public int compare(TimeSeries ts1, TimeSeries ts2) {
+                return ts1.getName().compareTo(ts2.getName());
+            }
+        });
         return timeSeries;
     }
 
