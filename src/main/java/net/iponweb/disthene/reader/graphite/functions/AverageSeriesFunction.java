@@ -7,6 +7,7 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
+import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
@@ -44,13 +45,12 @@ public class AverageSeriesFunction extends DistheneFunction {
         Double[] values = new Double[length];
 
         for (int i = 0; i < length; i++) {
-            double sum = 0;
-
+            List<Double> points = new ArrayList<>();
             for(TimeSeries ts : processedArguments) {
-                sum += ts.getValues()[i] != null ? ts.getValues()[i] : 0.;
+                points.add(ts.getValues()[i]);
             }
 
-            values[i] = sum / processedArguments.size();
+            values[i] = CollectionUtils.average(points);
         }
 
         resultTimeSeries.setValues(values);

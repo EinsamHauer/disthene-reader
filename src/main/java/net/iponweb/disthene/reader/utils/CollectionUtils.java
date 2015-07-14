@@ -39,6 +39,8 @@ public class CollectionUtils {
 
     public static Double sum(Collection<Double> values) {
         List<Double> filteredValues = filterNulls(values);
+        if (filteredValues.size() == 0) return null;
+
         double sum = 0;
         for(Double value : filteredValues) {
             sum += value;
