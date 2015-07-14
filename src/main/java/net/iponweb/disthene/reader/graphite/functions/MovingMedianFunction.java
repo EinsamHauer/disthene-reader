@@ -10,10 +10,7 @@ import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -35,23 +32,29 @@ public class MovingMedianFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
+        int step = processedArguments.get(0).getStep();
+        int length = processedArguments.get(0).getValues().length;
         long window = ((Double) arguments.get(1)).longValue();
 
-        int length = processedArguments.get(0).getValues().length;
+        List<TimeSeries> bootstrapped = evaluator.bootstrap((Target) arguments.get(0), processedArguments, window * step);
+        if (bootstrapped.size() == 0) return new ArrayList<>();
 
-        for (TimeSeries ts : processedArguments) {
+        int bootstrappedLength = bootstrapped.get(0).getValues().length;
+
+        for (int i = 0; i < processedArguments.size(); i++) {
             Queue<Double> queue = new LinkedList<>();
-            Double[] values = new Double[length];
+            Double[] values = new Double[bootstrappedLength];
+            TimeSeries bts = bootstrapped.get(i);
 
-            for (int i = 0; i < length; i++) {
+            for (int j = 0; j < bootstrappedLength; j++) {
                 if (queue.size() == 0) {
-                    values[i] = ts.getValues()[i];
+                    values[j] = bts.getValues()[j];
                 } else {
-                    values[i] = CollectionUtils.median(queue);
+                    values[j] = CollectionUtils.median(queue);
                 }
 
-                if (ts.getValues()[i] != null) {
-                    queue.offer(ts.getValues()[i]);
+                if (bts.getValues()[j] != null) {
+                    queue.offer(bts.getValues()[j]);
                 }
 
                 if (queue.size() > window) {
@@ -59,8 +62,8 @@ public class MovingMedianFunction extends DistheneFunction {
                 }
             }
 
-            ts.setValues(values);
-            ts.setName("movingMedian(" + ts.getName() + "," + window + ")");
+            processedArguments.get(i).setValues(Arrays.copyOfRange(values, bootstrappedLength - length, bootstrappedLength));
+            processedArguments.get(i).setName("movingMedian(" + processedArguments.get(i).getName() + "," + window + ")");
         }
 
         return processedArguments;
