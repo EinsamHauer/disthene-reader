@@ -294,7 +294,7 @@ public abstract class Graph {
             }
             int numberOfLines = Math.max(legends.size() - numRight, numRight);
             columns = (int) Math.floor(columns / 2.0);
-            int legendHeight = Math.max(1, (numberOfLines / columns)) * (lineHeight + padding);
+            int legendHeight = (int) (Math.max(1, ((double) numberOfLines / columns)) * (lineHeight + padding));
             yMax -= legendHeight;
             int x = xMin;
             int y = yMax + 2 * padding;
