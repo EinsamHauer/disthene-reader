@@ -103,9 +103,6 @@ NOT IMPLEMENTED
   'weightedAverage': weightedAverage,
 
   # Transform functions
-  'summarize' : summarize,
-  'smartSummarize' : smartSummarize,
-  'hitcount'  : hitcount,
 
   # Calculate functions
 
@@ -119,6 +116,12 @@ NOT IMPLEMENTED
 
 WILL NOT BE IMPLEMENTED???
 ========================================================================================================================
+  # Transform functions
+  'summarize' : summarize,                 ***not sure it's needed at all, use case is rare?***
+  'smartSummarize' : smartSummarize,       ***not sure it's needed at all, use case is rare?***
+  'hitcount'  : hitcount,                  ***not sure it's needed at all, use case is rare?***
+
+
   # Series Filter functions
   'fallbackSeries' : fallbackSeries,
   'removeBetweenPercentile' : removeBetweenPercentile,
@@ -126,7 +129,6 @@ WILL NOT BE IMPLEMENTED???
   'exclude' : exclude,
   'grep' : grep,
   'removeEmptySeries' : removeEmptySeries,
-
 
   # Special functions
   'map': mapSeries,                 ***overkill/need to change grammar***
