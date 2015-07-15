@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.handler.parameters;
 
 import net.iponweb.disthene.reader.graph.ColorTable;
 import net.iponweb.disthene.reader.graph.FontTable;
+import net.iponweb.disthene.reader.graph.Graph;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 
 import java.awt.*;
@@ -75,6 +76,9 @@ public class ImageParameters {
     private int minorY = 1;
 
     private double areaAlpha = 1;
+
+    private Graph.GraphType graphType = Graph.GraphType.LINE;
+    private Graph.PieMode pieMode = Graph.PieMode.AVERAGE;
 
     public ImageParameters() {
         yDivisors.add(4);
@@ -476,6 +480,22 @@ public class ImageParameters {
         }
 
         return fontStyle;
+    }
+
+    public Graph.GraphType getGraphType() {
+        return graphType;
+    }
+
+    public void setGraphType(Graph.GraphType graphType) {
+        this.graphType = graphType;
+    }
+
+    public Graph.PieMode getPieMode() {
+        return pieMode;
+    }
+
+    public void setPieMode(Graph.PieMode pieMode) {
+        this.pieMode = pieMode;
     }
 
     public enum Side {

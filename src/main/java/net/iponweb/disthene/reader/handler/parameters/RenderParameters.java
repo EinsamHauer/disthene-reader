@@ -8,6 +8,7 @@ import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.format.Format;
 import net.iponweb.disthene.reader.graph.ColorTable;
+import net.iponweb.disthene.reader.graph.Graph;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -246,6 +247,14 @@ public class RenderParameters {
             parameters.getImageParameters().setGraphOnly(Boolean.parseBoolean(queryStringDecoder.parameters().get("graphOnly").get(0)));
         }
 
+        if (queryStringDecoder.parameters().get("graphType") != null) {
+            try {
+                parameters.getImageParameters().setGraphType(Graph.GraphType.valueOf(queryStringDecoder.parameters().get("graphType").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown graphType : " + queryStringDecoder.parameters().get("graphType").get(0).toUpperCase());
+            }
+        }
+
         if (queryStringDecoder.parameters().get("hideLegend") != null) {
             parameters.getImageParameters().setHideLegend(Boolean.parseBoolean(queryStringDecoder.parameters().get("hideLegend").get(0)));
         }
@@ -354,6 +363,14 @@ public class RenderParameters {
                 }
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("minXStep format : " + queryStringDecoder.parameters().get("minXStep").get(0));
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("pieMode") != null) {
+            try {
+                parameters.getImageParameters().setPieMode(Graph.PieMode.valueOf(queryStringDecoder.parameters().get("pieMode").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown pieMode : " + queryStringDecoder.parameters().get("pieMode").get(0).toUpperCase());
             }
         }
 

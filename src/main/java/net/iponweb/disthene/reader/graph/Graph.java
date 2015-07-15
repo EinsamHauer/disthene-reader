@@ -93,6 +93,14 @@ public abstract class Graph {
     protected BufferedImage image;
     protected Graphics2D g2d;
 
+    public static Graph getInstance(GraphType type, RenderParameters renderParameters, List<TimeSeries> data) {
+        if (type.equals(GraphType.PIE)) {
+            return new PieGraph(renderParameters, data);
+        } else {
+            return new LineGraph(renderParameters, data);
+        }
+
+    }
 
     public Graph(RenderParameters renderParameters, List<TimeSeries> data) {
         this.renderParameters = renderParameters;
@@ -1408,11 +1416,20 @@ public abstract class Graph {
         }
     }
 
+    //todo: move enums to separate classes?
     protected enum HorizontalAlign {
         LEFT, CENTER, RIGHT
     }
 
     protected enum VerticalAlign {
         TOP, MIDDLE, BOTTOM, BASELINE
+    }
+
+    public enum GraphType {
+        LINE, PIE
+    }
+
+    public enum PieMode {
+        AVERAGE, MAXIMUM, MINIMUM
     }
 }
