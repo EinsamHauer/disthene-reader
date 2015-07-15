@@ -33,6 +33,7 @@ IMPLEMENTED
   'nonNegativeDerivative' : nonNegativeDerivative,
   'percentileOfSeries': percentileOfSeries,
   'highestMax' : highestMax,
+  'timeStack': timeStack,
 
   # Calculate functions
   'divideSeries' : divideSeries,
@@ -102,8 +103,6 @@ NOT IMPLEMENTED
   'weightedAverage': weightedAverage,
 
   # Transform functions
-  'timeStack': timeStack,
-  'timeSlice': timeSlice,
   'summarize' : summarize,
   'smartSummarize' : smartSummarize,
   'hitcount'  : hitcount,
