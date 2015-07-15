@@ -19,7 +19,8 @@ import java.util.List;
  */
 public class HoltWinters {
 
-    private static final long SEASON = 604800; // 7 days
+    private static final long BOOTSTRAP = 604800; // 7 days
+    private static final long SEASON = 86400; // 7 days
     private static final double ALPHA = 0.1;
     private static final double GAMMA = 0.1;
     private static final double BETA = 0.0035;
@@ -57,7 +58,7 @@ public class HoltWinters {
         long to = original.get(0).getTo();
         int length = original.get(0).getValues().length;
 
-        List<TimeSeries> bootstrapped = evaluator.bootstrap(target, original, SEASON);
+        List<TimeSeries> bootstrapped = evaluator.bootstrap(target, original, BOOTSTRAP);
 
         for (TimeSeries ts : bootstrapped) {
             analyzeSingleSeries(ts, from, to, length);

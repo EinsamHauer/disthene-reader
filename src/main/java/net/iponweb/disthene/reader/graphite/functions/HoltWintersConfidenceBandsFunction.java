@@ -62,8 +62,8 @@ public class HoltWintersConfidenceBandsFunction extends DistheneFunction {
             lower.setValues(lowerValues);
             lower.setName("holtWintersConfidenceLower(" + forecasts.get(i).getName() + ")");
 
-            result.add(upper);
             result.add(lower);
+            result.add(upper);
         }
 
         return result;
