@@ -165,7 +165,7 @@ public class MetricService {
             }
         }
 
-        logger.debug("Number of series fetched: " + timeSeries);
+        logger.debug("Number of series fetched: " + timeSeries.size());
         // sort it by path
         Collections.sort(timeSeries, new Comparator<TimeSeries>() {
             @Override
