@@ -46,7 +46,7 @@ public class LineGraph extends Graph {
         }
 
         // Set stacked options where needed right away
-        if ((imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) || imageParameters.getAreaMode().equals(ImageParameters.AreaMode.ALL)) && !secondYAxis) {
+            if ((imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED) || imageParameters.getAreaMode().equals(ImageParameters.AreaMode.ALL)) && !secondYAxis) {
             for (DecoratedTimeSeries ts : data) {
                 if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
                     ts.addOption(TimeSeriesOption.STACKED);
@@ -58,14 +58,16 @@ public class LineGraph extends Graph {
             }
         }
 
-        int length = data.get(0).getValues().length;
-        double[] total = new double[length];
-        for (DecoratedTimeSeries ts : getStackedData(data)) {
-            for (int i = 0; i < length; i++) {
-                if (ts.getValues()[i] != null) {
-                    double original = ts.getValues()[i];
-                    ts.getValues()[i] += total[i];
-                    total[i] += original;
+        if (imageParameters.getAreaMode().equals(ImageParameters.AreaMode.STACKED)) {
+            int length = data.get(0).getValues().length;
+            double[] total = new double[length];
+            for (DecoratedTimeSeries ts : getStackedData(data)) {
+                for (int i = 0; i < length; i++) {
+                    if (ts.getValues()[i] != null) {
+                        double original = ts.getValues()[i];
+                        ts.getValues()[i] += total[i];
+                        total[i] += original;
+                    }
                 }
             }
         }

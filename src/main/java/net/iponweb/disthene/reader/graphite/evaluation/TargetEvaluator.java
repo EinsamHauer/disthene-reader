@@ -78,18 +78,21 @@ public class TargetEvaluator {
 
         int step = original.get(0).getStep();
 
-        // normalize
+        // normalize (assuming bootstrapped step can only be bigger
         if (bootstrapped.get(0).getStep() != step) {
-            double ratio = bootstrapped.get(0).getStep() / step;
+            int ratio = bootstrapped.get(0).getStep() / step;
             for(TimeSeries ts : bootstrapped) {
+                List<Double> values = new ArrayList<>();
                 for (int i = 0; i < ts.getValues().length; i++) {
-                    ts.getValues()[i] = ts.getValues()[i] * ratio;
+                    values.addAll(Collections.nCopies(ratio, ts.getValues()[i]));
                 }
+                ts.setValues(values.toArray(new Double[values.size()]));
             }
         }
 
         for (int i = 0; i < bootstrapped.size(); i++) {
             bootstrapped.get(i).setValues(ObjectArrays.concat(bootstrapped.get(i).getValues(), original.get(i).getValues(), Double.class));
+            bootstrapped.get(i).setStep(step);
         }
 
         return bootstrapped;

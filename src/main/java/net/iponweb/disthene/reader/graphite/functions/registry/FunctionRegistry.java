@@ -1,8 +1,10 @@
 package net.iponweb.disthene.reader.graphite.functions.registry;
 
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
+import net.iponweb.disthene.reader.graphite.HoltWintersConfidenceAreaFunction;
 import net.iponweb.disthene.reader.graphite.functions.TimeShiftFunction;
 import net.iponweb.disthene.reader.graphite.functions.*;
+import net.iponweb.disthene.reader.graphite.utils.HoltWinters;
 
 import java.awt.*;
 import java.lang.reflect.Constructor;
@@ -47,6 +49,10 @@ public class FunctionRegistry {
         registry.put("highestAverage", HighestAverageFunction.class);
         registry.put("highestCurrent", HighestCurrentFunction.class);
         registry.put("highestMax", HighestMaxFunction.class);
+        registry.put("holtWintersAberration", HoltWintersAberrationFunction.class);
+        registry.put("holtWintersConfidenceArea", HoltWintersConfidenceAreaFunction.class);
+        registry.put("holtWintersConfidenceBands", HoltWintersConfidenceBandsFunction.class);
+        registry.put("holtWintersForecast", HoltWintersForecastFunction.class);
         registry.put("integral", IntegralFunction.class);
         registry.put("invert", InvertFunction.class);
         registry.put("isNonNull", IsNonNullFunction.class);

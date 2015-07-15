@@ -42,6 +42,10 @@ IMPLEMENTED
   'movingAverage' : movingAverage,  ***MODIFIED***
   'movingMedian' : movingMedian,    ***MODIFIED***
   'stdev' : stdev,
+  'holtWintersForecast': holtWintersForecast,
+  'holtWintersConfidenceBands': holtWintersConfidenceBands,
+  'holtWintersConfidenceArea': holtWintersConfidenceArea,
+  'holtWintersAberration': holtWintersAberration,
 
   # Series Filter functions
   'mostDeviant' : mostDeviant,
@@ -105,10 +109,6 @@ NOT IMPLEMENTED
   'hitcount'  : hitcount,
 
   # Calculate functions
-  'holtWintersForecast': holtWintersForecast,
-  'holtWintersConfidenceBands': holtWintersConfidenceBands,
-  'holtWintersConfidenceArea': holtWintersConfidenceArea,
-  'holtWintersAberration': holtWintersAberration,
 
   # Series Filter functions
 
