@@ -79,6 +79,9 @@ public class ImageParameters {
 
     private Graph.GraphType graphType = Graph.GraphType.LINE;
     private Graph.PieMode pieMode = Graph.PieMode.AVERAGE;
+    private Graph.PieLabelsStyle pieLabelsStyle = Graph.PieLabelsStyle.PERCENT;
+    private Graph.PieLabelsOrientation pieLabelsOrientation = Graph.PieLabelsOrientation.HORIZONTAL;
+    private Double pieLabelsMin = 5.;
 
     public ImageParameters() {
         yDivisors.add(4);
@@ -496,6 +499,30 @@ public class ImageParameters {
 
     public void setPieMode(Graph.PieMode pieMode) {
         this.pieMode = pieMode;
+    }
+
+    public Graph.PieLabelsStyle getPieLabelsStyle() {
+        return pieLabelsStyle;
+    }
+
+    public void setPieLabelsStyle(Graph.PieLabelsStyle pieLabelsStyle) {
+        this.pieLabelsStyle = pieLabelsStyle;
+    }
+
+    public Graph.PieLabelsOrientation getPieLabelsOrientation() {
+        return pieLabelsOrientation;
+    }
+
+    public void setPieLabelsOrientation(Graph.PieLabelsOrientation pieLabelsOrientation) {
+        this.pieLabelsOrientation = pieLabelsOrientation;
+    }
+
+    public Double getPieLabelsMin() {
+        return pieLabelsMin;
+    }
+
+    public void setPieLabelsMin(Double pieLabelsMin) {
+        this.pieLabelsMin = pieLabelsMin;
     }
 
     public enum Side {

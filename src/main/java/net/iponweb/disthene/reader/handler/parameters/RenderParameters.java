@@ -374,6 +374,14 @@ public class RenderParameters {
             }
         }
 
+        if (queryStringDecoder.parameters().get("pieLabels") != null) {
+            try {
+                parameters.getImageParameters().setPieLabelsOrientation(Graph.PieLabelsOrientation.valueOf(queryStringDecoder.parameters().get("pieLabels").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown pieLabels : " + queryStringDecoder.parameters().get("pieLabels").get(0).toUpperCase());
+            }
+        }
+
         if (queryStringDecoder.parameters().get("rightColor") != null) {
             Color color = ColorTable.getColorByName(queryStringDecoder.parameters().get("rightColor").get(0).replaceAll("^\"|\"$", ""));
             if (color != null) parameters.getImageParameters().setRightColor(color);
@@ -397,6 +405,22 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("uniqueLegend") != null) {
             parameters.getImageParameters().setUniqueLegend(Boolean.parseBoolean(queryStringDecoder.parameters().get("uniqueLegend").get(0)));
+        }
+
+        if (queryStringDecoder.parameters().get("valueLabels") != null) {
+            try {
+                parameters.getImageParameters().setPieLabelsStyle(Graph.PieLabelsStyle.valueOf(queryStringDecoder.parameters().get("valueLabels").get(0).toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidParameterValueException("Unknown valueLabels : " + queryStringDecoder.parameters().get("valueLabels").get(0).toUpperCase());
+            }
+        }
+
+        if (queryStringDecoder.parameters().get("valueLabelsMin") != null) {
+            try {
+                parameters.getImageParameters().setPieLabelsMin(Double.valueOf(queryStringDecoder.parameters().get("valueLabelsMin").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("valueLabelsMin format : " + queryStringDecoder.parameters().get("valueLabelsMin").get(0));
+            }
         }
 
         if (queryStringDecoder.parameters().get("vtitle") != null) {

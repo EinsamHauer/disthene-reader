@@ -4,7 +4,6 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.beans.TimeSeriesOption;
 import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
-import net.iponweb.disthene.reader.graphite.utils.Unit;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.apache.log4j.Logger;
@@ -19,8 +18,9 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -145,7 +145,7 @@ public abstract class Graph {
         drawText(x, y, text, font, color, horizontalAlign, verticalAlign, 0);
     }
 
-    protected void drawText(int x, int y, String text, Font font, Color color, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign, int rotate) {
+    protected void drawText(int x, int y, String text, Font font, Color color, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign, double rotate) {
         g2d.setPaint(color);
         g2d.setFont(font);
 
@@ -1394,7 +1394,7 @@ public abstract class Graph {
     }
 
     private Stroke getStroke(DecoratedTimeSeries timeSeries) {
-        float lineWidth = 1.2f;
+        float lineWidth;
         if (timeSeries.hasOption(TimeSeriesOption.LINE_WIDTH)) {
             lineWidth = (float) timeSeries.getOption(TimeSeriesOption.LINE_WIDTH);
         } else {
@@ -1431,5 +1431,13 @@ public abstract class Graph {
 
     public enum PieMode {
         AVERAGE, MAXIMUM, MINIMUM
+    }
+
+    public enum PieLabelsStyle {
+        PERCENT, NUMBER, NONE
+    }
+
+    public enum PieLabelsOrientation {
+        HORIZONTAL, ROTATED
     }
 }
