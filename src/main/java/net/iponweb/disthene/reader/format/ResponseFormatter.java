@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
+import net.iponweb.disthene.reader.graph.DecoratedTimeSeries;
 import net.iponweb.disthene.reader.graph.Graph;
 import net.iponweb.disthene.reader.graph.LineGraph;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
@@ -21,7 +22,7 @@ public class ResponseFormatter {
 
     public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException, LogarithmicScaleNotAllowed {
         switch (parameters.getFormat()) {
-            case JSON: return formatResponseAsJson(timeSeriesList);
+            case JSON: return formatResponseAsJson(timeSeriesList, parameters);
             case RAW: return formatResponseAsRaw(timeSeriesList);
             case PNG: return formatResponseAsPng(timeSeriesList, parameters);
             default:throw new NotImplementedException();
@@ -46,8 +47,11 @@ public class ResponseFormatter {
         return response;
     }
 
-    private static FullHttpResponse formatResponseAsJson(List<TimeSeries> timeSeriesList) {
+    private static FullHttpResponse formatResponseAsJson(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) {
         List<String> results = new ArrayList<>();
+
+        // consolidate data points
+        consolidate(timeSeriesList, renderParameters.getMaxDataPoints());
 
         for(TimeSeries timeSeries : timeSeriesList) {
             List<String> datapoints = new ArrayList<>();
@@ -76,5 +80,20 @@ public class ResponseFormatter {
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "image/png");
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         return response;
+    }
+
+    private static void consolidate(List<TimeSeries> timeSeriesList, int maxDataPoints) {
+        for (TimeSeries ts : timeSeriesList) {
+            DecoratedTimeSeries dts = new DecoratedTimeSeries(ts);
+            if (maxDataPoints < ts.getValues().length) {
+                dts.setValuesPerPoint((int) Math.ceil(ts.getValues().length / (double) maxDataPoints));
+            } else {
+                dts.setValuesPerPoint(1);
+            }
+
+            ts.setStep(dts.getValuesPerPoint() * dts.getStep());
+            ts.setTo(ts.getFrom() + ts.getStep() * dts.getConsolidatedValues().length - 1);
+            ts.setValues(dts.getConsolidatedValues());
+        }
     }
 }

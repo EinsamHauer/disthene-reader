@@ -30,6 +30,7 @@ public class RenderParameters {
     private Long until;
     private Format format;
     private DateTimeZone tz;
+    private int maxDataPoints = Integer.MAX_VALUE;
 
     private ImageParameters imageParameters = new ImageParameters();
 
@@ -76,6 +77,18 @@ public class RenderParameters {
 
     public void setTz(DateTimeZone tz) {
         this.tz = tz;
+    }
+
+    public int getMaxDataPoints() {
+        return maxDataPoints;
+    }
+
+    public void setMaxDataPoints(int maxDataPoints) {
+        this.maxDataPoints = maxDataPoints;
+    }
+
+    public void setImageParameters(ImageParameters imageParameters) {
+        this.imageParameters = imageParameters;
     }
 
     public ImageParameters getImageParameters() {
@@ -172,6 +185,15 @@ public class RenderParameters {
             // default to now
             parameters.setFormat(Format.PNG);
         }
+
+        if (queryStringDecoder.parameters().get("maxDataPoints") != null) {
+            try {
+                parameters.setMaxDataPoints(Integer.valueOf(queryStringDecoder.parameters().get("maxDataPoints").get(0)));
+            } catch (NumberFormatException e) {
+                throw new InvalidParameterValueException("fontSize format : " + queryStringDecoder.parameters().get("fontSize").get(0));
+            }
+        }
+
 
         //*************************************************************************************************************
         // Image parameters
