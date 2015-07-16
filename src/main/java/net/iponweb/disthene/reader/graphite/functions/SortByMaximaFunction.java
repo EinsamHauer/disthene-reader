@@ -35,7 +35,8 @@ public class SortByMaximaFunction extends DistheneFunction {
         SortedMap<Double, List<TimeSeries>> sorted = new TreeMap<>(Collections.reverseOrder());
 
         for(TimeSeries ts : processedArguments) {
-            Double max = CollectionUtils.sum(Arrays.asList(ts.getValues()));
+            Double max = CollectionUtils.max(Arrays.asList(ts.getValues()));
+            if (max == null) continue;
             if (sorted.get(max) == null) sorted.put(max, new ArrayList<TimeSeries>());
             sorted.get(max).add(ts);
         }

@@ -163,10 +163,6 @@ public class MetricService {
             if (singlePathResult.getValues() != null) {
                 TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
                 ts.setValues(singlePathResult.getValues());
-
-                if (singlePathResult.isAllNulls()) {
-                    ts.setAllNulls(true);
-                }
                 timeSeries.add(ts);
             }
         }

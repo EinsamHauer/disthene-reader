@@ -35,7 +35,8 @@ public class SortByMinimaFunction extends DistheneFunction {
         SortedMap<Double, List<TimeSeries>> sorted = new TreeMap<>();
 
         for(TimeSeries ts : processedArguments) {
-            Double min = CollectionUtils.sum(Arrays.asList(ts.getValues()));
+            Double min = CollectionUtils.min(Arrays.asList(ts.getValues()));
+            if (min == null) continue;
             if (sorted.get(min) == null) sorted.put(min, new ArrayList<TimeSeries>());
             sorted.get(min).add(ts);
         }

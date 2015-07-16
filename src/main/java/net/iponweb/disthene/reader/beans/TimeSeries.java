@@ -11,7 +11,6 @@ public class TimeSeries {
     private Long from;
     private Long to;
     private int step;
-    private boolean allNulls;
 
     private Double[] values = new Double[0];
 
@@ -62,14 +61,6 @@ public class TimeSeries {
 
     public void setStep(int step) {
         this.step = step;
-    }
-
-    public boolean isAllNulls() {
-        return allNulls;
-    }
-
-    public void setAllNulls(boolean allNulls) {
-        this.allNulls = allNulls;
     }
 
     public void addOption(TimeSeriesOption option) {
