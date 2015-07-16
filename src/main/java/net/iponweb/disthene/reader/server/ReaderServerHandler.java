@@ -1,10 +1,10 @@
 package net.iponweb.disthene.reader.server;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.string.StringDecoder;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
 import org.apache.log4j.Logger;
 
@@ -72,7 +72,7 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             }
         } catch (Exception e) {
             logger.error("Invalid request", e);
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR);
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         }
     }

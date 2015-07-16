@@ -57,7 +57,10 @@ public class RenderHandler implements DistheneReaderHandler {
             try {
                 targets.add(new TargetVisitor(parameters.getTenant(), parameters.getFrom(), parameters.getUntil()).visit(tree));
             } catch (ParseCancellationException e) {
-                throw new InvalidParameterValueException("Could not parse target: " + targetString);
+                String additionalInfo = null;
+                if (e.getMessage() != null) additionalInfo = e.getMessage();
+                if (e.getCause() != null) additionalInfo = e.getCause().getMessage();
+                throw new InvalidParameterValueException("Could not parse target: " + targetString + " (" + additionalInfo + ")");
             }
         }
 //        logger.debug(targets);

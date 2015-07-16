@@ -109,7 +109,7 @@ public class FunctionRegistry {
     //todo: from & to parameters are only because of constantLine function. sort this out?
     public static DistheneFunction getFunction(String name, long from, long to) throws InvalidFunctionException {
         if (registry.get(name) == null) {
-            throw new InvalidFunctionException();
+            throw new InvalidFunctionException("Unknown function: " + name);
         }
 
         try {
@@ -119,7 +119,7 @@ public class FunctionRegistry {
             function.setTo(to);
             return function;
         } catch (Exception e) {
-            throw new InvalidFunctionException();
+            throw new InvalidFunctionException("Something went wrong constructing " + name + " function: " + e.getMessage());
         }
     }
 }

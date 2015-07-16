@@ -158,8 +158,6 @@ WILL NOT BE IMPLEMENTED???
 
 PARAMS NOT IMPLEMENTED
 ========================================================================================================================
-graphType ***need to implement pie graphs first***
-pieMode ***need to implement pie graphs first***
 jsonp ***makes no sense***
 localOnly ***makes no sense***
 maxDataPoints ***makes little sense***
