@@ -8,6 +8,7 @@ import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
+import net.iponweb.disthene.reader.utils.DateTimeUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
@@ -35,9 +36,17 @@ public class StdevFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        long window = ((Double) arguments.get(1)).longValue();
-
         int length = processedArguments.get(0).getValues().length;
+        int step = processedArguments.get(0).getStep();
+
+        // need to get window in number of data points
+        long window;
+        if (arguments.get(1) instanceof Double) {
+            window = ((Double) arguments.get(1)).longValue();
+        } else {
+            long offset = Math.abs(DateTimeUtils.parseTimeOffset((String) arguments.get(1)));
+            window = offset / step;
+        }
 
         for (TimeSeries ts : processedArguments) {
             Queue<Double> queue = new LinkedList<>();
@@ -70,6 +79,6 @@ public class StdevFunction extends DistheneFunction {
     public void checkArguments() throws InvalidArgumentException {
         if (arguments.size() != 2) throw new InvalidArgumentException("stdev: number of arguments is " + arguments.size() + ". Must be two.");
         if (!(arguments.get(0) instanceof PathTarget)) throw new InvalidArgumentException("stdev: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("stdev: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+        if (!(arguments.get(1) instanceof Double) && !(arguments.get(1) instanceof String)) throw new InvalidArgumentException("stdev: argument is " + arguments.get(1).getClass().getName() + ". Must be a number or a string");
     }
 }

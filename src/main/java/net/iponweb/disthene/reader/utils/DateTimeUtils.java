@@ -19,7 +19,7 @@ public class DateTimeUtils {
      * @return number of seconds in the offset
      */
     public static Long parseTimeOffset(String s) {
-        Matcher matcher = timeOffsetPattern.matcher(s);
+        Matcher matcher = timeOffsetPattern.matcher(s.replaceAll("^['\"]|['\"]$", ""));
 
         if (!matcher.matches()) return 0L;
 
