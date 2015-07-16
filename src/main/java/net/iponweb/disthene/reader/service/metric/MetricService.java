@@ -96,7 +96,9 @@ public class MetricService {
 
         for (ListenableFuture<SinglePathResult> future : futures) {
             SinglePathResult singlePathResult = future.get();
-            singlePathJsons.add("\"" + singlePathResult.getPath() + "\":" + singlePathResult.getJson());
+            if (!singlePathResult.isAllNulls()) {
+                singlePathJsons.add("\"" + singlePathResult.getPath() + "\":" + singlePathResult.getJson());
+            }
         }
 
 
@@ -161,6 +163,10 @@ public class MetricService {
             if (singlePathResult.getValues() != null) {
                 TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
                 ts.setValues(singlePathResult.getValues());
+
+                if (singlePathResult.isAllNulls()) {
+                    ts.setAllNulls(true);
+                }
                 timeSeries.add(ts);
             }
         }
@@ -211,6 +217,7 @@ public class MetricService {
         String path;
         String json;
         Double[] values = null;
+        boolean allNulls = true;
 
         private SinglePathResult(String path) {
             this.path = path;
@@ -228,6 +235,10 @@ public class MetricService {
             return values;
         }
 
+        public boolean isAllNulls() {
+            return allNulls;
+        }
+
         public void makeJson(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
             Double values[] = new Double[length];
             for (Row row : resultSet) {
@@ -240,10 +251,16 @@ public class MetricService {
 
         public void makeArray(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
             if (resultSet.getAvailableWithoutFetching() > 0) {
+                allNulls = false;
                 values = new Double[length];
                 for (Row row : resultSet) {
                     values[timestampIndices.get(row.getLong("time"))] =
                             isSumMetric(path) ? CollectionUtils.sum(row.getList("data", Double.class)) : CollectionUtils.average(row.getList("data", Double.class));
+                }
+            } else {
+                values = new Double[length];
+                for (Map.Entry<Long, Integer> entry : timestampIndices.entrySet()) {
+                    values[entry.getValue()] = null;
                 }
             }
         }

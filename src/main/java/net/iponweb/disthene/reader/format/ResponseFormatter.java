@@ -21,10 +21,17 @@ public class ResponseFormatter {
 
 
     public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException, LogarithmicScaleNotAllowed {
+        // Let's remove empty series
+        List<TimeSeries> filtered = new ArrayList<>();
+        for (TimeSeries ts : timeSeriesList) {
+            if (!ts.isAllNulls()) filtered.add(ts);
+        }
+
+
         switch (parameters.getFormat()) {
-            case JSON: return formatResponseAsJson(timeSeriesList, parameters);
-            case RAW: return formatResponseAsRaw(timeSeriesList);
-            case PNG: return formatResponseAsPng(timeSeriesList, parameters);
+            case JSON: return formatResponseAsJson(filtered, parameters);
+            case RAW: return formatResponseAsRaw(filtered);
+            case PNG: return formatResponseAsPng(filtered, parameters);
             default:throw new NotImplementedException();
         }
     }
