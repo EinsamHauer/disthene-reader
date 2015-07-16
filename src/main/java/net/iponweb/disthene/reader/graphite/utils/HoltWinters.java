@@ -21,8 +21,8 @@ public class HoltWinters {
 
     private static final long BOOTSTRAP = 604800; // 7 days
     private static final long SEASON = 86400; // 7 days
-    private static final double ALPHA = 0.1;
-    private static final double GAMMA = 0.1;
+    private static final double ALPHA = 0.2;
+    private static final double GAMMA = 0.2;
     private static final double BETA = 0.0035;
 
     private Target target;
@@ -92,11 +92,13 @@ public class HoltWinters {
         deviation[0] = 0.;
 
         for (int i = 1; i < values.length; i++) {
-            values[i] = values[i] != null ? values[i] : values[i - 1];
+            forecast[i] = level[i - 1] + trend[i - 1] + (i + 1 >= seasonLength ? seasonal[i + 1 - seasonLength] : 0);
+            values[i] = values[i] != null ? values[i] : forecast[i];
+
             level[i] = ALPHA * (values[i] - (i >= seasonLength ? seasonal[i - seasonLength] : 0)) + (1 - ALPHA) * (level[i - 1] + trend[i - 1]);
             trend[i] = BETA * (level[i] - level[i - 1]) + (1 - BETA) * trend[i-1];
-            seasonal[i] = GAMMA * (values[i] - level[i - 1] - trend[i - 1]) + (1 - GAMMA) * (i >= seasonLength ? seasonal[i - seasonLength] : 0);
-            forecast[i] = level[i - 1] + trend[i - 1] + (i - 1 >= seasonLength ? seasonal[i - 1 - seasonLength] : 0);
+            seasonal[i] = GAMMA * (values[i] - level[i - 1]) + (1 - GAMMA) * (i >= seasonLength ? seasonal[i - seasonLength] : 0);
+
             deviation[i] = GAMMA * Math.abs(values[i] - forecast[i]) + (1 - GAMMA) * (i >= seasonLength ? deviation[i - seasonLength] : 0);
         }
 
