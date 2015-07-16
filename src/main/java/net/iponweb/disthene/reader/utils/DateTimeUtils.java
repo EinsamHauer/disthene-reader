@@ -50,6 +50,6 @@ public class DateTimeUtils {
     }
 
     public static boolean testTimeOffset(String s) {
-        return timeOffsetPattern.matcher(s).matches();
+        return timeOffsetPattern.matcher(s.replaceAll("^['\"]|['\"]$", "")).matches();
     }
 }
