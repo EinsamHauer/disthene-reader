@@ -3,12 +3,14 @@ package net.iponweb.disthene.reader.graphite.functions;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
+import net.iponweb.disthene.reader.exceptions.InvalidNumberOfSeriesException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,25 +33,35 @@ public class AsPercentFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
+
+
+
         int length = processedArguments.get(0).getValues().length;
+        double[] total = new double[length];
 
         if (arguments.size() > 1) {
-            double total = (Double) arguments.get(1);
-            for (TimeSeries ts : processedArguments) {
-                for (int i = 0; i < length; i++) {
-                    if (ts.getValues()[i] != null ) {
-                        if (total != 0) {
-                            ts.getValues()[i] = (ts.getValues()[i] / total) * 100;
-                        } else {
-                            ts.getValues()[i] = null;
-                        }
+            List<TimeSeries> totalSeries = new ArrayList<>();
+            totalSeries.addAll(evaluator.eval((Target) arguments.get(1)));
+
+            if (totalSeries.size() == 0) {
+                return Collections.emptyList();
+            }
+
+            if (!TimeSeriesUtils.checkAlignment(totalSeries)) {
+                throw new TimeSeriesNotAlignedException();
+            }
+
+            if (totalSeries.get(0).getValues().length != length) throw new TimeSeriesNotAlignedException();
+
+            for (int i = 0; i < length; i++) {
+                total[i] = 0;
+                for (TimeSeries ts : totalSeries) {
+                    if (ts.getValues()[i] != null) {
+                        total[i] += ts.getValues()[i];
                     }
                 }
-
-                ts.setName("asPercent(" + ts.getName() + "," + total + ")");
             }
         } else {
-            double[] total = new double[length];
             for (int i = 0; i < length; i++) {
                 total[i] = 0;
                 for (TimeSeries ts : processedArguments) {
@@ -58,18 +70,23 @@ public class AsPercentFunction extends DistheneFunction {
                     }
                 }
             }
+        }
 
-            for (TimeSeries ts : processedArguments) {
-                for (int i = 0; i < length; i++) {
-                    if (ts.getValues()[i] != null ) {
-                        if (total[i] != 0) {
-                            ts.getValues()[i] = (ts.getValues()[i] / total[i]) * 100;
-                        } else {
-                            ts.getValues()[i] = null;
-                        }
+
+        for (TimeSeries ts : processedArguments) {
+            for (int i = 0; i < length; i++) {
+                if (ts.getValues()[i] != null ) {
+                    if (total[i] != 0) {
+                        ts.getValues()[i] = (ts.getValues()[i] / total[i]) * 100;
+                    } else {
+                        ts.getValues()[i] = null;
                     }
                 }
+            }
 
+            if (arguments.size() > 1) {
+                ts.setName("asPercent(" + ts.getName() + "," + ((Target) arguments.get(1)).getText() + ")");
+            } else {
                 setResultingName(ts);
             }
         }
@@ -81,6 +98,6 @@ public class AsPercentFunction extends DistheneFunction {
     public void checkArguments() throws InvalidArgumentException {
         if (arguments.size() > 2 || arguments.size() == 0) throw new InvalidArgumentException("asPercent: number of arguments is " + arguments.size() + ". Must be 1.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (arguments.size() > 1 && !(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+        if (arguments.size() > 1 && !(arguments.get(1) instanceof Target)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(1).getClass().getName() + ". Must be series");
     }
 }
