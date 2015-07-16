@@ -32,7 +32,7 @@ public class SortByMaximaFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        SortedMap<Double, List<TimeSeries>> sorted = new TreeMap<>();
+        SortedMap<Double, List<TimeSeries>> sorted = new TreeMap<>(Collections.reverseOrder());
 
         for(TimeSeries ts : processedArguments) {
             Double max = CollectionUtils.sum(Arrays.asList(ts.getValues()));
