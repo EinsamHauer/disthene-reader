@@ -24,6 +24,7 @@ public class FunctionRegistry {
         registry.put("alias", AliasFunction.class);
         registry.put("aliasByNode", AliasByNodeFunction.class);
         registry.put("aliasByMetric", AliasByMetricFunction.class);
+        registry.put("aliasSub", AliasSubFunction.class);
         registry.put("alpha", AlphaFunction.class);
         registry.put("areaBetween", AreaBetweenFunction.class);
         registry.put("asPercent", AsPercentFunction.class);
