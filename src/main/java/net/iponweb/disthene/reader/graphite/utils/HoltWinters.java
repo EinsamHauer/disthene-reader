@@ -20,8 +20,8 @@ import java.util.List;
  */
 public class HoltWinters {
 
-    private static final long BOOTSTRAP = 604800; // 7 days
-    private static final long SEASON = 86400; // 7 days
+    private static final long SEASON = 604800; // 7 days
+    private static final long BOOTSTRAP = SEASON * 2;
     private static final double ALPHA = 0.2;
     private static final double GAMMA = 0.2;
     private static final double BETA = 0.0035;
