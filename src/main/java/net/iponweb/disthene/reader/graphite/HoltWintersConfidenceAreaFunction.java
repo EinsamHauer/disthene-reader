@@ -27,7 +27,7 @@ public class HoltWintersConfidenceAreaFunction extends DistheneFunction {
 
         HoltWinters holtWinters = HoltWinters.analyze((Target) arguments.get(0), evaluator);
         List<TimeSeries> forecasts = holtWinters.getForecasts();
-        List<TimeSeries> deviations = holtWinters.getDeviations();
+        List<Double> deviations = holtWinters.getDeviations();
 
         if (forecasts.size() == 0) return Collections.emptyList();
 
@@ -45,12 +45,12 @@ public class HoltWintersConfidenceAreaFunction extends DistheneFunction {
             Double[] lowerValues = new Double[length];
 
             Double[] forecastValues = forecasts.get(i).getValues();
-            Double[] deviationValues = deviations.get(i).getValues();
+            double deviation = deviations.get(i);
 
             for (int j = 0; j < length; j++) {
-                if (forecastValues[j] != null && deviationValues[j] != null) {
-                    upperValues[j] = forecastValues[j] + delta * deviationValues[j];
-                    lowerValues[j] = forecastValues[j] - delta * deviationValues[j];
+                if (forecastValues[j] != null) {
+                    upperValues[j] = forecastValues[j] + delta * deviation;
+                    lowerValues[j] = forecastValues[j] - delta * deviation;
                 } else {
                     upperValues[j] = null;
                     lowerValues[j] = null;

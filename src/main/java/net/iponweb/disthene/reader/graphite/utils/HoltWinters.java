@@ -9,6 +9,7 @@ import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -30,7 +31,7 @@ public class HoltWinters {
 
     List<TimeSeries> original = new ArrayList<>();
     private List<TimeSeries> forecasts = new ArrayList<>();
-    private List<TimeSeries> deviations = new ArrayList<>();
+    private List<Double> deviations = new ArrayList<>();
 
     public HoltWinters(Target target, TargetEvaluator evaluator) {
         this.target = target;
@@ -65,7 +66,6 @@ public class HoltWinters {
         }
     }
 
-    //todo: result differs from graphite too much
     /**
      * Based on https://www.otexts.org/fpp/7/5
      * (Forecasting: principles and practice by Rob J Hyndman, George Athanasopoulos
@@ -74,41 +74,49 @@ public class HoltWinters {
         int seasonLength = (int) (SEASON / ts.getStep());
 
         Double[] values = ts.getValues();
-
-        Double[] level = new Double[values.length];
-        Double[] trend = new Double[values.length];
-        Double[] seasonal = new Double[values.length];
         Double[] forecast = new Double[values.length];
-        Double[] deviation = new Double[values.length];
 
-        // not sure what's best be done when there are missing values. Let's assume that the value stays as is and seed is 0.
+
+        int knownLength = ts.getValues().length - originalLength;
 
         // initialize
-        values[0] = values[0] != null ? values[0] : 0;
-        level[0] = values[0];
-        trend[0] = 0.;
-        seasonal[0] = 0.;
-        forecast[0] = values[0];
-        deviation[0] = 0.;
+        List<Double> seasonal = new LinkedList<>();
+        double baseline = values[1] != null ? values[1] : 0;
+        double slope = baseline - (values[0] != null ? values[0] : 0);
 
-        for (int i = 1; i < values.length; i++) {
-            forecast[i] = level[i - 1] + trend[i - 1] + (i + 1 >= seasonLength ? seasonal[i + 1 - seasonLength] : 0);
-            values[i] = values[i] != null ? values[i] : forecast[i];
-
-            level[i] = ALPHA * (values[i] - (i >= seasonLength ? seasonal[i - seasonLength] : 0)) + (1 - ALPHA) * (level[i - 1] + trend[i - 1]);
-            trend[i] = BETA * (level[i] - level[i - 1]) + (1 - BETA) * trend[i-1];
-            seasonal[i] = GAMMA * (values[i] - level[i - 1]) + (1 - GAMMA) * (i >= seasonLength ? seasonal[i - seasonLength] : 0);
-
-            deviation[i] = GAMMA * Math.abs(values[i] - forecast[i]) + (1 - GAMMA) * (i >= seasonLength ? deviation[i - seasonLength] : 0);
+        for (int i = 0; i < seasonLength; i++) {
+            seasonal.add(values[i] != null ? values[i] : 0);
+            forecast[i] = values[i] != null ? values[i] : 0;
         }
+
+        for (int i = seasonLength; i < knownLength; i++) {
+            forecast[i] = baseline + slope + seasonal.get(seasonLength - 1);
+
+            double previousBaseline = baseline;
+            double previousSlope = slope;
+            double previousSeasonal = seasonal.remove(0);
+
+            baseline = ALPHA * (values[i] - previousSeasonal) + (1.0 - ALPHA) * (previousBaseline + previousSlope);
+            slope = BETA * (baseline - previousBaseline) + (1.0 - BETA) * previousSlope;
+            seasonal.add(GAMMA * (values[i] - baseline) + (1.0 - GAMMA) * previousSeasonal);
+        }
+
+        for (int i = knownLength; i < values.length; i++) {
+            forecast[i] = baseline + slope + seasonal.get((seasonLength - 1 + (i - knownLength) % seasonLength) % seasonLength);
+        }
+
+        double sum = 0;
+        for (int i = seasonLength; i < knownLength; i++) {
+            sum += (forecast[i] - values[i]) * (forecast[i] - values[i]);
+        }
+
+        double deviation = Math.sqrt(sum / (knownLength - seasonLength));
 
         TimeSeries forecastTimeSeries = new TimeSeries(ts.getName(), ts.getFrom(), ts.getTo(), ts.getStep());
         forecastTimeSeries.setValues(forecast);
         forecasts.add(revert(forecastTimeSeries, originalFrom, originalTo, originalLength));
 
-        TimeSeries deviationTimeSeries = new TimeSeries(ts.getName(), ts.getFrom(), ts.getTo(), ts.getStep());
-        deviationTimeSeries.setValues(deviation);
-        deviations.add(revert(deviationTimeSeries, originalFrom, originalTo, originalLength));
+        deviations.add(deviation);
     }
 
     private TimeSeries revert(TimeSeries ts, long originalFrom, long originalTo, int originalLength) {
@@ -122,7 +130,7 @@ public class HoltWinters {
         return forecasts;
     }
 
-    public List<TimeSeries> getDeviations() {
+    public List<Double> getDeviations() {
         return deviations;
     }
 

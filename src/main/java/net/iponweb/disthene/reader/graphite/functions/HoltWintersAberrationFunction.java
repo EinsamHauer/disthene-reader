@@ -27,7 +27,7 @@ public class HoltWintersAberrationFunction extends DistheneFunction {
         HoltWinters holtWinters = HoltWinters.analyze((Target) arguments.get(0), evaluator);
         List<TimeSeries> original = holtWinters.getOriginal();
         List<TimeSeries> forecasts = holtWinters.getForecasts();
-        List<TimeSeries> deviations = holtWinters.getDeviations();
+        List<Double> deviations = holtWinters.getDeviations();
 
         if (forecasts.size() == 0) return Collections.emptyList();
 
@@ -44,16 +44,16 @@ public class HoltWintersAberrationFunction extends DistheneFunction {
 
             Double[] originalValues = original.get(i).getValues();
             Double[] forecastValues = forecasts.get(i).getValues();
-            Double[] deviationValues = deviations.get(i).getValues();
+            double deviation = deviations.get(i);
 
             for (int j = 0; j < length; j++) {
 
                 if (originalValues[j] == null) {
                     aberrationValues[j] = 0.;
-                } else if (forecastValues[j] != null && deviationValues[j] != null && originalValues[j] > forecastValues[j] + delta * deviationValues[j]) {
-                    aberrationValues[j] = originalValues[j] - forecastValues[j] - delta * deviationValues[j];
-                } else if (forecastValues[j] != null && deviationValues[j] != null && originalValues[j] < forecastValues[j] - delta * deviationValues[j]) {
-                    aberrationValues[j] = originalValues[j] - forecastValues[j] + delta * deviationValues[j];
+                } else if (forecastValues[j] != null && originalValues[j] > forecastValues[j] + delta * deviation) {
+                    aberrationValues[j] = originalValues[j] - forecastValues[j] - delta * deviation;
+                } else if (forecastValues[j] != null && originalValues[j] < forecastValues[j] - delta * deviation) {
+                    aberrationValues[j] = originalValues[j] - forecastValues[j] + delta * deviation;
                 } else {
                     aberrationValues[j] = 0.;
                 }
