@@ -18,14 +18,14 @@ public class XAxisConfigProvider {
     private static List<XAxisConfig> configs = new ArrayList<>();
 
     static {
-        configs.add(new XAxisConfig(0, SEC, 5, MIN, 1, SEC, 5, "H:m:s", 10 * MIN));
-        configs.add(new XAxisConfig(0.07, SEC, 10, MIN, 1, SEC, 10, "H:m:s", 20 * MIN));
-        configs.add(new XAxisConfig(0.14, SEC, 15, MIN, 1, SEC, 15, "H:m:s", 30 * MIN));
-        configs.add(new XAxisConfig(0.27, SEC, 30, MIN, 2, MIN, 1, "H:m", 2 * HOUR));
-        configs.add(new XAxisConfig(0.5, MIN, 1, MIN, 2, MIN, 1, "H:m", 2 * HOUR));
-        configs.add(new XAxisConfig(1.2, MIN, 1, MIN, 4, MIN, 2, "H:m", 3 * HOUR));
-        configs.add(new XAxisConfig(2, MIN, 1, MIN, 10, MIN, 5, "H:m", 6 * HOUR));
-        configs.add(new XAxisConfig(5, MIN, 2, MIN, 10, MIN, 10, "H:m", 12 * HOUR));
+        configs.add(new XAxisConfig(0, SEC, 5, MIN, 1, SEC, 5, "HH:mm:ss", 10 * MIN));
+        configs.add(new XAxisConfig(0.07, SEC, 10, MIN, 1, SEC, 10, "HH:mm:ss", 20 * MIN));
+        configs.add(new XAxisConfig(0.14, SEC, 15, MIN, 1, SEC, 15, "HH:mm:ss", 30 * MIN));
+        configs.add(new XAxisConfig(0.27, SEC, 30, MIN, 2, MIN, 1, "H:mm", 2 * HOUR));
+        configs.add(new XAxisConfig(0.5, MIN, 1, MIN, 2, MIN, 1, "HH:mm", 2 * HOUR));
+        configs.add(new XAxisConfig(1.2, MIN, 1, MIN, 4, MIN, 2, "HH:mm", 3 * HOUR));
+        configs.add(new XAxisConfig(2, MIN, 1, MIN, 10, MIN, 5, "HH:mm", 6 * HOUR));
+        configs.add(new XAxisConfig(5, MIN, 2, MIN, 10, MIN, 10, "HH:mm", 12 * HOUR));
         configs.add(new XAxisConfig(10, MIN, 5, MIN, 20, MIN, 20, "HH:mm", 1 * DAY));
         configs.add(new XAxisConfig(30, MIN, 10, HOUR, 1, HOUR, 1, "HH:mm", 2 * DAY));
         configs.add(new XAxisConfig(60, MIN, 30, HOUR, 2, HOUR, 2, "HH:mm", 2 * DAY));
