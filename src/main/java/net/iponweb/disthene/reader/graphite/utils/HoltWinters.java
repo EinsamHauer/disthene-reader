@@ -92,13 +92,14 @@ public class HoltWinters {
         for (int i = seasonLength; i < knownLength; i++) {
             forecast[i] = baseline + slope + seasonal.get(seasonLength - 1);
 
+            double value = values[i] != null ? values[i] : 0;
             double previousBaseline = baseline;
             double previousSlope = slope;
             double previousSeasonal = seasonal.remove(0);
 
-            baseline = ALPHA * (values[i] - previousSeasonal) + (1.0 - ALPHA) * (previousBaseline + previousSlope);
+            baseline = ALPHA * (value - previousSeasonal) + (1.0 - ALPHA) * (previousBaseline + previousSlope);
             slope = BETA * (baseline - previousBaseline) + (1.0 - BETA) * previousSlope;
-            seasonal.add(GAMMA * (values[i] - baseline) + (1.0 - GAMMA) * previousSeasonal);
+            seasonal.add(GAMMA * (value - baseline) + (1.0 - GAMMA) * previousSeasonal);
         }
 
         for (int i = knownLength; i < values.length; i++) {
@@ -107,7 +108,8 @@ public class HoltWinters {
 
         double sum = 0;
         for (int i = seasonLength; i < knownLength; i++) {
-            sum += (forecast[i] - values[i]) * (forecast[i] - values[i]);
+            double value = values[i] != null ? values[i] : 0;
+            sum += (forecast[i] - value) * (forecast[i] - value);
         }
 
         double deviation = Math.sqrt(sum / (knownLength - seasonLength));
