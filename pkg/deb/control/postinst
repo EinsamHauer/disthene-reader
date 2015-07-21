@@ -3,7 +3,7 @@
 chown -R root:root /usr/lib/disthene-reader
 chown root:root /usr/bin/disthene-reader
 chown disthene-reader:disthene-reader /var/log/disthene-reader
-chown -R disthene:disthene /etc/disthene-reader
+chown -R disthene-reader:disthene-reader /etc/disthene-reader
 chown root:root /etc/init.d/disthene-reader
 
 if [ -x "/etc/init.d/disthene-reader" ]; then
