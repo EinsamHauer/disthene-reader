@@ -37,6 +37,10 @@ class disthene-reader (
     $disthene_log_config = 'puppet:///modules/disthene-reader/disthene-reader-log4j.xml'
   }
 
+  package { 'disthene-reader':
+    ensure => installed,
+  }
+
   file { 'disthene_reader_config':
     ensure  => present,
     path    => '/etc/disthene-reader/disthene-reader.yaml',
