@@ -5,5 +5,5 @@ Priority: optional
 Architecture: all
 Depends:
 Recommends: oracle-java-7 | oracle-java-8
-Description: Alternative storage backend for graphite, backed by cassandra
+Description: Alternative storage backend for graphite, backed by cassandra (reader part)
 Maintainer: Andrei Ivanov
