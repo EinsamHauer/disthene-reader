@@ -2,7 +2,7 @@
 # Fakeroot and lein don't get along, so we set ownership after the fact.
 chown -R root:root /usr/lib/disthene-reader
 chown root:root /usr/bin/disthene-reader
-chown disthene:disthene /var/log/disthene-reader
+chown disthene-reader:disthene-reader /var/log/disthene-reader
 chown -R disthene:disthene /etc/disthene-reader
 chown root:root /etc/init.d/disthene-reader
 
