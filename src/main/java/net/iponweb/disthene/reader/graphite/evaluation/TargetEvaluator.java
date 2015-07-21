@@ -1,7 +1,6 @@
 package net.iponweb.disthene.reader.graphite.evaluation;
 
 import com.google.common.collect.ObjectArrays;
-import com.google.gson.Gson;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
@@ -14,12 +13,9 @@ import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Andrei Ivanov
@@ -54,7 +50,7 @@ public class TargetEvaluator {
     public TimeSeries getEmptyTimeSeries(long from, long to) {
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = metricService.getRollup(from, effectiveTo);
+        Rollup bestRollup = metricService.getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
 

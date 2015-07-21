@@ -48,7 +48,7 @@ public class MetricService {
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = getRollup(from, effectiveTo);
+        Rollup bestRollup = getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -113,7 +113,7 @@ public class MetricService {
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = getRollup(from, effectiveTo);
+        Rollup bestRollup = getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -178,8 +178,7 @@ public class MetricService {
         return timeSeries;
     }
 
-    public Rollup getRollup(long from, long to) {
-        long timeDelta = to -from;
+    public Rollup getRollup(long from) {
         long now = System.currentTimeMillis() / 1000L ;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
@@ -195,17 +194,6 @@ public class MetricService {
             return distheneReaderConfiguration.getReader().getRollups().get(distheneReaderConfiguration.getReader().getRollups().size() - 1);
         }
 
-/*
-        Rollup result = survivals.get(0);
-
-        for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
-            if (timeDelta > distheneReaderConfiguration.getReader().getResolution() * rollup.getRollup()) {
-                result = rollup;
-            }
-        }
-
-        return result;
-*/
         return survivals.get(0);
     }
 
