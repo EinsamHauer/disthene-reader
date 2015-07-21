@@ -1,4 +1,4 @@
-class disthene (
+class disthene-reader (
   $java_xmx = '4G',
   $java_xms = '2G',
   $java_extra_options = '',
@@ -6,7 +6,7 @@ class disthene (
   $disthene_reader_package_version = 'present',
 
   $reader_host = '127.0.0.1',
-  $reader_port = '2003',
+  $reader_port = '8080',
   $reader_rollups = ['60s:5356800s','900s:62208000s'],
 
   $store_cluster = [$::ipaddress],
