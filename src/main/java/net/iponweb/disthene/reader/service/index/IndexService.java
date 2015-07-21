@@ -15,6 +15,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,6 +57,11 @@ public class IndexService {
                         FilterBuilders.termFilter("tenant", tenant)))
                 .addField("path")
                 .execute().actionGet();
+
+        // if total hits exceeds maximum - abort right away returning empty array
+        if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
+            return Collections.emptyList();
+        }
 
         while (response.getHits().getHits().length > 0) {
             for (SearchHit hit : response.getHits()) {

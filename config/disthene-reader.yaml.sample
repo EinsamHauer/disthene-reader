@@ -4,7 +4,6 @@ reader:
   rollups:
     - 60s:5356800s
     - 900s:62208000s
-  resolution: 1600
 store:
   cluster:
     - "cassandra-1"
@@ -26,9 +25,4 @@ index:
   type: "path"
   scroll: 50000
   timeout: 120000
-  maxPaths: 2000
-stats:
-  interval: 60
-  tenant: "test"
-  hostname: "disthene-reader-1a"
-  log: true
+  maxPaths: 50000

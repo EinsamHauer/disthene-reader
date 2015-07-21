@@ -8,7 +8,6 @@ class disthene (
   $reader_host = '127.0.0.1',
   $reader_port = '2003',
   $reader_rollups = ['60s:5356800s','900s:62208000s'],
-  $reader_resolution = '1600',
 
   $store_cluster = [$::ipaddress],
   $store_port = '9042',
@@ -26,13 +25,7 @@ class disthene (
   $index_type = 'path',
   $index_scroll = '50000',
   $index_timeout = '120000',
-  $index_bulk_actions = '10000',
-  $index_max_paths = '10000',
-
-  $stats_interval = 60,
-  $stats_tenant = "NONE",
-  $stats_hostname = "$::hostname",
-  $stats_log = 'true',
+  $index_max_paths = '50000',
 
   $custom_log_config = false,
 )

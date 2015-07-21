@@ -5,7 +5,6 @@ reader:
 <% @reader_rollups.each do |rollup| -%>
     - <%= rollup %>
 <% end -%>
-  resolution: <%= @reader_resolution %>
 store:
   cluster:
 <% @store_cluster.each do |node| -%>
@@ -30,8 +29,3 @@ index:
   scroll: <%= @index_scroll %>
   timeout: <%= @index_timeout %>
   maxPaths: <%= @index_max_paths %>
-stats:
-  interval: <%= @stats_interval %>
-  tenant: "<%= @stats_tenant %>"
-  hostname: "<%= @stats_hostname %>"
-  log: <%= @stats_log %>
