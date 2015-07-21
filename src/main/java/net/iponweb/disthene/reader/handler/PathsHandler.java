@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
+import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import org.apache.log4j.Logger;
@@ -24,7 +25,7 @@ public class PathsHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws UnsupportedMethodException, MissingParameterException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException {
         PathsParameters parameters = parse(request);
         String pathsAsJsonArray = indexService.getPathsAsJsonArray(parameters.getTenant(), parameters.getQuery());
 
@@ -55,6 +56,7 @@ public class PathsHandler implements DistheneReaderHandler {
 
             return parameters;
         } else if (request.getMethod().equals(HttpMethod.POST)) {
+            ((HttpContent) request).content().resetReaderIndex();
             PathsParameters parameters = new Gson().fromJson(((HttpContent) request).content().toString(Charset.defaultCharset()), PathsParameters.class);
             if (parameters.getTenant() == null) {
                 throw new MissingParameterException("Tenant parameter is missing");
@@ -64,7 +66,7 @@ public class PathsHandler implements DistheneReaderHandler {
             }
             return parameters;
         } else {
-            throw new UnsupportedMethodException();
+            throw new UnsupportedMethodException("Method is not supported: " + request.getMethod().name());
         }
     }
 

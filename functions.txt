@@ -1,0 +1,172 @@
+IMPLEMENTED
+========================================================================================================================
+  # Combine functions
+  'averageSeries' : averageSeries,
+  'avg' : averageSeries,
+  'sumSeries' : sumSeries,
+  'sum' : sumSeries,
+  'multiplySeries' : multiplySeries,
+  'countSeries': countSeries,
+  'minSeries' : minSeries,
+  'maxSeries' : maxSeries,
+  'rangeOfSeries': rangeOfSeries,
+  'stddevSeries' : stddevSeries,
+  'percentileOfSeries': percentileOfSeries,
+  'averageSeriesWithWildcards': averageSeriesWithWildcards,
+  'sumSeriesWithWildcards': sumSeriesWithWildcards,
+  'multiplySeriesWithWildcards': multiplySeriesWithWildcards,
+
+  # Transform functions
+  'absolute' : absolute,
+  'scale' : scale,
+  'scaleToSeconds' : scaleToSeconds,
+  'offset' : offset,
+  'offsetToZero' : offsetToZero,
+  'integral' : integral,
+  'log' : logarithm,
+  'timeShift': timeShift,
+  'derivative' : derivative,
+  'squareRoot' : squareRoot,
+  'pow' : pow,
+  'perSecond' : perSecond,
+  'invert' : invert,
+  'nonNegativeDerivative' : nonNegativeDerivative,
+  'percentileOfSeries': percentileOfSeries,
+  'highestMax' : highestMax,
+  'timeStack': timeStack,
+
+  # Calculate functions
+  'divideSeries' : divideSeries,
+  'diffSeries' : diffSeries,
+  'asPercent' : asPercent,
+  'pct' : asPercent,
+  'movingAverage' : movingAverage,  ***MODIFIED***
+  'movingMedian' : movingMedian,    ***MODIFIED***
+  'stdev' : stdev,
+  'holtWintersForecast': holtWintersForecast,
+  'holtWintersConfidenceBands': holtWintersConfidenceBands,
+  'holtWintersConfidenceArea': holtWintersConfidenceArea,
+  'holtWintersAberration': holtWintersAberration,
+
+  # Series Filter functions
+  'mostDeviant' : mostDeviant,
+  'highestCurrent' : highestCurrent,
+  'highestAverage' : highestAverage,
+  'lowestCurrent' : lowestCurrent,
+  'lowestAverage' : lowestAverage,
+  'currentAbove' : currentAbove,
+  'currentBelow' : currentBelow,
+  'averageAbove' : averageAbove,
+  'averageBelow' : averageBelow,
+  'maximumAbove' : maximumAbove,
+  'minimumAbove' : minimumAbove,
+  'maximumBelow' : maximumBelow,
+  'minimumBelow' : minimumBelow,
+  'nPercentile' : nPercentile,
+  'limit' : limit,
+  'sortByTotal'  : sortByTotal,
+  'sortByName' : sortByName,
+  'sortByMaxima' : sortByMaxima,
+  'sortByMinima' : sortByMinima,
+  'averageOutsidePercentile' : averageOutsidePercentile,
+
+  # Data Filter functions
+  'removeAboveValue' : removeAboveValue,
+  'removeBelowValue' : removeBelowValue,
+  'removeAbovePercentile' : removeAbovePercentile,
+  'removeBelowPercentile' : removeBelowPercentile,
+
+  # Special functions
+  'stacked' : stacked,
+  'dashed' : dashed,
+  'secondYAxis': secondYAxis,
+  'alias' : alias,
+  'alpha' : alpha,
+  'color' : color,
+  'aliasByNode' : aliasByNode,
+  'aliasByMetric' : aliasByMetric,
+  'constantLine' : constantLine,
+  'keepLastValue' : keepLastValue,
+  'isNonNull' : isNonNull,
+  'legendValue' : legendValue,
+  'cactiStyle' : cactiStyle,
+  'transformNull' : transformNull,
+  'lineWidth' : lineWidth,
+  'drawAsInfinite' : drawAsInfinite,
+  'areaBetween' : areaBetween,
+  'aggregateLine' : aggregateLine,
+  'group' : group,
+  'aliasSub' : aliasSub,
+
+NOT IMPLEMENTED
+========================================================================================================================
+  # Combine functions
+  'weightedAverage': weightedAverage,
+
+  # Transform functions
+
+  # Calculate functions
+
+  # Series Filter functions
+
+
+  # Data Filter functions
+
+  # Special functions
+
+
+WILL NOT BE IMPLEMENTED???
+========================================================================================================================
+  # Transform functions
+  'summarize' : summarize,                 ***not sure it's needed at all, use case is rare?***
+  'smartSummarize' : smartSummarize,       ***not sure it's needed at all, use case is rare?***
+  'hitcount'  : hitcount,                  ***not sure it's needed at all, use case is rare?***
+
+
+  # Series Filter functions
+  'fallbackSeries' : fallbackSeries,
+  'removeBetweenPercentile' : removeBetweenPercentile,
+  'useSeriesAbove': useSeriesAbove,
+  'exclude' : exclude,
+  'grep' : grep,
+  'removeEmptySeries' : removeEmptySeries,
+
+  # Special functions
+  'map': mapSeries,                 ***overkill/need to change grammar***
+  'mapSeries': mapSeries,           ***overkill/need to change grammar***
+  'reduce': reduceSeries,           ***overkill/need to change grammar***
+  'reduceSeries': reduceSeries,     ***overkill/need to change grammar***
+  'identity': identity,             ***corner use case***
+  'threshold' : threshold,          ***redundant - constantLine does the same thing combined with legendValue and color***
+  'cumulative' : cumulative,        ***seems to be useful only in some corner cases***
+  'consolidateBy' : consolidateBy,  ***seems to be useful only in some corner cases***
+  'changed' : changed,              ***seems to be useful only in some corner cases***
+  'groupByNode' : groupByNode,      ***seems to be useful only in some corner cases***
+  'substr' : substr,                ***seems to be useful only in some corner cases***
+
+  # test functions
+  'time': timeFunction,
+  "sin": sinFunction,
+  "randomWalk": randomWalkFunction,
+  'timeFunction': timeFunction,
+  "sinFunction": sinFunction,
+  "randomWalkFunction": randomWalkFunction,
+
+  #events
+  'events': events,
+
+
+PARAMS NOT IMPLEMENTED
+========================================================================================================================
+jsonp ***makes no sense***
+localOnly ***makes no sense***
+noCache ***makes little sense***
+template ***not sure if it's needed***
+xFormat ***not sure if it's needed***
+yDivisor ***not sure if it's needed***
+
+vtitle ***not working as expected***
+vtitleRight ***not working as expected***
+
+BUGS
+========================================================================================================================

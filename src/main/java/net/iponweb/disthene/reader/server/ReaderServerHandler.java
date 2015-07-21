@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.server;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -9,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
@@ -20,9 +22,9 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
     final static Logger logger = Logger.getLogger(ReaderServerHandler.class);
 
-    private Map<String, DistheneReaderHandler> handlers = new HashMap<>();
+    private Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
 
-    public ReaderServerHandler(Map<String, DistheneReaderHandler> handlers) {
+    public ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
         this.handlers = handlers;
     }
 
@@ -39,13 +41,27 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
             }
 
+            logger.debug("Got request: " + ((HttpRequest) message).getMethod() + " " + ((HttpRequest) message).getUri());
+            byte[] bytes = new byte[((HttpContent) message).content().readableBytes()];
+            ((HttpContent) message).content().readBytes(bytes);
+            logger.debug("Request content: " + new String(bytes));
+
             String path = new QueryStringDecoder(((HttpRequest) message).getUri()).path();
-            DistheneReaderHandler handler = handlers.get(path);
+
+            DistheneReaderHandler handler = null;
+            for(Map.Entry<Pattern,DistheneReaderHandler> entry : handlers.entrySet()) {
+                if (entry.getKey().matcher(path).matches()) {
+                    handler = entry.getValue();
+                    break;
+                }
+            }
+
 
             if (handler != null) {
                 response = handler.handle(request);
             } else {
                 response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
             }
 
             if (keepAlive) {
@@ -56,7 +72,7 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             }
         } catch (Exception e) {
             logger.error("Invalid request", e);
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR);
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         }
     }

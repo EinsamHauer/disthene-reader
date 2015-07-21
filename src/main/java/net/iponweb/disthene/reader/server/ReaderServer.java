@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author Andrei Ivanov
@@ -29,7 +30,7 @@ public class ReaderServer {
 
     private ReaderConfiguration configuration;
 
-    private Map<String, DistheneReaderHandler> handlers = new HashMap<>();
+    private Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
 
     public ReaderServer(ReaderConfiguration configuration) {
         this.configuration = configuration;
@@ -64,7 +65,7 @@ public class ReaderServer {
     }
 
     public void registerHandler(String path, DistheneReaderHandler handler) {
-        handlers.put(path, handler);
+        handlers.put(Pattern.compile(path), handler);
     }
 
     public void shutdown() {
