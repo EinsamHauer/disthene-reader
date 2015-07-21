@@ -1,4 +1,4 @@
-class disthene-reader (
+class disthene_reader (
   $java_xmx = '4G',
   $java_xms = '2G',
   $java_extra_options = '',
@@ -34,7 +34,7 @@ class disthene-reader (
     $disthene_log_config = 'puppet:///modules/config/disthene-reader-log4j.xml'
   }
   else {
-    $disthene_log_config = 'puppet:///modules/disthene-reader/disthene-reader-log4j.xml'
+    $disthene_log_config = 'puppet:///modules/disthene_reader/disthene-reader-log4j.xml'
   }
 
   package { 'disthene-reader':
@@ -44,7 +44,7 @@ class disthene-reader (
   file { 'disthene_reader_config':
     ensure  => present,
     path    => '/etc/disthene-reader/disthene-reader.yaml',
-    content => template('disthene-reader/disthene-reader.yaml.erb'),
+    content => template('disthene_reader/disthene-reader.yaml.erb'),
     require => Package['disthene-reader'],
   }
 
@@ -59,7 +59,7 @@ class disthene-reader (
   file { 'disthene_reader_defaults':
     ensure  => present,
     path    => '/etc/default/disthene-reader',
-    content => template('disthene-reader/disthene-reader-default.erb'),
+    content => template('disthene_reader/disthene-reader-default.erb'),
     require => File['disthene_reader_config'],
   }
 
