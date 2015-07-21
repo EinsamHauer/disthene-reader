@@ -4,7 +4,7 @@ if [ -f /etc/default/disthene-reader ]; then
     . /etc/default/disthene-reader
 fi
 
-JAR="/usr/lib/disthene/disthene-reader.jar"
+JAR="/usr/lib/disthene-reader/disthene-reader.jar"
 OPTS=""
 
 if [ -n "$DISTHENE_READER_CONFIG_FILE" ]; then
