@@ -170,7 +170,7 @@
                                     <type>link</type>
                                     <symlink>true</symlink>
                                     <linkName>/usr/lib/disthene-reader/disthene-reader.jar</linkName>
-                                    <linkTarget>/usr/lib/disthene/${project.build.finalName}.jar</linkTarget>
+                                    <linkTarget>/usr/lib/disthene-reader/${project.build.finalName}.jar</linkTarget>
                                 </data>
 
                                 <data>
