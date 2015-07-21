@@ -14,6 +14,7 @@ import net.iponweb.disthene.reader.graphite.grammar.GraphiteLexer;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import net.iponweb.disthene.reader.service.metric.MetricService;
+import net.iponweb.disthene.reader.service.stats.StatsService;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -35,9 +36,11 @@ public class RenderHandler implements DistheneReaderHandler {
     final static Logger logger = Logger.getLogger(RenderHandler.class);
 
     private TargetEvaluator evaluator;
+    private StatsService statsService;
 
-    public RenderHandler(MetricService metricService) {
+    public RenderHandler(MetricService metricService, StatsService statsService) {
         this.evaluator = new TargetEvaluator(metricService);
+        this.statsService = statsService;
     }
 
     @Override
@@ -45,6 +48,8 @@ public class RenderHandler implements DistheneReaderHandler {
         RenderParameters parameters = RenderParameters.parse(request);
 
         logger.debug("Got request: " + parameters);
+
+        statsService.incRenderRequests(parameters.getTenant());
 
         List<Target> targets = new ArrayList<>();
 
@@ -63,7 +68,6 @@ public class RenderHandler implements DistheneReaderHandler {
                 throw new InvalidParameterValueException("Could not parse target: " + targetString + " (" + additionalInfo + ")");
             }
         }
-//        logger.debug(targets);
 
         // now evaluate each target producing list of TimeSeries
         List<TimeSeries> results = new ArrayList<>();
@@ -71,12 +75,6 @@ public class RenderHandler implements DistheneReaderHandler {
         for(Target target : targets) {
             results.addAll(evaluator.eval(target));
         }
-
-/*
-        for(TimeSeries ts : results) {
-            logger.debug(ts);
-        }
-*/
 
         return ResponseFormatter.formatResponse(results, parameters);
     }

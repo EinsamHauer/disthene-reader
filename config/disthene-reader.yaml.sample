@@ -26,3 +26,9 @@ index:
   scroll: 50000
   timeout: 120000
   maxPaths: 50000
+stats:
+  interval: 60
+  tenant: "graphite"
+  hostname: "disthene-1a"
+  carbonHost: "carbon.example.net"
+  carbonPort: 2003

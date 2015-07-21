@@ -13,6 +13,7 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.service.index.IndexService;
+import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -30,15 +31,17 @@ public class MetricService {
 
     private IndexService indexService;
     private CassandraService cassandraService;
+    private StatsService statsService;
 
     private DistheneReaderConfiguration distheneReaderConfiguration;
 
     private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
-    public MetricService(IndexService indexService, CassandraService cassandraService, DistheneReaderConfiguration distheneReaderConfiguration) {
+    public MetricService(IndexService indexService, CassandraService cassandraService, StatsService statsService, DistheneReaderConfiguration distheneReaderConfiguration) {
         this.indexService = indexService;
         this.cassandraService = cassandraService;
         this.distheneReaderConfiguration = distheneReaderConfiguration;
+        this.statsService = statsService;
     }
 
     public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
@@ -110,6 +113,8 @@ public class MetricService {
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
 
+        statsService.incRenderPathsRead(tenant, paths.size());
+
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
@@ -175,6 +180,15 @@ public class MetricService {
                 return ts1.getName().compareTo(ts2.getName());
             }
         });
+
+        int totalPoints = 0;
+
+        for (TimeSeries ts : timeSeries) {
+            totalPoints += ts.getValues().length;
+        }
+
+        statsService.incRenderPointsRead(tenant, totalPoints);
+
         return timeSeries;
     }
 

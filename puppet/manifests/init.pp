@@ -27,6 +27,12 @@ class disthene_reader (
   $index_timeout = '120000',
   $index_max_paths = '50000',
 
+  $stats_interval = 60,
+  $stats_tenant = "NONE",
+  $stats_hostname = "$::hostname",
+  $stats_carbon_hostname = "carbon",
+  $stats_carbon_port = 2003,
+
   $custom_log_config = false,
 )
 {

@@ -8,6 +8,7 @@ import net.iponweb.disthene.reader.handler.RenderHandler;
 import net.iponweb.disthene.reader.server.ReaderServer;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.metric.MetricService;
+import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
@@ -41,6 +42,7 @@ public class DistheneReader {
     private IndexService indexService;
     private CassandraService cassandraService;
     private MetricService metricService;
+    private StatsService statsService;
 
 
     public DistheneReader(String configLocation) {
@@ -55,6 +57,9 @@ public class DistheneReader {
             in.close();
             logger.info("Running with the following config: " + distheneReaderConfiguration.toString());
 
+            logger.info("Creating stats");
+            statsService = new StatsService(distheneReaderConfiguration.getStats());
+
             logger.info("Creating reader");
             readerServer = new ReaderServer(distheneReaderConfiguration.getReader());
 
@@ -65,7 +70,7 @@ public class DistheneReader {
             cassandraService = new CassandraService(distheneReaderConfiguration.getStore());
 
             logger.info("Creating metric service");
-            metricService = new MetricService(indexService, cassandraService, distheneReaderConfiguration);
+            metricService = new MetricService(indexService, cassandraService, statsService, distheneReaderConfiguration);
 
             logger.info("Creating paths handler");
             PathsHandler pathsHandler = new PathsHandler(indexService);
@@ -80,7 +85,7 @@ public class DistheneReader {
             readerServer.registerHandler(PING_PATH, pingHandler);
 
             logger.info("Creating render handler");
-            RenderHandler renderHandler = new RenderHandler(metricService);
+            RenderHandler renderHandler = new RenderHandler(metricService, statsService);
             readerServer.registerHandler(RENDER_PATH, renderHandler);
 
             logger.info("Starting reader");
@@ -130,6 +135,9 @@ public class DistheneReader {
 
             logger.info("Shutting down C* service");
             cassandraService.shutdown();
+
+            logger.info("Shutting down stats service");
+            statsService.shutdown();
 
             logger.info("Shutdown complete");
 
