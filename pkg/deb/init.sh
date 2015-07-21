@@ -15,7 +15,7 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
-DESC="Disthene reader"
+DESC=""
 NAME=disthene-reader
 DAEMON=/usr/bin/disthene-reader
 DAEMON_USER=disthene-reader
