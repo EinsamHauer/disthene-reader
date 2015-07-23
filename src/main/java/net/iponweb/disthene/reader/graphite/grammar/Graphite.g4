@@ -7,9 +7,7 @@ expression:
 
 pathExpression: (pathElement DOT)* pathElement;
 
-pathElement: (partialPathElement | matchEnum)+;
-
-matchEnum: LEFT_BRACE (partialPathElement COMMA)* partialPathElement RIGHT_BRACE;
+pathElement: partialPathElement+;
 
 args: (WS* arg WS* COMMA WS*)* arg WS*;
 
@@ -26,29 +24,29 @@ partialPathElement: (EscapedChar)+ | FunctionName | path;
 
 number: Integer | Float | Scientific;
 
-path: (VALID_METRIC_CHAR | number)+;
+path: (ValidChars | number)+;
+
+fake: ValidChars;
 
 Boolean: TRUE | FALSE;
-Integer: '-'* DIGIT+;
-Float: '-'* DIGIT+ '.' DIGIT+;
 Scientific: (Integer | Float) ('e' | 'E') Integer;
 QoutedString: DoubleQuotedString | SingleQuotedString;
 DoubleQuotedString: '"' ~[\r\n]*? '"';
 SingleQuotedString: '\'' ~[\r\n]*? '\'';
 FunctionName: [a-zA-Z_]+ [a-zA-Z_0-9]*;
+ValidChars: [!#$%&*+\-/0123456789,:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]\{\}^_`abcdefghijklmnopqrstuvwxyz|~]+;
+Integer: '-'* DIGIT+;
+Float: '-'* DIGIT+ '.' DIGIT+;
 EscapedChar: BACKSLASH SYMBOL;
 
 DOT: '.';
 COMMA: ',';
-LEFT_BRACE: '{';
-RIGHT_BRACE: '}';
 LEFT_PAREN: '(';
 RIGHT_PAREN: ')';
 SYMBOL: [(){},=.'"];
 BACKSLASH: '\\';
 DIGIT: [0-9];
 WS: (' ' | '\t')+ -> skip;
-VALID_METRIC_CHAR: [!#$%&*+\-/0123456789,:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]\{\}^_`abcdefghijklmnopqrstuvwxyz|~];
 TRUE: ('t' | 'T')('r' | 'R')('u' | 'U')('e' | 'E');
 FALSE: ('f' | 'F')('a' | 'A')('l' | 'L')('s' | 'S')('e' | 'E');
 
