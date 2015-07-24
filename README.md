@@ -21,6 +21,34 @@ The following functions have a different implementation:
 * holtWintersConfidenceArea
 * holtWintersAberration
 
+The following functions are not implemented:
+* summarize
+* smartSummarize
+* hitcount
+* fallbackSeries
+* removeBetweenPercentile
+* useSeriesAbove
+* exclude
+* grep
+* removeEmptySeries
+* map
+* mapSeries
+* reduce
+* reduceSeries
+* identity
+* threshold
+* cumulative
+* consolidateBy
+* changed
+* groupByNode
+* substr
+* time
+* sin
+* randomWalk
+* timeFunction
+* sinFunction
+* randomWalkFunction
+* events
 
 
 
