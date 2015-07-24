@@ -12,7 +12,7 @@ The following APIs are supported:
 * /metrics
 * /render mostly as per Graphite specification version 0.10.0
 
-The functions are mostly per Graphite specification version 0.10.0 with seceral exception below.
+The functions are mostly per Graphite specification version 0.10.0 with several exceptions below.
 
 The following functions have a different implementation:
 * stdev (see https://github.com/graphite-project/graphite-web/issues/986)
