@@ -6,6 +6,25 @@ This is a "dual" project to [disthene](https://github.com/EinsamHauer/disthene).
 Besides that **graphite-api** as well as original **graphite** rendering could really be a bit faster.
 All in all, this project is about read and rendering performance exactly like **disthene**
 
+## What's in
+The following APIs are supported:
+* /paths API for backward compatibility with **graphite-api** and **cyanite**
+* /metrics
+* /render mostly as per Graphite specification version 0.10.0
+
+The functions are mostly per Graphite specification version 0.10.0 with seceral exception below.
+
+The following functions have a different implementation:
+* stdev (see https://github.com/graphite-project/graphite-web/issues/986)
+* holtWintersForecast
+* holtWintersConfidenceBands
+* holtWintersConfidenceArea
+* holtWintersAberration
+
+
+
+
+
 ## Compiling 
 
 This is a standard Java Maven project. 
@@ -21,7 +40,7 @@ There are a couple of things you will need in runtime, just the same set as for 
 
 * Cassandra
 * Elasticsearch
-* Graphite-web 
+* Graphite-web (probably a modified version like https://github.com/cybem/graphite-web-iow)
 * [graphite-cyanite](https://github.com/brutasse/graphite-cyanite)
 
 ## Configuration
