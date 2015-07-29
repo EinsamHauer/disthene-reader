@@ -202,16 +202,6 @@
                                 </data>
 
                                 <data>
-                                    <src>${basedir}/pkg/deb/disthene-reader-default</src>
-                                    <dst>disthene-reader</dst>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/etc/default</prefix>
-                                    </mapper>
-                                </data>
-
-                                <data>
                                     <src>${basedir}/pkg/deb/disthene-reader</src>
                                     <type>file</type>
                                     <mapper>
