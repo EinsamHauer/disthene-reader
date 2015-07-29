@@ -33,7 +33,7 @@ public class AggregateLineFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        String aggregation = arguments.size() > 1 ? ((String) arguments.get(1)).toLowerCase() : "avg";
+        String aggregation = arguments.size() > 1 ? ((String) arguments.get(1)).toLowerCase().replaceAll("[\"\']", "") : "avg";
 
         for (TimeSeries ts : processedArguments) {
             List<Double> valuesArray = Arrays.asList(ts.getValues());
@@ -78,7 +78,7 @@ public class AggregateLineFunction extends DistheneFunction {
 
         if (arguments.size() > 1) {
             if (!(arguments.get(1) instanceof String)) throw new InvalidArgumentException("aggregateLine: argument is " + arguments.get(1).getClass().getName() + ". Must be a string");
-            String argument = ((String) arguments.get(1)).toLowerCase();
+            String argument = ((String) arguments.get(1)).toLowerCase().replaceAll("[\"\']", "");
             if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("total") && !argument.equals("min") && !argument.equals("max")) {
                 throw new InvalidArgumentException("aggregateLine: must be aggregation.");
             }
