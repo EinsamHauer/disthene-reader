@@ -384,7 +384,7 @@ public abstract class Graph {
 
         for (DecoratedTimeSeries ts : data) {
             double numberOfDataPoints = ts.getValues().length;
-            double divisor = ts.getValues().length;
+            double divisor = ts.getValues().length - 1;
             double bestXStep = numberOfPixels / divisor;
 
             if (bestXStep < imageParameters.getMinXStep()) {
@@ -776,7 +776,7 @@ public abstract class Graph {
         startDateTime = new DateTime(startTime * 1000, renderParameters.getTz());
         endDateTime = new DateTime(endTime * 1000, renderParameters.getTz());
 
-        double secondsPerPixel = (endTime - startTime) / graphWidth;
+        double secondsPerPixel = (endTime - startTime) / (double) graphWidth;
         xScaleFactor = (double) graphWidth / (endTime - startTime);
 
         xAxisConfig = XAxisConfigProvider.getXAxisConfig(secondsPerPixel, endTime - startTime);
