@@ -7,8 +7,8 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.graph.DecoratedTimeSeries;
 import net.iponweb.disthene.reader.graph.Graph;
-import net.iponweb.disthene.reader.graph.LineGraph;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
+import org.joda.time.DateTime;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
@@ -27,9 +27,32 @@ public class ResponseFormatter {
         switch (parameters.getFormat()) {
             case JSON: return formatResponseAsJson(filtered, parameters);
             case RAW: return formatResponseAsRaw(filtered);
+            case CSV: return formatResponseAsCSV(filtered, parameters);
             case PNG: return formatResponseAsPng(filtered, parameters);
             default:throw new NotImplementedException();
         }
+    }
+
+    private static FullHttpResponse formatResponseAsCSV(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) {
+        List<String> results = new ArrayList<>();
+
+        for(TimeSeries timeSeries : timeSeriesList) {
+            Double[] values = timeSeries.getValues();
+            for(int i = 0; i < values.length; i++) {
+                DateTime dt = new DateTime((timeSeries.getFrom() + i * timeSeries.getStep()) * 1000, renderParameters.getTz());
+                results.add(timeSeries.getName() + "," + dt.toString("YYYY-MM-dd HH:mm:ss") + "," + (values[i] != null ? String.format("%.1f", values[i]) : ""));
+            }
+        }
+
+        String responseString = Joiner.on("\n").join(results);
+
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.wrappedBuffer(responseString.getBytes()));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/csv");
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        return response;
     }
 
     private static FullHttpResponse formatResponseAsRaw(List<TimeSeries> timeSeriesList) {
@@ -38,6 +61,7 @@ public class ResponseFormatter {
         for(TimeSeries timeSeries : timeSeriesList) {
             results.add(timeSeries.getName() + "," + timeSeries.getFrom() + "," + timeSeries.getTo() + "," + timeSeries.getStep() + "|" + Joiner.on(",").useForNull("null").join(timeSeries.getValues()));
         }
+
         String responseString = Joiner.on("\n").join(results);
 
 
