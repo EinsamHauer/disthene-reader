@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.utils;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -23,5 +24,29 @@ public class TimeSeriesUtils {
         }
 
         return true;
+    }
+
+    private static void align(List<TimeSeries> timeSeries) {
+        //todo: we assume that steps are multiples of each other. So, basically, we are selecting the largest step. Not sure if this needs be fixed
+        long step = timeSeries.get(0).getStep();
+
+        for (TimeSeries ts : timeSeries) {
+            step = step < ts.getStep() ? ts.getStep() : step;
+        }
+
+        // we have a new step, let's consolidate each time series one by one
+        for (TimeSeries ts : timeSeries) {
+
+        }
+
+
+    }
+
+    private static void consolidate(TimeSeries timeSeries, long step) {
+        return;
+    }
+
+    private static long GCD(long a, long b) {
+        return BigInteger.valueOf(a).gcd(BigInteger.valueOf(b)).longValue();
     }
 }
