@@ -82,7 +82,7 @@ public class MovingMedianFunction extends DistheneFunction {
     @Override
     public void checkArguments() throws InvalidArgumentException {
         if (arguments.size() != 2) throw new InvalidArgumentException("movingMedian: number of arguments is " + arguments.size() + ". Must be two.");
-        if (!(arguments.get(0) instanceof PathTarget)) throw new InvalidArgumentException("movingMedian: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("movingMedian: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
         if (!(arguments.get(1) instanceof Double) && !(arguments.get(1) instanceof String)) throw new InvalidArgumentException("movingMedian: argument is " + arguments.get(1).getClass().getName() + ". Must be a number or a string");
     }
 }
