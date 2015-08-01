@@ -102,6 +102,7 @@ public class FunctionRegistry {
         registry.put("sumSeries", SumSeriesFunction.class);
         registry.put("sumSeriesWithWildcards", SumSeriesWithWildcardsFunction.class);
         registry.put("sum", SumSeriesFunction.class);
+        registry.put("summarize", SummarizeFunction.class);
         registry.put("timeShift", TimeShiftFunction.class);
         registry.put("timeStack", TimeStackFunction.class);
         registry.put("transformNull", TransformNullFunction.class);

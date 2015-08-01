@@ -34,6 +34,7 @@ IMPLEMENTED
   'percentileOfSeries': percentileOfSeries,
   'highestMax' : highestMax,
   'timeStack': timeStack,
+  'summarize' : summarize
 
   # Calculate functions
   'divideSeries' : divideSeries,
@@ -118,7 +119,6 @@ NOT IMPLEMENTED
 WILL NOT BE IMPLEMENTED???
 ========================================================================================================================
   # Transform functions
-  'summarize' : summarize,                 ***not sure it's needed at all, use case is rare?***
   'smartSummarize' : smartSummarize,       ***not sure it's needed at all, use case is rare?***
   'hitcount'  : hitcount,                  ***not sure it's needed at all, use case is rare?***
 
