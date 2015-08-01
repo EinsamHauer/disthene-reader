@@ -22,7 +22,6 @@ The following functions have a different implementation:
 * holtWintersAberration
 
 The following functions are not implemented:
-* summarize
 * smartSummarize
 * hitcount
 * fallbackSeries
