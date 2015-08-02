@@ -108,6 +108,7 @@ public class SummarizeFunction extends DistheneFunction {
             ts.setTo(to);
             ts.setStep(step);
             ts.setValues(consolidated.toArray(new Double[1]));
+            ts.setName("summarize(" + ts.getName() + ",\"" + arguments.get(1) + "\",\"" + aggregation + "\")");
         }
 
         return processedArguments;
