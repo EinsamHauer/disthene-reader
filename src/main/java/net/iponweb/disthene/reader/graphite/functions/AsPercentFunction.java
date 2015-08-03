@@ -3,7 +3,6 @@ package net.iponweb.disthene.reader.graphite.functions;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
-import net.iponweb.disthene.reader.exceptions.InvalidNumberOfSeriesException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
@@ -39,7 +38,7 @@ public class AsPercentFunction extends DistheneFunction {
         int length = processedArguments.get(0).getValues().length;
         double[] total = new double[length];
 
-        if (arguments.size() > 1) {
+        if (arguments.size() > 1 && (arguments.get(1) instanceof Target)) {
             List<TimeSeries> totalSeries = new ArrayList<>();
             totalSeries.addAll(evaluator.eval((Target) arguments.get(1)));
 
@@ -60,6 +59,11 @@ public class AsPercentFunction extends DistheneFunction {
                         total[i] += ts.getValues()[i];
                     }
                 }
+            }
+        } else if (arguments.size() > 1 && (arguments.get(1) instanceof Double)) {
+            double value = (Double) arguments.get(1);
+            for (int i = 0; i < length; i++) {
+                total[i] = value;
             }
         } else {
             for (int i = 0; i < length; i++) {
@@ -84,8 +88,10 @@ public class AsPercentFunction extends DistheneFunction {
                 }
             }
 
-            if (arguments.size() > 1) {
+            if (arguments.size() > 1 && (arguments.get(1) instanceof Target)) {
                 ts.setName("asPercent(" + ts.getName() + "," + ((Target) arguments.get(1)).getText() + ")");
+            } else if (arguments.size() > 1 && (arguments.get(1) instanceof Double)) {
+                ts.setName("asPercent(" + ts.getName() + "," + arguments.get(1) + ")");
             } else {
                 setResultingName(ts);
             }
@@ -98,6 +104,6 @@ public class AsPercentFunction extends DistheneFunction {
     public void checkArguments() throws InvalidArgumentException {
         if (arguments.size() > 2 || arguments.size() == 0) throw new InvalidArgumentException("asPercent: number of arguments is " + arguments.size() + ". Must be 1.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (arguments.size() > 1 && !(arguments.get(1) instanceof Target)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(1).getClass().getName() + ". Must be series");
+        if (arguments.size() > 1 && !(arguments.get(1) instanceof Target) && !(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(1).getClass().getName() + ". Must be series or number");
     }
 }
