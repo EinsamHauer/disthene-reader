@@ -34,7 +34,8 @@ IMPLEMENTED
   'percentileOfSeries': percentileOfSeries,
   'highestMax' : highestMax,
   'timeStack': timeStack,
-  'summarize' : summarize
+  'summarize' : summarize,
+  'hitcount'  : hitcount
 
   # Calculate functions
   'divideSeries' : divideSeries,
@@ -98,6 +99,7 @@ IMPLEMENTED
   'aggregateLine' : aggregateLine,
   'group' : group,
   'aliasSub' : aliasSub,
+  'threshold' : threshold
 
 NOT IMPLEMENTED
 ========================================================================================================================
@@ -120,7 +122,6 @@ WILL NOT BE IMPLEMENTED???
 ========================================================================================================================
   # Transform functions
   'smartSummarize' : smartSummarize,       ***not sure it's needed at all, use case is rare?***
-  'hitcount'  : hitcount,                  ***not sure it's needed at all, use case is rare?***
 
 
   # Series Filter functions
@@ -137,7 +138,6 @@ WILL NOT BE IMPLEMENTED???
   'reduce': reduceSeries,           ***overkill/need to change grammar***
   'reduceSeries': reduceSeries,     ***overkill/need to change grammar***
   'identity': identity,             ***corner use case***
-  'threshold' : threshold,          ***redundant - constantLine does the same thing combined with legendValue and color***
   'cumulative' : cumulative,        ***seems to be useful only in some corner cases***
   'consolidateBy' : consolidateBy,  ***seems to be useful only in some corner cases***
   'changed' : changed,              ***seems to be useful only in some corner cases***

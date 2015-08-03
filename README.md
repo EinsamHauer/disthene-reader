@@ -23,7 +23,6 @@ The following functions have a different implementation:
 
 The following functions are not implemented:
 * smartSummarize
-* hitcount
 * fallbackSeries
 * removeBetweenPercentile
 * useSeriesAbove
@@ -35,7 +34,6 @@ The following functions are not implemented:
 * reduce
 * reduceSeries
 * identity
-* threshold
 * cumulative
 * consolidateBy
 * changed
