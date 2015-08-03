@@ -34,6 +34,7 @@ class disthene_reader (
   $stats_carbon_port = 2003,
 
   $custom_log_config = false,
+  $custom_throttling_config = false,
 )
 {
   if $custom_log_config {
@@ -41,6 +42,13 @@ class disthene_reader (
   }
   else {
     $disthene_log_config = 'puppet:///modules/disthene_reader/disthene-reader-log4j.xml'
+  }
+
+  if $custom_throttling_config {
+    $disthene_throttling_config = 'puppet:///modules/config/throttling.yaml'
+  }
+  else {
+    $disthene_throttling_config = 'puppet:///modules/disthene_reader/throttling.yaml'
   }
 
   package { 'disthene-reader':
@@ -58,6 +66,14 @@ class disthene_reader (
     ensure  => present,
     path    => '/etc/disthene-reader/disthene-reader-log4j.xml',
     source  => $disthene_log_config,
+    require => Package['disthene-reader'],
+    notify  => Service['disthene-reader'],
+  }
+
+  file { 'disthene_throttling_config':
+    ensure  => present,
+    path    => '/etc/disthene-reader/throttling.yaml',
+    source  => $disthene_throttling_config,
     require => Package['disthene-reader'],
     notify  => Service['disthene-reader'],
   }

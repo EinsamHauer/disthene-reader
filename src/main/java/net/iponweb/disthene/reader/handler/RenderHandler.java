@@ -15,6 +15,7 @@ import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
+import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -37,10 +38,12 @@ public class RenderHandler implements DistheneReaderHandler {
 
     private TargetEvaluator evaluator;
     private StatsService statsService;
+    private ThrottlingService throttlingService;
 
-    public RenderHandler(MetricService metricService, StatsService statsService) {
+    public RenderHandler(MetricService metricService, StatsService statsService, ThrottlingService throttlingService) {
         this.evaluator = new TargetEvaluator(metricService);
         this.statsService = statsService;
+        this.throttlingService = throttlingService;
     }
 
     @Override
@@ -49,7 +52,13 @@ public class RenderHandler implements DistheneReaderHandler {
 
         logger.debug("Got request: " + parameters);
 
+        double throttled = throttlingService.throttle(parameters.getTenant());
+
         statsService.incRenderRequests(parameters.getTenant());
+
+        if (throttled > 0) {
+            statsService.incThrottleTime(parameters.getTenant(), throttled);
+        }
 
         List<Target> targets = new ArrayList<>();
 

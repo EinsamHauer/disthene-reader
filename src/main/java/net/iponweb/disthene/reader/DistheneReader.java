@@ -1,6 +1,7 @@
 package net.iponweb.disthene.reader;
 
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
+import net.iponweb.disthene.reader.config.ThrottlingConfiguration;
 import net.iponweb.disthene.reader.handler.MetricsHandler;
 import net.iponweb.disthene.reader.handler.PathsHandler;
 import net.iponweb.disthene.reader.handler.PingHandler;
@@ -10,6 +11,7 @@ import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
+import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -17,10 +19,13 @@ import org.yaml.snakeyaml.Yaml;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrei Ivanov
@@ -29,6 +34,7 @@ public class DistheneReader {
 
     private static final String DEFAULT_CONFIG_LOCATION = "/etc/disthene-reader/disthene-reader.yaml";
     private static final String DEFAULT_LOG_CONFIG_LOCATION = "/etc/disthene-reader/disthene-reader-log4j.xml";
+    private static final String DEFAULT_THROTTLING_CONFIG_LOCATION = "/etc/disthene-reader/throttling.yaml";
 
     private static final String METRICS_PATH = "^/metrics\\/?$";
     private static final String PATHS_PATH = "^/paths\\/?$";
@@ -38,15 +44,17 @@ public class DistheneReader {
     private static Logger logger;
 
     private String configLocation;
+    private String throttlingConfigLocation;
     private ReaderServer readerServer;
     private IndexService indexService;
     private CassandraService cassandraService;
     private MetricService metricService;
     private StatsService statsService;
+    private ThrottlingService throttlingService;
 
-
-    public DistheneReader(String configLocation) {
+    public DistheneReader(String configLocation, String throttlingConfigLocation) {
         this.configLocation = configLocation;
+        this.throttlingConfigLocation = throttlingConfigLocation;
     }
 
     private void run() {
@@ -56,6 +64,21 @@ public class DistheneReader {
             DistheneReaderConfiguration distheneReaderConfiguration = yaml.loadAs(in, DistheneReaderConfiguration.class);
             in.close();
             logger.info("Running with the following config: " + distheneReaderConfiguration.toString());
+
+            ThrottlingConfiguration throttlingConfiguration;
+            File file = new File(throttlingConfigLocation);
+            if(file.exists() && !file.isDirectory()) {
+                logger.info("Loading throttling rules");
+                in = Files.newInputStream(Paths.get(throttlingConfigLocation));
+                throttlingConfiguration = yaml.loadAs(in, ThrottlingConfiguration.class);
+                in.close();
+            } else {
+                throttlingConfiguration = new ThrottlingConfiguration();
+            }
+
+            logger.debug("Running with the following throttling configuration: " + throttlingConfiguration.toString());
+            logger.info("Creating throttling");
+            throttlingService = new ThrottlingService(throttlingConfiguration);
 
             logger.info("Creating stats");
             statsService = new StatsService(distheneReaderConfiguration.getStats());
@@ -73,7 +96,7 @@ public class DistheneReader {
             metricService = new MetricService(indexService, cassandraService, statsService, distheneReaderConfiguration);
 
             logger.info("Creating paths handler");
-            PathsHandler pathsHandler = new PathsHandler(indexService);
+            PathsHandler pathsHandler = new PathsHandler(indexService, statsService);
             readerServer.registerHandler(PATHS_PATH, pathsHandler);
 
             logger.info("Creating metrics handler");
@@ -85,7 +108,7 @@ public class DistheneReader {
             readerServer.registerHandler(PING_PATH, pingHandler);
 
             logger.info("Creating render handler");
-            RenderHandler renderHandler = new RenderHandler(metricService, statsService);
+            RenderHandler renderHandler = new RenderHandler(metricService, statsService, throttlingService);
             readerServer.registerHandler(RENDER_PATH, renderHandler);
 
             logger.info("Starting reader");
@@ -103,6 +126,7 @@ public class DistheneReader {
         Options options = new Options();
         options.addOption("c", "config", true, "config location");
         options.addOption("l", "log-config", true, "log config location");
+        options.addOption("t", "throttling-config", true, "throttling config location");
 
         CommandLineParser parser = new GnuParser();
 
@@ -111,7 +135,7 @@ public class DistheneReader {
             System.getProperties().setProperty("log4j.configuration", "file:" + commandLine.getOptionValue("l", DEFAULT_LOG_CONFIG_LOCATION));
             logger = Logger.getLogger(DistheneReader.class);
 
-            new DistheneReader(commandLine.getOptionValue("c", DEFAULT_CONFIG_LOCATION)).run();
+            new DistheneReader(commandLine.getOptionValue("c", DEFAULT_CONFIG_LOCATION), commandLine.getOptionValue("t", DEFAULT_THROTTLING_CONFIG_LOCATION)).run();
 
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();

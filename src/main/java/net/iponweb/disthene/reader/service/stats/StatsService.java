@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.service.stats;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import net.iponweb.disthene.reader.config.StatsConfiguration;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -67,6 +68,11 @@ public class StatsService {
         getStatsRecord(tenant).incPathsRequests();
     }
 
+    public void incThrottleTime(String tenant, double value) {
+        getStatsRecord(tenant).incThrottled(value);
+    }
+
+
     private synchronized void flush() {
         Map<String, StatsRecord> statsToFlush = new HashMap<>();
 
@@ -86,6 +92,7 @@ public class StatsService {
             long totalRenderPathsRead = 0;
             long totalRenderPointsRead = 0;
             long totalPathsRequests = 0;
+            double totalThrottled = 0;
 
             for (Map.Entry<String, StatsRecord> entry : statsToFlush.entrySet()) {
                 String tenant = entry.getKey();
@@ -95,17 +102,20 @@ public class StatsService {
                 totalRenderPathsRead += statsRecord.getRenderPathsRead();
                 totalRenderPointsRead += statsRecord.getRenderPointsRead();
                 totalPathsRequests += statsRecord.getPathsRequests();
+                totalThrottled += statsRecord.getThrottled();
 
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsRecord.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsRecord.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsRecord.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsRecord.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".throttled " + statsRecord.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant());
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + totalRenderPathsRead + " " + timestamp + " " + statsConfiguration.getTenant());
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant());
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant());
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant());
 
             dos.flush();
             connection.close();
@@ -123,15 +133,19 @@ public class StatsService {
         private AtomicLong renderPathsRead = new AtomicLong(0);
         private AtomicLong renderPointsRead = new AtomicLong(0);
         private AtomicLong pathsRequests = new AtomicLong(0);
+        private AtomicDouble throttled = new AtomicDouble(0);
 
         public StatsRecord() {
         }
 
-        public StatsRecord(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests) {
+
+
+        public StatsRecord(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests, double throttled) {
             this.renderRequests = new AtomicLong(renderRequests);
             this.renderPathsRead = new AtomicLong(renderPathsRead);
             this.renderPointsRead = new AtomicLong(renderPointsRead);
             this.pathsRequests = new AtomicLong(pathsRequests);
+            this.throttled = new AtomicDouble(throttled);
         }
 
         /**
@@ -139,7 +153,7 @@ public class StatsService {
          * @return snapshot of the record
          */
         public StatsRecord reset() {
-            return new StatsRecord(renderRequests.getAndSet(0), renderPathsRead.getAndSet(0), renderPointsRead.getAndSet(0), pathsRequests.getAndSet(0));
+            return new StatsRecord(renderRequests.getAndSet(0), renderPathsRead.getAndSet(0), renderPointsRead.getAndSet(0), pathsRequests.getAndSet(0), throttled.getAndSet(0));
         }
 
         public void incRenderRequests() {
@@ -158,6 +172,10 @@ public class StatsService {
             pathsRequests.addAndGet(1);
         }
 
+        public void incThrottled(double value) {
+            throttled.addAndGet(value);
+        }
+
         public long getRenderRequests() {
             return renderRequests.get();
         }
@@ -172,6 +190,10 @@ public class StatsService {
 
         public long getPathsRequests() {
             return pathsRequests.get();
+        }
+
+        public double getThrottled() {
+            return throttled.get();
         }
     }
 

@@ -7,6 +7,7 @@ import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.index.IndexService;
+import net.iponweb.disthene.reader.service.stats.StatsService;
 import org.apache.log4j.Logger;
 
 import java.nio.charset.Charset;
@@ -19,14 +20,19 @@ public class PathsHandler implements DistheneReaderHandler {
     final static Logger logger = Logger.getLogger(PathsHandler.class);
 
     private IndexService indexService;
+    private StatsService statsService;
 
-    public PathsHandler(IndexService indexService) {
+    public PathsHandler(IndexService indexService, StatsService statsService) {
         this.indexService = indexService;
+        this.statsService = statsService;
     }
 
     @Override
     public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException {
         PathsParameters parameters = parse(request);
+
+        statsService.incPathsRequests(parameters.getTenant());
+
         String pathsAsJsonArray = indexService.getPathsAsJsonArray(parameters.getTenant(), parameters.getQuery());
 
         FullHttpResponse response = new DefaultFullHttpResponse(
