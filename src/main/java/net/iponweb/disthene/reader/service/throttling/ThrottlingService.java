@@ -55,4 +55,18 @@ public class ThrottlingService {
 
         return tenantThrottled + totalThrottled;
     }
+
+    public void reload(ThrottlingConfiguration throttlingConfiguration) {
+        Map<String, RateLimiter> rateLimiters = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : throttlingConfiguration.getTenants().entrySet()) {
+            rateLimiters.put(entry.getKey(), RateLimiter.create(entry.getValue()));
+        }
+
+        RateLimiter totalRateLimiter = RateLimiter.create(throttlingConfiguration.getTotalQPS());
+
+        this.throttlingConfiguration = throttlingConfiguration;
+        this.rateLimiters = rateLimiters;
+        this.totalRateLimiter = totalRateLimiter;
+
+    }
 }

@@ -115,6 +115,7 @@ public class DistheneReader {
             readerServer.run();
 
             Signal.handle(new Signal("TERM"), new SigtermSignalHandler());
+            Signal.handle(new Signal("HUP"), new SighupSignalHandler());
         } catch (IOException e) {
             logger.error(e);
         } catch (InterruptedException e) {
@@ -168,4 +169,36 @@ public class DistheneReader {
             System.exit(0);
         }
     }
+
+    private class SighupSignalHandler implements SignalHandler {
+
+        @Override
+        public void handle(Signal signal) {
+            logger.info("Received sighup");
+
+            logger.info("Reloading throttling configuration");
+            try {
+                ThrottlingConfiguration throttlingConfiguration;
+                File file = new File(throttlingConfigLocation);
+                if(file.exists() && !file.isDirectory()) {
+                    Yaml yaml = new Yaml();
+                    logger.info("Loading throttling configuration");
+                    InputStream in = Files.newInputStream(Paths.get(throttlingConfigLocation));
+                    throttlingConfiguration = yaml.loadAs(in, ThrottlingConfiguration.class);
+                    in.close();
+                } else {
+                    throttlingConfiguration = new ThrottlingConfiguration();
+                }
+
+                throttlingService.reload(throttlingConfiguration);
+
+                logger.debug("Running with the following throttling configuration: " + throttlingConfiguration.toString());
+            } catch (Exception e) {
+                logger.error("Reloading throttling configuration failed");
+                logger.error(e);
+            }
+        }
+    }
+
+
 }
