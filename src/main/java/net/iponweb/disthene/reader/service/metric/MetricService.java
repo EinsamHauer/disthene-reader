@@ -37,7 +37,8 @@ public class MetricService {
 
     private DistheneReaderConfiguration distheneReaderConfiguration;
 
-    private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+//    private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(16));
 
     public MetricService(IndexService indexService, CassandraService cassandraService, StatsService statsService, DistheneReaderConfiguration distheneReaderConfiguration) {
         this.indexService = indexService;
