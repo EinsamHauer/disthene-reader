@@ -4,6 +4,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrei Ivanov
@@ -92,6 +94,7 @@ public class MetricService {
                     )
             );
         }
+
         futures = Futures.inCompletionOrder(futures);
 
         // Build response content JSON
@@ -159,6 +162,9 @@ public class MetricService {
                     )
             );
         }
+
+        Stopwatch timer = Stopwatch.createStarted();
+
         futures = Futures.inCompletionOrder(futures);
 
         List<TimeSeries> timeSeries = new ArrayList<>();
@@ -173,6 +179,9 @@ public class MetricService {
         }
 
         logger.debug("Number of series fetched: " + timeSeries.size());
+        timer.stop();
+        logger.debug("Fetching from Cassandra took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
+
         // sort it by path
         Collections.sort(timeSeries, new Comparator<TimeSeries>() {
             @Override

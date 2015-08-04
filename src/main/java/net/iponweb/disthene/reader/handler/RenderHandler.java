@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.handler;
 
+import com.google.common.base.Stopwatch;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -28,6 +29,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrei Ivanov
@@ -51,6 +53,7 @@ public class RenderHandler implements DistheneReaderHandler {
         RenderParameters parameters = RenderParameters.parse(request);
 
         logger.debug("Got request: " + parameters);
+        Stopwatch timer = Stopwatch.createStarted();
 
         double throttled = throttlingService.throttle(parameters.getTenant());
 
@@ -84,6 +87,9 @@ public class RenderHandler implements DistheneReaderHandler {
         for(Target target : targets) {
             results.addAll(evaluator.eval(target));
         }
+
+        timer.stop();
+        logger.debug("Request took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + parameters + ")");
 
         return ResponseFormatter.formatResponse(results, parameters);
     }
