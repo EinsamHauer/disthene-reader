@@ -71,7 +71,8 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.write(response).addListener(ChannelFutureListener.CLOSE);
             }
         } catch (Exception e) {
-            logger.error("Invalid request", e);
+            logger.error("Invalid request: " + e.getMessage());
+            logger.debug("Invalid request: ", e);
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         }

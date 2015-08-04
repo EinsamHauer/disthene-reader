@@ -12,8 +12,8 @@ public class StoreConfiguration {
     private String columnFamily;
     private int port;
     private int maxConnections;
-    private int readTimeout;
-    private int connectTimeout;
+    private double readTimeout;
+    private double connectTimeout;
     private int maxRequests;
 
     public List<String> getCluster() {
@@ -48,19 +48,19 @@ public class StoreConfiguration {
         this.maxConnections = maxConnections;
     }
 
-    public int getReadTimeout() {
+    public double getReadTimeout() {
         return readTimeout;
     }
 
-    public void setReadTimeout(int readTimeout) {
+    public void setReadTimeout(double readTimeout) {
         this.readTimeout = readTimeout;
     }
 
-    public int getConnectTimeout() {
+    public double getConnectTimeout() {
         return connectTimeout;
     }
 
-    public void setConnectTimeout(int connectTimeout) {
+    public void setConnectTimeout(double connectTimeout) {
         this.connectTimeout = connectTimeout;
     }
 

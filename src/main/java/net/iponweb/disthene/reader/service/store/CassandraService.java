@@ -31,8 +31,8 @@ public class CassandraService {
                 .setReceiveBufferSize(1024 * 1024)
                 .setSendBufferSize(1024 * 1024)
                 .setTcpNoDelay(false)
-                .setReadTimeoutMillis(storeConfiguration.getReadTimeout() * 1000)
-                .setConnectTimeoutMillis(storeConfiguration.getConnectTimeout() * 1000);
+                .setReadTimeoutMillis((int) (storeConfiguration.getReadTimeout() * 1000))
+                .setConnectTimeoutMillis((int) (storeConfiguration.getConnectTimeout() * 1000));
 
         PoolingOptions poolingOptions = new PoolingOptions();
         poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, storeConfiguration.getMaxConnections());
@@ -44,7 +44,7 @@ public class CassandraService {
                 .withSocketOptions(socketOptions)
                 .withCompression(ProtocolOptions.Compression.LZ4)
                 .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-//                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra-1a.graphite.devops.iponweb.net", 9042))))
+//                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra1a.aws-va.graphite.iponweb.net", 9042))))
                 .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
                 .withProtocolVersion(ProtocolVersion.V2)
