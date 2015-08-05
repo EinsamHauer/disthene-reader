@@ -28,9 +28,10 @@ public class DivideSeriesFunction extends DistheneFunction {
         List<TimeSeries> dividends = new ArrayList<>();
         dividends.addAll(evaluator.eval((Target) arguments.get(0)));
 
-        if (dividends.size() == 0) return new ArrayList<>();
+        if (dividends.size() == 0) return Collections.emptyList();
 
         List<TimeSeries> divisors = evaluator.eval((Target) arguments.get(1));
+        if (divisors.size() == 0) return Collections.emptyList();
         if (divisors.size() != 1) throw new MultipleDivisorsException();
         TimeSeries divisor = divisors.get(0);
 
