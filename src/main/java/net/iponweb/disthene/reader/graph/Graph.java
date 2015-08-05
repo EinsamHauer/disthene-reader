@@ -18,6 +18,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1362,13 +1363,15 @@ public abstract class Graph {
     // todo: this "magic rounding" is a complete atrocity - fix it!
     private List<Double> fRange(double step, double min, double max) {
         List<Double> result = new ArrayList<>();
-        double f = min;
+        BigDecimal bf = BigDecimal.valueOf(min);
+        BigDecimal bMax = BigDecimal.valueOf(max);
+        BigDecimal bMin = BigDecimal.valueOf(min);
+        BigDecimal bStep = BigDecimal.valueOf(step);
 
-        while (f <= max) {
-            result.add(GraphiteUtils.magicRound(f));
-            f += step;
-//            f = GraphiteUtils.magicRound(f);
-            if (f == min) {
+        while (bf.compareTo(bMax) <= 0) {
+            result.add(GraphiteUtils.magicRound(bf).doubleValue());
+            bf = bf.add(bStep);
+            if (bf.compareTo(bMin) == 0) {
                 result.add(max);
                 break;
             }

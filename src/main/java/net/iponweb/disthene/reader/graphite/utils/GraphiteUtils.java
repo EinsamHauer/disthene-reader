@@ -88,4 +88,14 @@ public class GraphiteUtils {
             return value;
         }
     }
+
+    private final static BigDecimal ONE = BigDecimal.valueOf(1.0);
+    private final static BigDecimal MINUS_ONE = BigDecimal.valueOf(-1.0);
+    public static BigDecimal magicRound(BigDecimal value) {
+        if (value.compareTo(MINUS_ONE) > 0 && value.compareTo(ONE) < 0) {
+            return value.setScale(2 - (int) Math.log10(Math.abs(value.doubleValue())), BigDecimal.ROUND_HALF_UP);
+        } else {
+            return value;
+        }
+    }
 }
