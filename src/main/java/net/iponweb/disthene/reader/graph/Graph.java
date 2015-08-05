@@ -1365,9 +1365,9 @@ public abstract class Graph {
         double f = min;
 
         while (f <= max) {
-            result.add(f);
+            result.add(GraphiteUtils.magicRound(f));
             f += step;
-            f = GraphiteUtils.magicRound(f);
+//            f = GraphiteUtils.magicRound(f);
             if (f == min) {
                 result.add(max);
                 break;
