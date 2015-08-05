@@ -77,7 +77,7 @@ public class GraphiteUtils {
     }
 
     public static String formatValue(double value, UnitSystem unitSystem) {
-        return String.format("%.2f%s", formatUnitValue(value, unitSystem), formatUnitPrefix(value, unitSystem));
+        return String.format("%s%s", formatUnitValue(value, unitSystem), formatUnitPrefix(value, unitSystem));
     }
 
     // todo: this "magic rounding" is a complete atrocity - fix it!

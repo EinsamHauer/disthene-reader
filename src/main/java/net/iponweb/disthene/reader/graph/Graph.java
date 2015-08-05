@@ -1327,7 +1327,7 @@ public abstract class Graph {
         }
 
         if (ySpan > 10 || !spanPrefix.equals(prefix)) {
-            return String.format("%.1f %s", value, prefix);
+            return String.format("%s %s", value, prefix);
         } else if (ySpan > 3) {
             return String.format("%.1f %s", value, prefix);
         } else if (ySpan > 0.1) {
