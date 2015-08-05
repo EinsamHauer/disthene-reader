@@ -61,8 +61,8 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 response = handler.handle(request);
             } else {
                 response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
             }
+            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
 
             if (keepAlive) {
                 response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
