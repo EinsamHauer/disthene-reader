@@ -1359,6 +1359,7 @@ public abstract class Graph {
         return result;
     }
 
+    // todo: this "magic rounding" is a complete atrocity - fix it!
     private List<Double> fRange(double step, double min, double max) {
         List<Double> result = new ArrayList<>();
         double f = min;

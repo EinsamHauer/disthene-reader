@@ -80,9 +80,10 @@ public class GraphiteUtils {
         return String.format("%.2f%s", formatUnitValue(value, unitSystem), formatUnitPrefix(value, unitSystem));
     }
 
+    // todo: this "magic rounding" is a complete atrocity - fix it!
     public static double magicRound(double value) {
         if (value > -1.0 && value < 1.0) {
-            return new BigDecimal(value).setScale(2 - (int) Math.log10(Math.abs(value)), BigDecimal.ROUND_HALF_DOWN).doubleValue();
+            return new BigDecimal(value).setScale(2 - (int) Math.log10(Math.abs(value)), BigDecimal.ROUND_UP).doubleValue();
         } else {
             return value;
         }
