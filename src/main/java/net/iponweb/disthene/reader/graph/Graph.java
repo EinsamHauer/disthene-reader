@@ -1162,14 +1162,16 @@ public abstract class Graph {
                 xPos = x - ts.getxStep();
             }
 
-            if (secondYAxis) {
-                if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
-                    fillAreaAndClip(path, xPos, startX, getYCoordRight(0));
+            if (consecutiveNulls == 0) {
+                if (secondYAxis) {
+                    if (ts.hasOption(TimeSeriesOption.SECOND_Y_AXIS)) {
+                        fillAreaAndClip(path, xPos, startX, getYCoordRight(0));
+                    } else {
+                        fillAreaAndClip(path, xPos, startX, getYCoordLeft(0));
+                    }
                 } else {
-                    fillAreaAndClip(path, xPos, startX, getYCoordLeft(0));
+                    fillAreaAndClip(path, xPos, startX, getYCoord(0));
                 }
-            } else {
-                fillAreaAndClip(path, xPos, startX, getYCoord(0));
             }
         }
 
