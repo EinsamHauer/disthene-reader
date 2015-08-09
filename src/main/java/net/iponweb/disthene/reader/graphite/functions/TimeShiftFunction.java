@@ -41,8 +41,8 @@ public class TimeShiftFunction extends DistheneFunction {
         }
 
         for (TimeSeries ts : processedArguments) {
-            ts.setFrom(from);
-            ts.setTo(to);
+            ts.setFrom(ts.getFrom() - offset);
+            ts.setTo(ts.getTo() - offset);
             ts.setName("timeShift(" + ts.getName() + "," + arguments.get(1) + ")");
         }
 

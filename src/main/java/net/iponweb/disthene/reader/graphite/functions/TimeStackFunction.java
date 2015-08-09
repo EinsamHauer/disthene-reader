@@ -34,8 +34,8 @@ public class TimeStackFunction extends DistheneFunction {
         while (startIndex <= endIndex) {
             List<TimeSeries> processedArguments = evaluator.eval(((Target) arguments.get(0)).shiftBy(- offset * startIndex));
             for (TimeSeries ts : processedArguments) {
-                ts.setFrom(from);
-                ts.setTo(to);
+                ts.setFrom(ts.getFrom() - offset);
+                ts.setTo(ts.getTo() - offset);
                 ts.setName("timeShift(" + ts.getName() + "," + arguments.get(1) + "," + startIndex + ")");
                 resultList.add(ts);
             }
