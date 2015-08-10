@@ -11,6 +11,7 @@ import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.joda.time.DateTime;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,18 @@ public class ResponseFormatter {
             Double[] values = timeSeries.getValues();
             for(int i = 0; i < values.length; i++) {
                 DateTime dt = new DateTime((timeSeries.getFrom() + i * timeSeries.getStep()) * 1000, renderParameters.getTz());
-                results.add(timeSeries.getName() + "," + dt.toString("YYYY-MM-dd HH:mm:ss") + "," + (values[i] != null ? String.format("%.1f", values[i]) : ""));
+                String stringValue;
+                if (values[i] == null) {
+                    stringValue = "";
+                } else {
+                    BigDecimal bigDecimal = BigDecimal.valueOf(values[i]);
+                    if (bigDecimal.precision() > 10) {
+                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
+                    }
+
+                    stringValue = bigDecimal.stripTrailingZeros().toPlainString();
+                }
+                results.add(timeSeries.getName() + "," + dt.toString("YYYY-MM-dd HH:mm:ss") + "," + stringValue);
             }
         }
 
@@ -59,7 +71,19 @@ public class ResponseFormatter {
         List<String> results = new ArrayList<>();
 
         for(TimeSeries timeSeries : timeSeriesList) {
-            results.add(timeSeries.getName() + "," + timeSeries.getFrom() + "," + timeSeries.getTo() + "," + timeSeries.getStep() + "|" + Joiner.on(",").useForNull("null").join(timeSeries.getValues()));
+            List<String> formattedValues = new ArrayList<>();
+            for (Double value : timeSeries.getValues()) {
+                if (value == null) {
+                    formattedValues.add("null");
+                } else {
+                    BigDecimal bigDecimal = BigDecimal.valueOf(value);
+                    if (bigDecimal.precision() > 10) {
+                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
+                    }
+                    formattedValues.add(bigDecimal.stripTrailingZeros().toPlainString());
+                }
+            }
+            results.add(timeSeries.getName() + "," + timeSeries.getFrom() + "," + timeSeries.getTo() + "," + timeSeries.getStep() + "|" + Joiner.on(",").useForNull("null").join(formattedValues));
         }
 
         String responseString = Joiner.on("\n").join(results);
@@ -83,7 +107,19 @@ public class ResponseFormatter {
         for(TimeSeries timeSeries : timeSeriesList) {
             List<String> datapoints = new ArrayList<>();
             for(int i = 0; i < timeSeries.getValues().length; i++) {
-                datapoints.add("[" + timeSeries.getValues()[i] + ", " + (timeSeries.getFrom() + timeSeries.getStep() * i) + "]");
+                String stringValue;
+                if (timeSeries.getValues()[i] == null) {
+                    stringValue = "null";
+                } else {
+                    BigDecimal bigDecimal = BigDecimal.valueOf(timeSeries.getValues()[i]);
+                    if (bigDecimal.precision() > 10) {
+                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
+                    }
+
+                    stringValue = bigDecimal.stripTrailingZeros().toPlainString();
+                }
+
+                datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + timeSeries.getStep() * i) + "]");
             }
             results.add("{\"target\": \"" + timeSeries.getName() + "\", \"datapoints\": [" + Joiner.on(", ").join(datapoints) + "]}");
         }
