@@ -37,6 +37,9 @@ public class ReaderServer {
     }
 
     public void run() throws InterruptedException {
+        bossGroup = new NioEventLoopGroup(configuration.getThreads());
+        workerGroup = new NioEventLoopGroup(configuration.getThreads());
+
         ServerBootstrap b = new ServerBootstrap();
 
         b.group(bossGroup, workerGroup)
