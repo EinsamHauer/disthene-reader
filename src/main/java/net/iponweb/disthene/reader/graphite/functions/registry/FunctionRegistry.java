@@ -1,7 +1,7 @@
 package net.iponweb.disthene.reader.graphite.functions.registry;
 
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
-import net.iponweb.disthene.reader.graphite.HoltWintersConfidenceAreaFunction;
+import net.iponweb.disthene.reader.graphite.functions.HoltWintersConfidenceAreaFunction;
 import net.iponweb.disthene.reader.graphite.functions.TimeShiftFunction;
 import net.iponweb.disthene.reader.graphite.functions.*;
 
