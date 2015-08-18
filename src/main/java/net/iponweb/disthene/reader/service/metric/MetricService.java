@@ -250,7 +250,7 @@ public class MetricService {
             Double values[] = new Double[length];
             for (Row row : resultSet) {
                 values[timestampIndices.get(row.getLong("time"))] =
-                        isSumMetric(path) ? CollectionUtils.sum(row.getList("data", Double.class)) : CollectionUtils.average(row.getList("data", Double.class));
+                        isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
             }
 
             json = new Gson().toJson(values);
@@ -262,7 +262,7 @@ public class MetricService {
                 values = new Double[length];
                 for (Row row : resultSet) {
                     values[timestampIndices.get(row.getLong("time"))] =
-                            isSumMetric(path) ? CollectionUtils.sum(row.getList("data", Double.class)) : CollectionUtils.average(row.getList("data", Double.class));
+                            isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
                 }
             } else {
                 values = new Double[length];

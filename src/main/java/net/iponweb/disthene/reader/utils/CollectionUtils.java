@@ -138,4 +138,27 @@ public class CollectionUtils {
         return result;
     }
 
+    // faster but unsafe methods assuming all values are not nulls and list is not empty
+    public static Double unsafeSum(Collection<Double> values) {
+        // shortcut if there is only one value
+        if (values.size() == 1) return values.iterator().next();
+
+        double sum = 0;
+        for(Double value : values) {
+            sum += value;
+        }
+        return sum;
+    }
+
+    public static Double unsafeAverage(Collection<Double> values) {
+        // shortcut if there is only one value
+        if (values.size() == 1) return values.iterator().next();
+
+        double sum = 0;
+        for(Double value : values) {
+            sum += value;
+        }
+        return sum / values.size();
+    }
+
 }
