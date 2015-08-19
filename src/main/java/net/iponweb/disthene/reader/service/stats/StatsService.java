@@ -7,7 +7,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +17,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Andrei Ivanov
  */
 public class StatsService {
-    private static final String SCHEDULER_NAME = "distheneReaderStatsFlusher";
 
     private Logger logger = Logger.getLogger(StatsService.class);
 
@@ -72,6 +70,10 @@ public class StatsService {
         getStatsRecord(tenant).incThrottled(value);
     }
 
+    public void incTimedOutRequests(String tenant) {
+        getStatsRecord(tenant).incTimedOutRequests();
+    }
+
 
     private synchronized void flush() {
         Map<String, StatsRecord> statsToFlush = new HashMap<>();
@@ -93,6 +95,7 @@ public class StatsService {
             long totalRenderPointsRead = 0;
             long totalPathsRequests = 0;
             double totalThrottled = 0;
+            long totalTimedOutRequests = 0;
 
             for (Map.Entry<String, StatsRecord> entry : statsToFlush.entrySet()) {
                 String tenant = entry.getKey();
@@ -103,12 +106,14 @@ public class StatsService {
                 totalRenderPointsRead += statsRecord.getRenderPointsRead();
                 totalPathsRequests += statsRecord.getPathsRequests();
                 totalThrottled += statsRecord.getThrottled();
+                totalTimedOutRequests += statsRecord.getTimedOutRequests();
 
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsRecord.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsRecord.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsRecord.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsRecord.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".throttled " + statsRecord.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsRecord.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant());
@@ -116,6 +121,7 @@ public class StatsService {
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant());
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant());
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant());
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + totalTimedOutRequests + " " + timestamp + " " + statsConfiguration.getTenant());
 
             dos.flush();
             connection.close();
@@ -134,18 +140,18 @@ public class StatsService {
         private AtomicLong renderPointsRead = new AtomicLong(0);
         private AtomicLong pathsRequests = new AtomicLong(0);
         private AtomicDouble throttled = new AtomicDouble(0);
+        private AtomicLong timedOutRequests = new AtomicLong(0);
 
         public StatsRecord() {
         }
 
-
-
-        public StatsRecord(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests, double throttled) {
+        public StatsRecord(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests, double throttled, long timedOut) {
             this.renderRequests = new AtomicLong(renderRequests);
             this.renderPathsRead = new AtomicLong(renderPathsRead);
             this.renderPointsRead = new AtomicLong(renderPointsRead);
             this.pathsRequests = new AtomicLong(pathsRequests);
             this.throttled = new AtomicDouble(throttled);
+            this.timedOutRequests = new AtomicLong(timedOut);
         }
 
         /**
@@ -153,7 +159,7 @@ public class StatsService {
          * @return snapshot of the record
          */
         public StatsRecord reset() {
-            return new StatsRecord(renderRequests.getAndSet(0), renderPathsRead.getAndSet(0), renderPointsRead.getAndSet(0), pathsRequests.getAndSet(0), throttled.getAndSet(0));
+            return new StatsRecord(renderRequests.getAndSet(0), renderPathsRead.getAndSet(0), renderPointsRead.getAndSet(0), pathsRequests.getAndSet(0), throttled.getAndSet(0), timedOutRequests.getAndSet(0));
         }
 
         public void incRenderRequests() {
@@ -176,6 +182,10 @@ public class StatsService {
             throttled.addAndGet(value);
         }
 
+        public void incTimedOutRequests() {
+            timedOutRequests.addAndGet(1);
+        }
+
         public long getRenderRequests() {
             return renderRequests.get();
         }
@@ -195,6 +205,11 @@ public class StatsService {
         public double getThrottled() {
             return throttled.get();
         }
+
+        public long getTimedOutRequests() {
+            return timedOutRequests.get();
+        }
+
     }
 
 }

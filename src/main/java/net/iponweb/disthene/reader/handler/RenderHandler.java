@@ -97,6 +97,7 @@ public class RenderHandler implements DistheneReaderHandler {
             }, readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS, true);
         } catch (UncheckedTimeoutException e) {
             logger.debug("Request timed out: " + parameters);
+            statsService.incTimedOutRequests(parameters.getTenant());
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
         } catch (Exception e) {
             logger.error(e);
