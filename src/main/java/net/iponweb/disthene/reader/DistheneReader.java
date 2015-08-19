@@ -108,7 +108,7 @@ public class DistheneReader {
             readerServer.registerHandler(PING_PATH, pingHandler);
 
             logger.info("Creating render handler");
-            RenderHandler renderHandler = new RenderHandler(metricService, statsService, throttlingService);
+            RenderHandler renderHandler = new RenderHandler(metricService, statsService, throttlingService, distheneReaderConfiguration.getReader());
             readerServer.registerHandler(RENDER_PATH, renderHandler);
 
             logger.info("Starting reader");

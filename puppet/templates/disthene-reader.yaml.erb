@@ -2,6 +2,7 @@ reader:
   bind: "<%= @reader_host %>"
   port: <%= @reader_port %>
   threads: <%= @reader_threads %>
+  requestTimeout: <%= @reader_request_timeout %>
   rollups:
 <% @reader_rollups.each do |rollup| -%>
     - <%= rollup %>

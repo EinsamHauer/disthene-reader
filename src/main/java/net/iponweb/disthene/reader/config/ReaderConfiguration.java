@@ -10,6 +10,7 @@ public class ReaderConfiguration {
     private String bind;
     private int port;
     private int threads = 32;
+    private int requestTimeout = 30;
     private List<Rollup> rollups = new ArrayList<>();
 
     public String getBind() {
@@ -44,12 +45,21 @@ public class ReaderConfiguration {
         this.threads = threads;
     }
 
+    public int getRequestTimeout() {
+        return requestTimeout;
+    }
+
+    public void setRequestTimeout(int requestTimeout) {
+        this.requestTimeout = requestTimeout;
+    }
+
     @Override
     public String toString() {
         return "ReaderConfiguration{" +
                 "bind='" + bind + '\'' +
                 ", port=" + port +
                 ", threads=" + threads +
+                ", requestTimeout=" + requestTimeout +
                 ", rollups=" + rollups +
                 '}';
     }
