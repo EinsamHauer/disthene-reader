@@ -140,6 +140,11 @@ public class MetricService {
         logger.debug("Expected number of data points in series is " + length);
         logger.debug("Expected number of series is " + paths.size());
 
+        // Fail (return empty list) right away if we exceed maximum number of points
+        if (paths.size() * length > distheneReaderConfiguration.getReader().getMaxPoints()) {
+            logger.debug("Expected total number of data points exceeds the limit: " + paths.size() * length);
+            return Collections.emptyList();
+        }
 
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());

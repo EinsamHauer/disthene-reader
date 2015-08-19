@@ -3,6 +3,7 @@ reader:
   port: <%= @reader_port %>
   threads: <%= @reader_threads %>
   requestTimeout: <%= @reader_request_timeout %>
+  maxPoints: <%= @reader_max_points %>
   rollups:
 <% @reader_rollups.each do |rollup| -%>
     - <%= rollup %>

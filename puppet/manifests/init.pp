@@ -9,6 +9,7 @@ class disthene_reader (
   $reader_port = '8080',
   $reader_threads = '16',
   $reader_request_timeout = '30',
+  $reader_max_points = '60000000',
   $reader_rollups = ['60s:5356800s','900s:62208000s'],
 
   $store_cluster = [$::ipaddress],

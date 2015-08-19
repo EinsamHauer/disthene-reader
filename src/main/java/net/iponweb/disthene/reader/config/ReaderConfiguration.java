@@ -11,6 +11,7 @@ public class ReaderConfiguration {
     private int port;
     private int threads = 32;
     private int requestTimeout = 30;
+    private int maxPoints = 60_000_000;
     private List<Rollup> rollups = new ArrayList<>();
 
     public String getBind() {
@@ -53,6 +54,14 @@ public class ReaderConfiguration {
         this.requestTimeout = requestTimeout;
     }
 
+    public int getMaxPoints() {
+        return maxPoints;
+    }
+
+    public void setMaxPoints(int maxPoints) {
+        this.maxPoints = maxPoints;
+    }
+
     @Override
     public String toString() {
         return "ReaderConfiguration{" +
@@ -60,6 +69,7 @@ public class ReaderConfiguration {
                 ", port=" + port +
                 ", threads=" + threads +
                 ", requestTimeout=" + requestTimeout +
+                ", maxPoints=" + maxPoints +
                 ", rollups=" + rollups +
                 '}';
     }
