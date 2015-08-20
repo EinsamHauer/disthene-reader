@@ -6,6 +6,7 @@ import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidNumberOfSeriesException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
+import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
@@ -37,7 +38,7 @@ public class TargetEvaluator {
     public List<TimeSeries> visit(PathTarget pathTarget) throws EvaluationException {
         try {
             return metricService.getMetricsAsList(pathTarget.getTenant(), Collections.singletonList(pathTarget.getPath()), pathTarget.getFrom(), pathTarget.getTo());
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TooMuchDataExpectedException e) {
             logger.error(e.getMessage());
             logger.debug(e);
             throw new EvaluationException(e);

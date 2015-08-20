@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
+import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
@@ -113,7 +114,7 @@ public class MetricService {
 
     }
 
-    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
+    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
 
         statsService.incRenderPathsRead(tenant, paths.size());
@@ -143,7 +144,7 @@ public class MetricService {
         // Fail (return empty list) right away if we exceed maximum number of points
         if (paths.size() * length > distheneReaderConfiguration.getReader().getMaxPoints()) {
             logger.debug("Expected total number of data points exceeds the limit: " + paths.size() * length);
-            return Collections.emptyList();
+            throw new TooMuchDataExpectedException("Expected total number of data points exceeds the limit: " + paths.size() * length + " (the limit is " + distheneReaderConfiguration.getReader().getMaxPoints() + ")");
         }
 
         // Now let's query C*

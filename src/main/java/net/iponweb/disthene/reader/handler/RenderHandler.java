@@ -7,10 +7,7 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.ReaderConfiguration;
-import net.iponweb.disthene.reader.exceptions.EvaluationException;
-import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
-import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
-import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
+import net.iponweb.disthene.reader.exceptions.*;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
@@ -99,6 +96,8 @@ public class RenderHandler implements DistheneReaderHandler {
             logger.debug("Request timed out: " + parameters);
             statsService.incTimedOutRequests(parameters.getTenant());
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
+        } catch (EvaluationException | LogarithmicScaleNotAllowed e) {
+            throw e;
         } catch (Exception e) {
             logger.error(e);
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);

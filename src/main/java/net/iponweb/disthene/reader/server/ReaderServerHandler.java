@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
+import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
 import org.apache.log4j.Logger;
 
@@ -12,8 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -70,6 +70,14 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             } else {
                 ctx.write(response).addListener(ChannelFutureListener.CLOSE);
             }
+        } catch (EvaluationException e) {
+            FullHttpResponse response;
+            if (e.getCause() != null) {
+                response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getCause().getMessage()).getBytes()));
+            } else {
+                response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
+            }
+            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
             logger.error("Invalid request: " + e.getMessage());
             logger.debug("Invalid request: ", e);
