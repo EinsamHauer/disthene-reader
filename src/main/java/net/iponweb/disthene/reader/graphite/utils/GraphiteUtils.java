@@ -31,11 +31,14 @@ public class GraphiteUtils {
     }
 
     public static double formatUnitValue(double value, UnitSystem unitSystem) {
+/*
         // Firstly, round the value a bit
         if (value > 0 && value < 1.0) {
-            value = new BigDecimal(value).setScale(2 - (int) Math.log10(value), BigDecimal.ROUND_HALF_DOWN).doubleValue();
+            BigDecimal bd = BigDecimal.valueOf(value);
+            value = bd.setScale(bd.scale() - 1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
         }
 
+*/
 
         for (Unit unit : unitSystem.getPrefixes()) {
             if (Math.abs(value) >= unit.getValue()) {
@@ -51,7 +54,7 @@ public class GraphiteUtils {
             return Math.floor(value);
         }
 
-        return value;
+        return  value;
     }
 
     public static String formatUnitPrefix(double value, double step, UnitSystem unitSystem) {
@@ -77,7 +80,25 @@ public class GraphiteUtils {
     }
 
     public static String formatValue(double value, UnitSystem unitSystem) {
-        return String.format("%s%s", formatUnitValue(value, unitSystem), formatUnitPrefix(value, unitSystem));
+        return String.format("%s%s", formatDoubleSpecialSmart(formatUnitValue(value, unitSystem)), formatUnitPrefix(value, unitSystem));
+    }
+
+    public static String formatDoubleSpecialPlain(Double value) {
+        BigDecimal bigDecimal = BigDecimal.valueOf(value);
+        if (bigDecimal.precision() > 10) {
+            bigDecimal = bigDecimal.setScale(bigDecimal.scale() - 1, BigDecimal.ROUND_HALF_UP);
+        }
+
+        return bigDecimal.stripTrailingZeros().toPlainString();
+    }
+
+    public static String formatDoubleSpecialSmart(Double value) {
+        BigDecimal bigDecimal = BigDecimal.valueOf(value);
+        if (bigDecimal.precision() > 10) {
+            bigDecimal = bigDecimal.setScale(bigDecimal.scale() - 1, BigDecimal.ROUND_HALF_UP);
+        }
+
+        return bigDecimal.stripTrailingZeros().toEngineeringString();
     }
 
     // todo: this "magic rounding" is a complete atrocity - fix it!

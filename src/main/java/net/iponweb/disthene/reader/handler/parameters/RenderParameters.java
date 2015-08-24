@@ -174,6 +174,11 @@ public class RenderParameters {
             parameters.setUntil(System.currentTimeMillis() / 1000L);
         }
 
+        // Prohibiting "until in the future"
+        if (parameters.getUntil() > (System.currentTimeMillis() / 1000L)) {
+            parameters.setUntil(System.currentTimeMillis() / 1000L);
+        }
+
         // parse format defaulting to PNG
         if (queryStringDecoder.parameters().get("format") != null) {
             try {

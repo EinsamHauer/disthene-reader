@@ -7,6 +7,7 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.graph.DecoratedTimeSeries;
 import net.iponweb.disthene.reader.graph.Graph;
+import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.joda.time.DateTime;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -76,11 +77,7 @@ public class ResponseFormatter {
                 if (value == null) {
                     formattedValues.add("null");
                 } else {
-                    BigDecimal bigDecimal = BigDecimal.valueOf(value);
-                    if (bigDecimal.precision() > 10) {
-                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
-                    }
-                    formattedValues.add(bigDecimal.stripTrailingZeros().toPlainString());
+                    formattedValues.add(GraphiteUtils.formatDoubleSpecialPlain(value));
                 }
             }
             results.add(timeSeries.getName() + "," + timeSeries.getFrom() + "," + timeSeries.getTo() + "," + timeSeries.getStep() + "|" + Joiner.on(",").useForNull("null").join(formattedValues));
@@ -111,12 +108,7 @@ public class ResponseFormatter {
                 if (timeSeries.getValues()[i] == null) {
                     stringValue = "null";
                 } else {
-                    BigDecimal bigDecimal = BigDecimal.valueOf(timeSeries.getValues()[i]);
-                    if (bigDecimal.precision() > 10) {
-                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
-                    }
-
-                    stringValue = bigDecimal.stripTrailingZeros().toPlainString();
+                    stringValue = GraphiteUtils.formatDoubleSpecialPlain(timeSeries.getValues()[i]);
                 }
 
                 datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + timeSeries.getStep() * i) + "]");
