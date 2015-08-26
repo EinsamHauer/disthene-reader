@@ -1,6 +1,8 @@
 package net.iponweb.disthene.reader.format;
 
 import com.google.common.base.Joiner;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
@@ -98,6 +100,8 @@ public class ResponseFormatter {
     private static FullHttpResponse formatResponseAsJson(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) {
         List<String> results = new ArrayList<>();
 
+        Gson gson = new Gson();
+
         // consolidate data points
         consolidate(timeSeriesList, renderParameters.getMaxDataPoints());
 
@@ -113,7 +117,7 @@ public class ResponseFormatter {
 
                 datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + timeSeries.getStep() * i) + "]");
             }
-            results.add("{\"target\": \"" + timeSeries.getName() + "\", \"datapoints\": [" + Joiner.on(", ").join(datapoints) + "]}");
+            results.add("{\"target\": " + gson.toJson(timeSeries.getName()) + ", \"datapoints\": [" + Joiner.on(", ").join(datapoints) + "]}");
         }
         String responseString = "[" + Joiner.on(", ").join(results) + "]";
 
