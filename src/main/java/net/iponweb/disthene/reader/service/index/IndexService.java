@@ -104,6 +104,24 @@ public class IndexService {
         return "[" + joiner.join(paths) + "]";
     }
 
+    public String getSearchPathsAsString(String tenant, String regEx, int limit) {
+        SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
+                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                .setSize(limit)
+                .setQuery(QueryBuilders.filteredQuery(
+                        QueryBuilders.regexpQuery("path", regEx),
+                        FilterBuilders.termFilter("tenant", tenant)))
+                .addField("path")
+                .execute().actionGet();
+
+        List<String> paths = new ArrayList<>();
+        for (SearchHit hit : response.getHits()) {
+            paths.add((String) hit.field("path").getValue());
+        }
+
+        return Joiner.on(",").skipNulls().join(paths);
+    }
+
     public void shutdown() {
         client.close();
     }

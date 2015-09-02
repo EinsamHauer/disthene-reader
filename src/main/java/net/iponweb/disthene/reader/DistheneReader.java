@@ -2,10 +2,7 @@ package net.iponweb.disthene.reader;
 
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.ThrottlingConfiguration;
-import net.iponweb.disthene.reader.handler.MetricsHandler;
-import net.iponweb.disthene.reader.handler.PathsHandler;
-import net.iponweb.disthene.reader.handler.PingHandler;
-import net.iponweb.disthene.reader.handler.RenderHandler;
+import net.iponweb.disthene.reader.handler.*;
 import net.iponweb.disthene.reader.server.ReaderServer;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.metric.MetricService;
@@ -40,6 +37,7 @@ public class DistheneReader {
     private static final String PATHS_PATH = "^/paths\\/?$";
     private static final String PING_PATH = "^/ping\\/?$";
     private static final String RENDER_PATH = "^/render\\/?$";
+    private static final String SEARCH_PATH = "^/search\\/?$";
 
     private static Logger logger;
 
@@ -110,6 +108,10 @@ public class DistheneReader {
             logger.info("Creating render handler");
             RenderHandler renderHandler = new RenderHandler(metricService, statsService, throttlingService, distheneReaderConfiguration.getReader());
             readerServer.registerHandler(RENDER_PATH, renderHandler);
+
+            logger.info("Creating search handler");
+            SearchHandler searchHandler = new SearchHandler(indexService, statsService);
+            readerServer.registerHandler(SEARCH_PATH, searchHandler);
 
             logger.info("Starting reader");
             readerServer.run();
