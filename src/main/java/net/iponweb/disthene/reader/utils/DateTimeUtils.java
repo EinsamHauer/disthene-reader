@@ -45,7 +45,7 @@ public class DateTimeUtils {
         } else if (s.startsWith("y")) {
             return 31536000;
         } else {
-            return 0;
+            return 60;
         }
     }
 

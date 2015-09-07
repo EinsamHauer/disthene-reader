@@ -38,10 +38,10 @@ public class HitcountFunction extends DistheneFunction {
         // todo: replicating graphite code below. probably, should be refactored
         for (TimeSeries ts : processedArguments) {
             Double[] values = ts.getValues();
-            int length = values.length;
             int bucketCount = (int) Math.ceil((ts.getTo() - ts.getFrom()) / (double) interval);
             Double[] buckets = new Double[bucketCount];
-            long newStart = ts.getTo() - bucketCount * interval;
+//            long newStart = ts.getTo() - bucketCount * interval;
+            long newStart = (ts.getTo() / interval) * interval - (bucketCount - 1) * interval;
 
             for (int i = 0; i < values.length; i++) {
                 Double value = values[i];
