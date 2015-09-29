@@ -6,9 +6,11 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
+import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,28 +35,16 @@ public class OffsetToZeroFunction extends DistheneFunction {
 
         int length = processedArguments.get(0).getValues().length;
 
-        Double offset = null;
-
         for (TimeSeries ts : processedArguments) {
-            for (int i = 0; i < length; i++) {
-                if (ts.getValues()[i] != null ) {
-                    if (offset == null || offset > ts.getValues()[i]) {
-                        offset = ts.getValues()[i];
-                    }
-                }
-
-            }
-        }
-
-        if (offset != null) {
-            for (TimeSeries ts : processedArguments) {
+            Double offset = CollectionUtils.min(Arrays.asList(ts.getValues()));
+            if (offset != null) {
                 for (int i = 0; i < length; i++) {
                     if (ts.getValues()[i] != null ) {
                         ts.getValues()[i] -= offset;
                     }
                 }
-                setResultingName(ts);
             }
+            setResultingName(ts);
         }
 
         return processedArguments;
