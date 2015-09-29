@@ -18,7 +18,7 @@ import java.util.List;
 public class DashedFunction extends DistheneFunction {
 
     public DashedFunction(String text) {
-        super(text, "stacked");
+        super(text, "dashed");
     }
 
     @Override
