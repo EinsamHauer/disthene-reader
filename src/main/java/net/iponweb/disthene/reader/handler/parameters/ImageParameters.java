@@ -29,6 +29,7 @@ public class ImageParameters {
     private boolean graphOnly = false;
 
     private boolean hideLegend = true;
+    private boolean hideLegendCompletely = false;
     private boolean hideGrid = false;
     private boolean hideAxes = false;
     private boolean hideYAxis = false;
@@ -143,6 +144,14 @@ public class ImageParameters {
 
     public void setHideLegend(boolean hideLegend) {
         this.hideLegend = hideLegend;
+    }
+
+    public boolean isHideLegendCompletely() {
+        return hideLegendCompletely;
+    }
+
+    public void setHideLegendCompletely(boolean hideLegendCompletely) {
+        this.hideLegendCompletely = hideLegendCompletely;
     }
 
     public boolean isHideGrid() {

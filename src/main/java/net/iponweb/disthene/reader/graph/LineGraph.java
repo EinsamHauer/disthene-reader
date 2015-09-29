@@ -124,7 +124,7 @@ public class LineGraph extends Graph {
         }
 
         //todo: config legend max items
-        if (!imageParameters.isHideLegend() || (data.size() <= 10)) {
+        if ((!imageParameters.isHideLegend() || (data.size() <= 10)) && !imageParameters.isHideLegendCompletely()) {
             List<String> legends = new ArrayList<>();
             List<Color> colors = new ArrayList<>();
             List<Boolean> secondYAxes = new ArrayList<>();

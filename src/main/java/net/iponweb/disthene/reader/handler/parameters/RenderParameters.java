@@ -283,7 +283,12 @@ public class RenderParameters {
         }
 
         if (queryStringDecoder.parameters().get("hideLegend") != null) {
-            parameters.getImageParameters().setHideLegend(Boolean.parseBoolean(queryStringDecoder.parameters().get("hideLegend").get(0)));
+            boolean hideLegend = Boolean.parseBoolean(queryStringDecoder.parameters().get("hideLegend").get(0));
+            if (hideLegend) {
+                parameters.getImageParameters().setHideLegendCompletely(true);
+            } else {
+                parameters.getImageParameters().setHideLegend(false);
+            }
         }
 
         if (queryStringDecoder.parameters().get("hideAxes") != null) {
