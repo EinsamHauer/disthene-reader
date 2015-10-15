@@ -116,12 +116,12 @@ public class StatsService {
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsRecord.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant());
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + totalRenderPathsRead + " " + timestamp + " " + statsConfiguration.getTenant());
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant());
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant());
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant());
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + totalTimedOutRequests + " " + timestamp + " " + statsConfiguration.getTenant());
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + totalRenderPathsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + totalTimedOutRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             dos.flush();
             connection.close();
