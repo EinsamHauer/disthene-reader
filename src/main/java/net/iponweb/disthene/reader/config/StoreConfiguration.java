@@ -10,11 +10,29 @@ public class StoreConfiguration {
     private List<String> cluster = new ArrayList<>();
     private String keyspace;
     private String columnFamily;
+    private String userName;
+    private String userPassword;
     private int port;
     private int maxConnections;
     private double readTimeout;
     private double connectTimeout;
     private int maxRequests;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
+    }
 
     public List<String> getCluster() {
         return cluster;
