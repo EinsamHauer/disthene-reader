@@ -49,7 +49,11 @@ public class ReaderServer {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast(new HttpRequestDecoder());
+                        p.addLast(new HttpRequestDecoder(
+		            configuration.getMaxInitialLineLength(),
+                            configuration.getMaxHeaderSize(),
+			    configuration.getMaxChunkSize()
+            		));
                         p.addLast(new HttpObjectAggregator(MAX_CONTENT_LENGTH));
                         p.addLast(new HttpResponseEncoder());
                         p.addLast(new HttpContentCompressor());

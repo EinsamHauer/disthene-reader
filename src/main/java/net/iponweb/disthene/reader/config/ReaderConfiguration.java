@@ -11,8 +11,35 @@ public class ReaderConfiguration {
     private int port;
     private int threads = 32;
     private int requestTimeout = 30;
+    private int maxInitialLineLength = 4096;
+    private int maxHeaderSize = 8192;
+    private int maxChunkSize = 8192;
     private int maxPoints = 60_000_000;
     private List<Rollup> rollups = new ArrayList<>();
+
+    public int getMaxInitialLineLength() {
+        return maxInitialLineLength;
+    }
+
+    public int getMaxHeaderSize() {
+        return maxHeaderSize;
+    }
+
+    public int getMaxChunkSize() {
+        return maxChunkSize;
+    }
+
+    public void setMaxInitialLineLength(int maxInitialLineLength) {
+        this.maxInitialLineLength = maxInitialLineLength;
+    }
+
+    public void setMaxHeaderSize(int maxHeaderSize) {
+        this.maxHeaderSize = maxHeaderSize;
+    }
+
+    public void setMaxChunkSize(int maxChunkSize) {
+        this.maxChunkSize = maxChunkSize;
+    }
 
     public String getBind() {
         return bind;
