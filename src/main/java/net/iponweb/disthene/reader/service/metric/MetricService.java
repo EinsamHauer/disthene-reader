@@ -253,15 +253,13 @@ public class MetricService {
         }
 
         public void makeJson(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
-            if (resultSet.getAvailableWithoutFetching() > 0) {
-                Double values[] = new Double[length];
-                for (Row row : resultSet) {
-                    values[timestampIndices.get(row.getLong("time"))] =
-                            isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
-                }
-
-                json = new Gson().toJson(values);
+        	Double values[] = new Double[length];
+            for (Row row : resultSet) {
+                values[timestampIndices.get(row.getLong("time"))] =
+                       isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
             }
+
+            json = new Gson().toJson(values);
         }
 
         public void makeArray(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
