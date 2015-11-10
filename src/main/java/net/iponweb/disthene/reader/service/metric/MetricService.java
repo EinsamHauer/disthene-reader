@@ -253,10 +253,10 @@ public class MetricService {
         }
 
         public void makeJson(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
-        	Double values[] = new Double[length];
+            Double values[] = new Double[length];
             for (Row row : resultSet) {
                 values[timestampIndices.get(row.getLong("time"))] =
-                       isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
+                        isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
             }
 
             json = new Gson().toJson(values);
