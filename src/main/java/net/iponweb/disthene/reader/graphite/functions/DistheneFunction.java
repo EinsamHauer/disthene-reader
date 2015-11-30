@@ -65,6 +65,10 @@ public abstract class DistheneFunction extends Target {
         return name + "(" + timeSeries.getName() + ")";
     }
 
+    public List<Object> getArguments() {
+        return arguments;
+    }
+
     @Override
     public Target shiftBy(long shift) {
         try {

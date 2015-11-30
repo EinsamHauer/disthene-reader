@@ -11,10 +11,12 @@ import net.iponweb.disthene.reader.exceptions.*;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
+import net.iponweb.disthene.reader.graphite.evaluation.DollarPreProcessor;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteLexer;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
+import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
@@ -36,6 +38,7 @@ public class RenderHandler implements DistheneReaderHandler {
     final static Logger logger = Logger.getLogger(RenderHandler.class);
 
     private TargetEvaluator evaluator;
+    private DollarPreProcessor dollarPreProcessor;
     private StatsService statsService;
     private ThrottlingService throttlingService;
     private ReaderConfiguration readerConfiguration;
@@ -44,8 +47,9 @@ public class RenderHandler implements DistheneReaderHandler {
     private TimeLimiter timeLimiter = new SimpleTimeLimiter(executor);
 
 
-    public RenderHandler(MetricService metricService, StatsService statsService, ThrottlingService throttlingService, ReaderConfiguration readerConfiguration) {
+    public RenderHandler(IndexService indexService, MetricService metricService, StatsService statsService, ThrottlingService throttlingService, ReaderConfiguration readerConfiguration) {
         this.evaluator = new TargetEvaluator(metricService);
+        this.dollarPreProcessor = new DollarPreProcessor(indexService);
         this.statsService = statsService;
         this.throttlingService = throttlingService;
         this.readerConfiguration = readerConfiguration;
@@ -75,8 +79,8 @@ public class RenderHandler implements DistheneReaderHandler {
             GraphiteParser parser = new GraphiteParser(tokens);
             ParseTree tree = parser.expression();
             try {
-                targets.add(new TargetVisitor(parameters.getTenant(), parameters.getFrom(), parameters.getUntil()).visit(tree));
-            } catch (ParseCancellationException e) {
+                targets.addAll(dollarPreProcessor.preProcess(new TargetVisitor(parameters.getTenant(), parameters.getFrom(), parameters.getUntil()).visit(tree)));
+            } catch (ParseCancellationException | InvalidFunctionException e) {
                 String additionalInfo = null;
                 if (e.getMessage() != null) additionalInfo = e.getMessage();
                 if (e.getCause() != null) additionalInfo = e.getCause().getMessage();
