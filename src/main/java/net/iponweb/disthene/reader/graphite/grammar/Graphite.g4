@@ -22,7 +22,7 @@ arg:
 
 call: FunctionName LEFT_PAREN args RIGHT_PAREN;
 
-partialPathElement: (EscapedChar)+ | FunctionName | path;
+partialPathElement: (EscapedChar)+ | FunctionName | Boolean | path;
 
 number: Integer | Float | Scientific;
 
