@@ -296,13 +296,13 @@ public abstract class Graph {
             int lineHeight = fontMetrics.getHeight() + 1;
             int labelWidth = fontMetrics.stringWidth(longestLegend) + 2 * (boxSize + padding);
             int columns = (int) Math.max(1, Math.floor((imageParameters.getWidth() - xMin) / labelWidth));
-            if (columns < 1) columns = 1;
             int numRight = 0;
             for (Boolean b : secondYAxes) {
                 if (b) numRight++;
             }
             int numberOfLines = Math.max(legends.size() - numRight, numRight);
             columns = (int) Math.floor(columns / 2.0);
+            if (columns < 1) columns = 1;
             int legendHeight = (int) (Math.max(1, ((double) numberOfLines / columns)) * (lineHeight + padding));
             yMax -= legendHeight;
             int x = xMin;
