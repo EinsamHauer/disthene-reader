@@ -78,6 +78,8 @@ public abstract class DistheneFunction extends Target {
                 }
             }
 
+            // we'd like to keep the text intact vs replacing it with function name here
+            function.setText(getText());
             return function;
         } catch (InvalidFunctionException ignored) {
         }
