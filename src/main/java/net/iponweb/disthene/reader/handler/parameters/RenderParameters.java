@@ -159,8 +159,6 @@ public class RenderParameters {
 
                 if (passedFromValue.matches("^.*[a-zA-Z]")) {
                     // a relative time character was found
-                    // split into number, unit
-
                     passedFromValue = passedFromValue.replace("-", ""); // remove signed value if present
 
                     String fromValue = "";
