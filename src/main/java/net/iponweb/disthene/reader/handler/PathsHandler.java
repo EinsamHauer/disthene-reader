@@ -52,7 +52,9 @@ public class PathsHandler implements DistheneReaderHandler {
             if (queryStringDecoder.parameters().get("tenant") != null) {
                 parameters.setTenant(queryStringDecoder.parameters().get("tenant").get(0));
             } else {
-                throw new MissingParameterException("Tenant parameter is missing");
+                // assume tenant "NONE"
+                parameters.setTenant("NONE");
+                logger.debug("No tenant in request. Assuming value of NONE");
             }
             if (queryStringDecoder.parameters().get("query") != null) {
                 parameters.setQuery(queryStringDecoder.parameters().get("query").get(0));
@@ -65,7 +67,9 @@ public class PathsHandler implements DistheneReaderHandler {
             ((HttpContent) request).content().resetReaderIndex();
             PathsParameters parameters = new Gson().fromJson(((HttpContent) request).content().toString(Charset.defaultCharset()), PathsParameters.class);
             if (parameters.getTenant() == null) {
-                throw new MissingParameterException("Tenant parameter is missing");
+                // assume tenant "NONE"
+                parameters.setTenant("NONE");
+                logger.debug("No tenant in request. Assuming value of NONE");
             }
             if (parameters.getQuery() == null) {
                 throw new MissingParameterException("Query parameter is missing");
