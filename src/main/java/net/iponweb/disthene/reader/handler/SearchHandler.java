@@ -65,7 +65,9 @@ public class SearchHandler implements DistheneReaderHandler {
         if (queryStringDecoder.parameters().get("tenant") != null) {
             parameters.setTenant(queryStringDecoder.parameters().get("tenant").get(0));
         } else {
-            throw new MissingParameterException("Tenant parameter is missing");
+            // assume tenant "NONE"
+            parameters.setTenant("NONE");
+            logger.debug("No tenant in request. Assuming value of NONE");
         }
         if (queryStringDecoder.parameters().get("query") != null) {
             parameters.setQuery(Joiner.on("|").skipNulls().join(queryStringDecoder.parameters().get("query")));
