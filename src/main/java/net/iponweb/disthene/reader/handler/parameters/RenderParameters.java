@@ -19,12 +19,16 @@ import java.lang.String;
 import java.lang.Integer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Andrei Ivanov
  */
 public class RenderParameters {
     final static Logger logger = Logger.getLogger(RenderParameters.class);
+
+    final private static Pattern EXTENDED_TIME_PATTERN = Pattern.compile("-*([0-9]+)([a-zA-Z]+)");
 
     private String tenant;
     private List<String> targets = new ArrayList<>();
@@ -155,50 +159,7 @@ public class RenderParameters {
         // parse from defaulting to -1d
         if (queryStringDecoder.parameters().get("from") != null) {
             try {
-                String passedFromValue = queryStringDecoder.parameters().get("from").get(0);
-
-                if (passedFromValue.matches("^.*[a-zA-Z]")) {
-                    // a relative time character was found
-                    passedFromValue = passedFromValue.replace("-", ""); // remove signed value if present
-
-                    String fromValue = "";
-                    String fromUnit = "";
-                    String v = "";
-                    Long unitValue = 0L;
-
-                    for (int i = 0 ; i < passedFromValue.length() - 1 ; i++) {
-                        v = String.valueOf(passedFromValue.charAt(i));
-
-                        if (v.matches("[a-zA-Z]")) {
-                            fromUnit = fromUnit.concat(v);
-                        } else {
-                            fromValue = fromValue.concat(v);
-                        }
-                    }
-                    // calc unit value
-                    if (fromUnit.startsWith("s")) {
-                        unitValue = 1L;
-                    } else if (fromUnit.startsWith("min")) {
-                        unitValue = 60L;
-                    } else if (fromUnit.startsWith("h")) {
-                        unitValue = 3600L;
-                    } else if (fromUnit.startsWith("d")) {
-                        unitValue = 86400L;
-                    } else if (fromUnit.startsWith("w")) {
-                        unitValue = 604800L;
-                    } else if (fromUnit.startsWith("mon")) {
-                        unitValue = 18144000L;
-                    } else if (fromUnit.startsWith("y")) {
-                        unitValue = 31536000L;
-                    } else {
-                        unitValue = 60L;
-                    }
-                    // calc offset as (now) - (number * unit value)
-                    parameters.setFrom((System.currentTimeMillis() / 1000L) - (Long.valueOf(fromValue) * unitValue));
-                } else {
-                    // no only numeric time
-                    parameters.setFrom(new DateTime(Long.valueOf(queryStringDecoder.parameters().get("from").get(0)) * 1000, parameters.getTz()).getMillis() / 1000L);
-                }
+                parameters.setFrom(parseExtendedTime(queryStringDecoder.parameters().get("from").get(0), parameters.getTz()));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("DateTime format not recognized (from): " + queryStringDecoder.parameters().get("from").get(0));
             }
@@ -210,49 +171,7 @@ public class RenderParameters {
         // parse until
         if (queryStringDecoder.parameters().get("until") != null) {
             try {
-               String passedUntilValue = queryStringDecoder.parameters().get("until").get(0);
-
-                if (passedUntilValue.matches("^.*[a-zA-Z]")) {
-                    // remove signed value if present
-                    passedUntilValue = passedUntilValue.replace("-", "");
-
-                    String untilValue = "";
-                    String untilUnit = "";
-                    String v = "";
-                    Long unitValue = 0L;
-
-                    for (int i = 0 ; i < passedUntilValue.length() - 1 ; i++) {
-                        v = String.valueOf(passedUntilValue.charAt(i));
-
-                        if (v.matches("[a-zA-Z]")) {
-                            untilUnit = untilUnit.concat(v);
-                        } else {
-                            untilValue = untilValue.concat(v);
-                        }
-                    }
-                    // calc unit value
-                    if (untilUnit.startsWith("s")) {
-                        unitValue = 1L;
-                    } else if (untilUnit.startsWith("min")) {
-                        unitValue = 60L;
-                    } else if (untilUnit.startsWith("h")) {
-                        unitValue = 3600L;
-                    } else if (untilUnit.startsWith("d")) {
-                        unitValue = 86400L;
-                    } else if (untilUnit.startsWith("w")) {
-                        unitValue = 604800L;
-                    } else if (untilUnit.startsWith("mon")) {
-                        unitValue = 18144000L;
-                    } else if (untilUnit.startsWith("y")) {
-                        unitValue = 31536000L;
-                    } else {
-                        unitValue = 60L;
-                    }
-                    // calc offset as (now) - (number * unit value)
-                    parameters.setUntil((System.currentTimeMillis() / 1000L) - (Long.valueOf(untilValue) * unitValue));
-                } else {
-                    parameters.setUntil(new DateTime(Long.valueOf(queryStringDecoder.parameters().get("until").get(0)) * 1000, parameters.getTz()).getMillis() / 1000L);
-                }
+                parameters.setUntil(parseExtendedTime(queryStringDecoder.parameters().get("until").get(0), parameters.getTz()));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("DateTime format not recognized (until): " + queryStringDecoder.parameters().get("until").get(0));
             }
@@ -662,6 +581,42 @@ public class RenderParameters {
         }
 
         return parameters;
+    }
+
+    private static long parseExtendedTime(String timeString, DateTimeZone tz) {
+        Matcher matcher = EXTENDED_TIME_PATTERN.matcher(timeString);
+
+        if (matcher.matches()) {
+            String value = matcher.group(1);
+            String unit = matcher.group(2);
+            Long unitValue;
+
+            // calc unit value
+            if (unit.startsWith("s")) {
+                unitValue = 1L;
+            } else if (unit.startsWith("min")) {
+                unitValue = 60L;
+            } else if (unit.startsWith("h")) {
+                unitValue = 3600L;
+            } else if (unit.startsWith("d")) {
+                unitValue = 86400L;
+            } else if (unit.startsWith("w")) {
+                unitValue = 604800L;
+            } else if (unit.startsWith("mon")) {
+                unitValue = 2678400L;
+            } else if (unit.startsWith("y")) {
+                unitValue = 31536000L;
+            } else {
+                unitValue = 60L;
+            }
+            // calc offset as (now) - (number * unit value)
+            return (System.currentTimeMillis() / 1000L) - (Long.valueOf(value) * unitValue);
+        } else {
+            return new DateTime(Long.valueOf(timeString) * 1000, tz).getMillis() / 1000L;
+        }
+
+
+
     }
 
 }
