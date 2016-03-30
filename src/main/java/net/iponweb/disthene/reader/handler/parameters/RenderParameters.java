@@ -15,14 +15,20 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.awt.*;
+import java.lang.String;
+import java.lang.Integer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Andrei Ivanov
  */
 public class RenderParameters {
     final static Logger logger = Logger.getLogger(RenderParameters.class);
+
+    final private static Pattern EXTENDED_TIME_PATTERN = Pattern.compile("-*([0-9]+)([a-zA-Z]+)");
 
     private String tenant;
     private List<String> targets = new ArrayList<>();
@@ -153,7 +159,7 @@ public class RenderParameters {
         // parse from defaulting to -1d
         if (queryStringDecoder.parameters().get("from") != null) {
             try {
-                parameters.setFrom(new DateTime(Long.valueOf(queryStringDecoder.parameters().get("from").get(0)) * 1000, parameters.getTz()).getMillis() / 1000L);
+                parameters.setFrom(parseExtendedTime(queryStringDecoder.parameters().get("from").get(0), parameters.getTz()));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("DateTime format not recognized (from): " + queryStringDecoder.parameters().get("from").get(0));
             }
@@ -162,16 +168,21 @@ public class RenderParameters {
             parameters.setFrom((System.currentTimeMillis() / 1000L) - 86400);
         }
 
-        // parse until defaulting to -1d
+        // parse until
         if (queryStringDecoder.parameters().get("until") != null) {
             try {
-                parameters.setUntil(new DateTime(Long.valueOf(queryStringDecoder.parameters().get("until").get(0)) * 1000, parameters.getTz()).getMillis() / 1000L);
+                parameters.setUntil(parseExtendedTime(queryStringDecoder.parameters().get("until").get(0), parameters.getTz()));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("DateTime format not recognized (until): " + queryStringDecoder.parameters().get("until").get(0));
             }
         } else {
             // default to now
             parameters.setUntil(System.currentTimeMillis() / 1000L);
+        }
+
+        // Prohibiting "from greater than until"
+        if (parameters.getFrom() > parameters.getUntil()) {
+            parameters.setFrom(parameters.getUntil());
         }
 
         // Prohibiting "until in the future"
@@ -570,6 +581,42 @@ public class RenderParameters {
         }
 
         return parameters;
+    }
+
+    private static long parseExtendedTime(String timeString, DateTimeZone tz) {
+        Matcher matcher = EXTENDED_TIME_PATTERN.matcher(timeString);
+
+        if (matcher.matches()) {
+            String value = matcher.group(1);
+            String unit = matcher.group(2);
+            Long unitValue;
+
+            // calc unit value
+            if (unit.startsWith("s")) {
+                unitValue = 1L;
+            } else if (unit.startsWith("min")) {
+                unitValue = 60L;
+            } else if (unit.startsWith("h")) {
+                unitValue = 3600L;
+            } else if (unit.startsWith("d")) {
+                unitValue = 86400L;
+            } else if (unit.startsWith("w")) {
+                unitValue = 604800L;
+            } else if (unit.startsWith("mon")) {
+                unitValue = 2678400L;
+            } else if (unit.startsWith("y")) {
+                unitValue = 31536000L;
+            } else {
+                unitValue = 60L;
+            }
+            // calc offset as (now) - (number * unit value)
+            return (System.currentTimeMillis() / 1000L) - (Long.valueOf(value) * unitValue);
+        } else {
+            return new DateTime(Long.valueOf(timeString) * 1000, tz).getMillis() / 1000L;
+        }
+
+
+
     }
 
 }

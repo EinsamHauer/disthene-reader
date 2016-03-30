@@ -77,7 +77,9 @@ public class MetricsHandler implements DistheneReaderHandler {
             MetricsParameters parameters =
                     new Gson().fromJson(((HttpContent) request).content().toString(Charset.defaultCharset()), MetricsParameters.class);
             if (parameters.getTenant() == null) {
-                throw new MissingParameterException("Tenant parameter is missing");
+                // assume tenant "NONE"
+                parameters.setTenant("NONE");
+                logger.debug("No tenant in request. Assuming value of NONE");
             }
             if (parameters.getPath().size() == 0) {
                 throw new MissingParameterException("Path parameter is missing");
