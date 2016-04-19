@@ -1,6 +1,7 @@
 package net.iponweb.disthene.reader.graphite.functions.registry;
 
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
+import net.iponweb.disthene.reader.graphite.evaluation.EvaluationContext;
 import net.iponweb.disthene.reader.graphite.functions.HoltWintersConfidenceAreaFunction;
 import net.iponweb.disthene.reader.graphite.functions.TimeShiftFunction;
 import net.iponweb.disthene.reader.graphite.functions.*;
@@ -109,7 +110,7 @@ public class FunctionRegistry {
     }
 
     //todo: from & to parameters are only because of constantLine function. sort this out?
-    public static DistheneFunction getFunction(String name, long from, long to) throws InvalidFunctionException {
+    public static DistheneFunction getFunction(EvaluationContext context, String name, long from, long to) throws InvalidFunctionException {
         if (registry.get(name) == null) {
             throw new InvalidFunctionException("Unknown function: " + name);
         }
@@ -119,6 +120,7 @@ public class FunctionRegistry {
             DistheneFunction function = constructor.newInstance(name);
             function.setFrom(from);
             function.setTo(to);
+            function.setContext(context);
             return function;
         } catch (Exception e) {
             throw new InvalidFunctionException("Something went wrong constructing " + name + " function: " + e.getMessage());

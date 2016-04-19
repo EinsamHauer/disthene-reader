@@ -8,6 +8,7 @@ import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
+import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
@@ -46,6 +47,8 @@ public class LegendValueFunction extends DistheneFunction {
             }
         }
 
+        ValueFormatter formatter = getContext().getFormatter();
+
         for (TimeSeries ts : processedArguments) {
             StringBuilder sb = new StringBuilder("");
             List<Double> valuesArray = Arrays.asList(ts.getValues());
@@ -54,35 +57,35 @@ public class LegendValueFunction extends DistheneFunction {
                     case "last": {
                         Double v = CollectionUtils.last(valuesArray);
                         if (v != null) {
-                            sb.append(" (last: ").append(GraphiteUtils.formatValue(v, unitSystem)).append(")");
+                            sb.append(" (last: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
                         break;
                     }
                     case "avg": {
                         Double v = CollectionUtils.average(valuesArray);
                         if (v != null) {
-                            sb.append(" (avg: ").append(GraphiteUtils.formatValue(v, unitSystem)).append(")");
+                            sb.append(" (avg: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
                         break;
                     }
                     case "total": {
                         Double v = CollectionUtils.sum(valuesArray);
                         if (v != null) {
-                            sb.append(" (total: ").append(GraphiteUtils.formatValue(v, unitSystem)).append(")");
+                            sb.append(" (total: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
                         break;
                     }
                     case "min": {
                         Double v = CollectionUtils.min(valuesArray);
                         if (v != null) {
-                            sb.append(" (min: ").append(GraphiteUtils.formatValue(v, unitSystem)).append(")");
+                            sb.append(" (min: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
                         break;
                     }
                     case "max": {
                         Double v = CollectionUtils.max(valuesArray);
                         if (v != null) {
-                            sb.append(" (max: ").append(GraphiteUtils.formatValue(v, unitSystem)).append(")");
+                            sb.append(" (max: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
                         break;
                     }

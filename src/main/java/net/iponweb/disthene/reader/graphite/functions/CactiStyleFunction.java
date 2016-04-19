@@ -8,6 +8,7 @@ import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
+import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
@@ -37,13 +38,15 @@ public class CactiStyleFunction extends DistheneFunction {
 
         UnitSystem unitSystem = arguments.size() > 1 ? UnitSystem.valueOf(((String) arguments.get(1)).replaceAll("^\"|\"$", "").toUpperCase()) : UnitSystem.NONE;
 
+        ValueFormatter formatter = getContext().getFormatter();
+
         for (TimeSeries ts : processedArguments) {
             List<Double> valuesArray = Arrays.asList(ts.getValues());
             Double last = CollectionUtils.last(valuesArray);
             Double min = CollectionUtils.min(valuesArray);
             Double max = CollectionUtils.max(valuesArray);
 
-            ts.setName(ts.getName() + " Current:" + GraphiteUtils.formatValue(last, unitSystem) + "   Max:" + GraphiteUtils.formatValue(max, unitSystem) + "   Min:" + GraphiteUtils.formatValue(min, unitSystem));
+            ts.setName(ts.getName() + " Current:" + formatter.formatValue(last, unitSystem) + "   Max:" + formatter.formatValue(max, unitSystem) + "   Min:" + formatter.formatValue(min, unitSystem));
         }
 
         return processedArguments;

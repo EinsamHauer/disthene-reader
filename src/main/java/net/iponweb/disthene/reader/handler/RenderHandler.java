@@ -11,9 +11,11 @@ import net.iponweb.disthene.reader.exceptions.*;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
+import net.iponweb.disthene.reader.graphite.evaluation.EvaluationContext;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteLexer;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
+import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
@@ -68,6 +70,10 @@ public class RenderHandler implements DistheneReaderHandler {
 
         final List<Target> targets = new ArrayList<>();
 
+        EvaluationContext context = new EvaluationContext(
+                readerConfiguration.isHumanReadableNumbers() ? ValueFormatter.getInstance(parameters.getFormat()) : ValueFormatter.getInstance(ValueFormatter.ValueFormatterType.MACHINE)
+        );
+
         // Let's parse the targets
         for(String targetString : parameters.getTargets()) {
             GraphiteLexer lexer = new GraphiteLexer(new ANTLRInputStream(targetString));
@@ -75,7 +81,7 @@ public class RenderHandler implements DistheneReaderHandler {
             GraphiteParser parser = new GraphiteParser(tokens);
             ParseTree tree = parser.expression();
             try {
-                targets.add(new TargetVisitor(parameters.getTenant(), parameters.getFrom(), parameters.getUntil()).visit(tree));
+                targets.add(new TargetVisitor(parameters.getTenant(), parameters.getFrom(), parameters.getUntil(), context).visit(tree));
             } catch (ParseCancellationException e) {
                 String additionalInfo = null;
                 if (e.getMessage() != null) additionalInfo = e.getMessage();

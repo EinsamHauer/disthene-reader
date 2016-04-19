@@ -15,6 +15,7 @@ public class ReaderConfiguration {
     private int maxHeaderSize = 8192;
     private int maxChunkSize = 8192;
     private int maxPoints = 60_000_000;
+    private boolean humanReadableNumbers = false;
     private List<Rollup> rollups = new ArrayList<>();
 
     public int getMaxInitialLineLength() {
@@ -87,6 +88,14 @@ public class ReaderConfiguration {
 
     public void setMaxPoints(int maxPoints) {
         this.maxPoints = maxPoints;
+    }
+
+    public boolean isHumanReadableNumbers() {
+        return humanReadableNumbers;
+    }
+
+    public void setHumanReadableNumbers(boolean humanReadableNumbers) {
+        this.humanReadableNumbers = humanReadableNumbers;
     }
 
     @Override

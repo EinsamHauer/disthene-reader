@@ -81,10 +81,6 @@ public class GraphiteUtils {
         return "";
     }
 
-    public static String formatValue(double value, UnitSystem unitSystem) {
-        return String.format("%s%s", formatDoubleSpecialSmart(formatUnitValue(value, unitSystem)), formatUnitPrefix(value, unitSystem));
-    }
-
     public static String formatDoubleSpecialPlain(Double value) {
         BigDecimal bigDecimal = BigDecimal.valueOf(value);
 
@@ -99,24 +95,6 @@ public class GraphiteUtils {
 
 
         return bigDecimal.stripTrailingZeros().toPlainString();
-    }
-
-    public static String formatDoubleSpecialSmart(Double value) {
-        BigDecimal bigDecimal = BigDecimal.valueOf(value);
-
-        // do not do this for math integers
-        if (!DoubleMath.isMathematicalInteger(value)) {
-            // precision is just like in graphite (scale check redundant but let it be)
-            if (bigDecimal.precision() > 12 && bigDecimal.scale() > 0) {
-                int roundTo = bigDecimal.scale() - bigDecimal.precision() + 12 > 0 ? bigDecimal.scale() - bigDecimal.precision() + 12 : 0;
-                bigDecimal = bigDecimal.setScale(roundTo, BigDecimal.ROUND_HALF_UP);
-            }
-        }
-
-
-        return (bigDecimal.precision() + bigDecimal.scale() > 12) ?
-                bigDecimal.stripTrailingZeros().toEngineeringString() : bigDecimal.stripTrailingZeros().toPlainString();
-
     }
 
     // todo: this "magic rounding" is a complete atrocity - fix it!

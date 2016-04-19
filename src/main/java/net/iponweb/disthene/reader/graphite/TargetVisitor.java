@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.graphite;
 
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.InvalidFunctionException;
+import net.iponweb.disthene.reader.graphite.evaluation.EvaluationContext;
 import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.graphite.functions.registry.FunctionRegistry;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteBaseVisitor;
@@ -16,23 +17,25 @@ public class TargetVisitor extends GraphiteBaseVisitor<Target> {
     private String tenant;
     private Long from;
     private Long to;
+    private EvaluationContext context;
 
-    public TargetVisitor(String tenant, Long from, Long to) {
+    public TargetVisitor(String tenant, Long from, Long to, EvaluationContext context) {
         this.tenant = tenant;
         this.from = from;
         this.to = to;
+        this.context = context;
     }
 
     @Override
     public Target visitExpressionPathExpression(GraphiteParser.ExpressionPathExpressionContext ctx) {
-        return new PathTarget(ctx.getText(), ctx.pathExpression().getText(), tenant, from, to);
+        return new PathTarget(ctx.getText(), context, ctx.pathExpression().getText(), tenant, from, to);
     }
 
     @Override
     public Target visitExpressionCall(GraphiteParser.ExpressionCallContext ctx) {
         GraphiteParser.CallContext call = ctx.call();
         try {
-            DistheneFunction function = FunctionRegistry.getFunction(call.FunctionName().getText(), from, to);
+            DistheneFunction function = FunctionRegistry.getFunction(context, call.FunctionName().getText(), from, to);
             function.setText(ctx.getText());
 
             for(GraphiteParser.ArgContext arg : call.args().arg()) {
