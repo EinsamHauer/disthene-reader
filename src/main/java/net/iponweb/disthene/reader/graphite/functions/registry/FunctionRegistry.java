@@ -107,6 +107,7 @@ public class FunctionRegistry {
         registry.put("timeShift", TimeShiftFunction.class);
         registry.put("timeStack", TimeStackFunction.class);
         registry.put("transformNull", TransformNullFunction.class);
+        registry.put("useSeriesAbove", UseSeriesAboveFunction.class);
     }
 
     //todo: from & to parameters are only because of constantLine function. sort this out?
