@@ -63,6 +63,11 @@ public class AggregateLineFunction extends DistheneFunction {
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
                     break;
                 }
+                case "first": {
+                    Double v = CollectionUtils.first(valuesArray);
+                    if (v != null) CollectionUtils.constant(ts.getValues(), v);
+                    break;
+                }
             }
             setResultingName(ts);
         }
@@ -79,7 +84,7 @@ public class AggregateLineFunction extends DistheneFunction {
         if (arguments.size() > 1) {
             if (!(arguments.get(1) instanceof String)) throw new InvalidArgumentException("aggregateLine: argument is " + arguments.get(1).getClass().getName() + ". Must be a string");
             String argument = ((String) arguments.get(1)).toLowerCase().replaceAll("[\"\']", "");
-            if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("total") && !argument.equals("min") && !argument.equals("max")) {
+            if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("total") && !argument.equals("min") && !argument.equals("max") && !argument.equals("first")) {
                 throw new InvalidArgumentException("aggregateLine: must be aggregation.");
             }
         }

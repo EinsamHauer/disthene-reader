@@ -109,6 +109,12 @@ public class CollectionUtils {
         return filteredValues.size() > 0 ? filteredValues.get(filteredValues.size() - 1) : null;
     }
 
+    public static Double first(Collection<Double> values) {
+        List<Double> filteredValues = filterNulls(values);
+
+        return filteredValues.size() > 0 ? filteredValues.get(0) : null;
+    }
+
     public static Double max(Collection<Double> values) {
         List<Double> filteredValues = filterNulls(values);
         if (filteredValues.size() == 0) return null;
