@@ -36,7 +36,7 @@ QoutedString: DoubleQuotedString | SingleQuotedString;
 DoubleQuotedString: '"' ~[\r\n]*? '"';
 SingleQuotedString: '\'' ~[\r\n]*? '\'';
 FunctionName: [a-zA-Z_]+ [a-zA-Z_0-9]*;
-ValidChars: [!#$%&*+\-/0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]^_`abcdefghijklmnopqrstuvwxyz|~]+;
+ValidChars: [=!#$%&*+\-/0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]^_`abcdefghijklmnopqrstuvwxyz|~]+;
 EscapedChar: BACKSLASH SYMBOL;
 
 DOT: '.';
