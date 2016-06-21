@@ -44,7 +44,7 @@ public class CassandraService {
                 .withSocketOptions(socketOptions)
                 .withCompression(ProtocolOptions.Compression.LZ4)
                 .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-//                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra", 9042))))
+                .withLoadBalancingPolicy(new WhiteListPolicy(new DCAwareRoundRobinPolicy(), Collections.singletonList(new InetSocketAddress("cassandra1b.aws-va.graphite.iponweb.net", 9042))))
                 .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
                 .withProtocolVersion(ProtocolVersion.V2)
