@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
+import com.google.common.math.DoubleMath;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
@@ -39,7 +40,8 @@ public class TransformNullFunction extends DistheneFunction {
             for (int i = 0; i < length; i++) {
                 ts.getValues()[i] = ts.getValues()[i] != null ? ts.getValues()[i] : transform;
             }
-            setResultingName(ts);
+            ts.setName("transformNull(" + ts.getName() + "," + (DoubleMath.isMathematicalInteger(transform) ? Integer.toString(transform.intValue()) : transform ) + ")");
+
         }
 
         return processedArguments;
