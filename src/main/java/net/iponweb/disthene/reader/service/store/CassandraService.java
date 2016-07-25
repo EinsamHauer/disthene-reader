@@ -45,7 +45,7 @@ public class CassandraService {
                 .withCompression(ProtocolOptions.Compression.LZ4)
                 .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
                 .withPoolingOptions(poolingOptions)
-                .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
+                .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.valueOf(storeConfiguration.getConsistency())))
                 .withProtocolVersion(ProtocolVersion.V2)
                 .withPort(storeConfiguration.getPort());
 

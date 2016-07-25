@@ -17,6 +17,7 @@ public class StoreConfiguration {
     private double readTimeout;
     private double connectTimeout;
     private int maxRequests;
+    private String consistency = "ONE";
 
     public String getUserName() {
         return userName;
@@ -98,17 +99,28 @@ public class StoreConfiguration {
         this.columnFamily = columnFamily;
     }
 
+    public String getConsistency() {
+        return consistency;
+    }
+
+    public void setConsistency(String consistency) {
+        this.consistency = consistency;
+    }
+
     @Override
     public String toString() {
         return "StoreConfiguration{" +
                 "cluster=" + cluster +
                 ", keyspace='" + keyspace + '\'' +
                 ", columnFamily='" + columnFamily + '\'' +
+                ", userName='" + userName + '\'' +
+                ", userPassword='" + userPassword + '\'' +
                 ", port=" + port +
                 ", maxConnections=" + maxConnections +
                 ", readTimeout=" + readTimeout +
                 ", connectTimeout=" + connectTimeout +
                 ", maxRequests=" + maxRequests +
+                ", consistency='" + consistency + '\'' +
                 '}';
     }
 }
