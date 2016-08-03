@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.service.store;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.policies.WhiteListPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
@@ -44,6 +45,7 @@ public class CassandraService {
                 .withSocketOptions(socketOptions)
                 .withCompression(ProtocolOptions.Compression.LZ4)
                 .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+                .withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
                 .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.valueOf(storeConfiguration.getConsistency())))
                 .withProtocolVersion(ProtocolVersion.V2)
