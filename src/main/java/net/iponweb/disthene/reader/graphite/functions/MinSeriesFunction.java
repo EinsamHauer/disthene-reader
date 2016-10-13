@@ -25,7 +25,10 @@ public class MinSeriesFunction extends DistheneFunction {
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
         List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+
+        for(Object target : arguments) {
+            processedArguments.addAll(evaluator.eval((Target) target));
+        }
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
