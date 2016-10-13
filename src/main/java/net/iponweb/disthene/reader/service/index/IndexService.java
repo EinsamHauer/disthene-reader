@@ -43,33 +43,42 @@ public class IndexService {
 
     public List<String> getPaths(String tenant, List<String> wildcards) {
         List<String> regExs = new ArrayList<>();
-        for(String wildcard : wildcards) {
-            regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
-        }
-        String regEx = Joiner.on("|").skipNulls().join(regExs);
-
         List<String> result = new ArrayList<>();
 
-        SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                .setSize(indexConfiguration.getScroll())
-                .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
-                        FilterBuilders.termFilter("tenant", tenant)))
-                .addField("path")
-                .execute().actionGet();
-
-        // if total hits exceeds maximum - abort right away returning empty array
-        if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
-            return Collections.emptyList();
+        for(String wildcard : wildcards) {
+            if (WildcardUtil.isPlainPath(wildcard)) {
+                result.add(wildcard);
+            } else {
+                regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
+            }
         }
 
-        while (response.getHits().getHits().length > 0) {
-            for (SearchHit hit : response.getHits()) {
-                result.add((String) hit.field("path").getValue());
-            }
-            response = client.prepareSearchScroll(response.getScrollId())
+        logger.debug("getPaths plain paths: " + result.size() + ", wildcard paths: " + regExs.size());
+
+        if (regExs.size() > 0) {
+            String regEx = Joiner.on("|").skipNulls().join(regExs);
+
+            SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
                     .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                    .setSize(indexConfiguration.getScroll())
+                    .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
+                            FilterBuilders.termFilter("tenant", tenant)))
+                    .addField("path")
                     .execute().actionGet();
+
+            // if total hits exceeds maximum - abort right away returning empty array
+            if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
+                return Collections.emptyList();
+            }
+
+            while (response.getHits().getHits().length > 0) {
+                for (SearchHit hit : response.getHits()) {
+                    result.add((String) hit.field("path").getValue());
+                }
+                response = client.prepareSearchScroll(response.getScrollId())
+                        .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                        .execute().actionGet();
+            }
         }
 
         return result;
