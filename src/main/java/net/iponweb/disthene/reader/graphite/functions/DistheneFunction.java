@@ -90,7 +90,7 @@ public abstract class DistheneFunction extends Target {
     @Override
     public Target previous(long period) {
         try {
-            DistheneFunction function = FunctionRegistry.getFunction(getContext(), name, to - period , to - 1);
+            DistheneFunction function = FunctionRegistry.getFunction(getContext(), name, from - period , from - 1);
 
             for (Object argument : arguments) {
                 if (argument instanceof Target) {

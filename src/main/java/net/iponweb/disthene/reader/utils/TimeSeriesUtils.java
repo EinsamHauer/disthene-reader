@@ -2,9 +2,7 @@ package net.iponweb.disthene.reader.utils;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -75,7 +73,7 @@ public class TimeSeriesUtils {
     // todo: think about different consolidation functions?
     // todo: assuming timeSeries.from <= from <= to <= timeSeries.to - has to be checked?
     // todo: from % step == 0 && to % step == 0
-    public static void consolidate(TimeSeries timeSeries, int step, long from, long to) {
+    private static void consolidate(TimeSeries timeSeries, int step, long from, long to) {
         List<Double> consolidated = new ArrayList<>();
         List<Double> buffer = new ArrayList<>();
 
