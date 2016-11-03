@@ -17,6 +17,7 @@ public class ReaderConfiguration {
     private int maxPoints = 60_000_000;
     private boolean humanReadableNumbers = false;
     private List<Rollup> rollups = new ArrayList<>();
+    private Rollup baseRollup;
 
     public int getMaxInitialLineLength() {
         return maxInitialLineLength;
@@ -63,7 +64,8 @@ public class ReaderConfiguration {
     }
 
     public void setRollups(List<Rollup> rollups) {
-        this.rollups = rollups;
+        baseRollup = rollups.get(0);
+        this.rollups = rollups.subList(1, rollups.size());
     }
 
     public int getThreads() {
@@ -96,6 +98,10 @@ public class ReaderConfiguration {
 
     public void setHumanReadableNumbers(boolean humanReadableNumbers) {
         this.humanReadableNumbers = humanReadableNumbers;
+    }
+
+    public Rollup getBaseRollup() {
+        return baseRollup;
     }
 
     @Override
