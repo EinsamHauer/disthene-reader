@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.ReaderConfiguration;
-import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.*;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
@@ -41,7 +40,6 @@ public class RenderHandler implements DistheneReaderHandler {
     private TargetEvaluator evaluator;
     private StatsService statsService;
     private ThrottlingService throttlingService;
-    private MetricService metricService;
     private ReaderConfiguration readerConfiguration;
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
@@ -50,7 +48,6 @@ public class RenderHandler implements DistheneReaderHandler {
 
     public RenderHandler(MetricService metricService, StatsService statsService, ThrottlingService throttlingService, ReaderConfiguration readerConfiguration) {
         this.evaluator = new TargetEvaluator(metricService);
-        this.metricService = metricService;
         this.statsService = statsService;
         this.throttlingService = throttlingService;
         this.readerConfiguration = readerConfiguration;
@@ -83,13 +80,8 @@ public class RenderHandler implements DistheneReaderHandler {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             GraphiteParser parser = new GraphiteParser(tokens);
             ParseTree tree = parser.expression();
-            // let's round from and until to minimal step
-            Rollup bestRollup = metricService.getRollup(parameters.getFrom());
-            long from = ((long) Math.ceil((double) parameters.getFrom() / bestRollup.getRollup())) * bestRollup.getRollup();
-            long until = Math.round((double) parameters.getUntil() / bestRollup.getRollup()) * bestRollup.getRollup();
-
             try {
-                targets.add(new TargetVisitor(parameters.getTenant(), from, until, context).visit(tree));
+                targets.add(new TargetVisitor(parameters.getTenant(), parameters.getFrom(), parameters.getUntil(), context).visit(tree));
             } catch (ParseCancellationException e) {
                 String additionalInfo = null;
                 if (e.getMessage() != null) additionalInfo = e.getMessage();
