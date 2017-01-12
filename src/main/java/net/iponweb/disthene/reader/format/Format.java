@@ -5,5 +5,5 @@ package net.iponweb.disthene.reader.format;
  */
 
 public enum Format {
-    PNG, RAW, CSV, JSON, SVG, PICKLE
+    PNG, RAW, CSV, JSON, SVG, PICKLE, GRAPHPLOT_JSON
 }

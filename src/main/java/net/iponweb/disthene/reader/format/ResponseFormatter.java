@@ -33,6 +33,7 @@ public class ResponseFormatter {
             case RAW: return formatResponseAsRaw(filtered);
             case CSV: return formatResponseAsCSV(filtered, parameters);
             case PNG: return formatResponseAsPng(filtered, parameters);
+            case GRAPHPLOT_JSON: return formatResponseAsGraphplotJson(filtered, parameters);
             default:throw new NotImplementedException();
         }
     }
@@ -140,6 +141,41 @@ public class ResponseFormatter {
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
+
+    private static FullHttpResponse formatResponseAsGraphplotJson(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) {
+        List<String> results = new ArrayList<>();
+
+        Gson gson = new Gson();
+
+        // consolidate data points
+        consolidate(timeSeriesList, renderParameters.getMaxDataPoints());
+
+        for(TimeSeries timeSeries : timeSeriesList) {
+            List<String> datapoints = new ArrayList<>();
+            for(int i = 0; i < timeSeries.getValues().length; i++) {
+                String stringValue;
+                if (timeSeries.getValues()[i] == null) {
+                    stringValue = "null";
+                } else {
+                    stringValue = GraphiteUtils.formatDoubleSpecialPlain(timeSeries.getValues()[i]);
+                }
+
+                datapoints.add(stringValue);
+            }
+            results.add("{\"start\": " + timeSeries.getFrom() + ", \"step\": " + timeSeries.getStep() + ", \"end\": " + (timeSeries.getFrom() + timeSeries.getStep() * timeSeries.getValues().length) + ", \"name\": \"" + timeSeries.getName() + "\", \"data\": [" + Joiner.on(", ").join(datapoints) + "]}");
+        }
+        String responseString = "[" + Joiner.on(", ").join(results) + "]";
+
+
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.wrappedBuffer(responseString.getBytes()));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        return response;
+    }
+
 
     private static void consolidate(List<TimeSeries> timeSeriesList, int maxDataPoints) {
         for (TimeSeries ts : timeSeriesList) {
