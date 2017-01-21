@@ -37,13 +37,16 @@ public class SumSeriesWithWildcardsFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        int position = ((Double) arguments.get(1)).intValue();
+        int[] positions = new int[arguments.size() - 1];
+        for (int i = 1; i < arguments.size(); i++) {
+            positions[i - 1] = ((Double) arguments.get(i)).intValue();
+        }
 
         // put series into buckets according to position
         Map<String, List<TimeSeries>> buckets = new HashMap<>();
 
         for (TimeSeries ts : processedArguments) {
-            String bucketName = getBucketName(ts.getName(), position);
+            String bucketName = getBucketName(ts.getName(), positions);
             if (!buckets.containsKey(bucketName)) buckets.put(bucketName, new ArrayList<TimeSeries>());
             buckets.get(bucketName).add(ts);
         }
@@ -76,22 +79,27 @@ public class SumSeriesWithWildcardsFunction extends DistheneFunction {
         return resultTimeSeries;
     }
 
-    private String getBucketName(String name, int position) {
+    private String getBucketName(String name, int[] positions) {
         String[] split = name.split("\\.");
-        if (position < split.length) {
-            split[position] = null;
+        for (int position : positions) {
+            if (position < split.length) {
+                split[position] = null;
+            }
         }
-
         return Joiner.on(".").skipNulls().join(split);
     }
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() != 2)
-            throw new InvalidArgumentException("sumSeriesWithWildcards: number of arguments is " + arguments.size() + ". Must be two.");
+        if (arguments.size() < 2)
+            throw new InvalidArgumentException("sumSeriesWithWildcards: number of arguments is " + arguments.size() + ". Must be at least two.");
+
         if (!(arguments.get(0) instanceof PathTarget))
             throw new InvalidArgumentException("sumSeriesWithWildcards: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (!(arguments.get(1) instanceof Double))
-            throw new InvalidArgumentException("sumSeriesWithWildcards: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+
+        for (int i = 1; i < arguments.size(); i++) {
+            if (!(arguments.get(i) instanceof Double))
+                throw new InvalidArgumentException("sumSeriesWithWildcards: argument " + i + " is " + arguments.get(i).getClass().getName() + ". Must be a number");
+        }
     }
 }
