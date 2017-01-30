@@ -59,7 +59,7 @@ public class TargetEvaluator {
 
         int length = (int) ((effectiveTo - effectiveFrom) / bestRollup.getRollup() + 1);
 
-        TimeSeries ts = new TimeSeries("", from, to, bestRollup.getRollup());
+        TimeSeries ts = new TimeSeries("", effectiveFrom, effectiveTo, bestRollup.getRollup());
         ts.setValues(new Double[length]);
 
         return ts;
