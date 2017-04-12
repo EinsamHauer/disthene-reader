@@ -17,7 +17,9 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * @author Andrei Ivanov
@@ -71,6 +73,14 @@ public class TargetEvaluator {
 
         List<TimeSeries> bootstrapped = new ArrayList<>();
         bootstrapped.addAll(eval(target.previous(period)));
+
+        Set<String> bootstrappedSeries = bootstrapped.stream().map(TimeSeries::getName).collect(Collectors.toSet());
+
+        for (TimeSeries ts : original.stream().filter(originalTs -> !bootstrappedSeries.contains(originalTs.getName())).collect(Collectors.toList())) {
+            TimeSeries emptyTimeSeries = getEmptyTimeSeries(ts.getFrom() - period, ts.getFrom() - 1);
+            emptyTimeSeries.setName(ts.getName());
+            bootstrapped.add(emptyTimeSeries);
+        }
 
         if (bootstrapped.size() != original.size()) throw new InvalidNumberOfSeriesException();
         if (!TimeSeriesUtils.checkAlignment(bootstrapped)) throw new TimeSeriesNotAlignedException();
