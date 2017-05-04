@@ -6,6 +6,7 @@ import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.policies.WhiteListPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
+import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import org.apache.log4j.Logger;
 
 import java.net.InetSocketAddress;
@@ -44,7 +45,7 @@ public class CassandraService {
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
                 .withCompression(ProtocolOptions.Compression.LZ4)
-                .withLoadBalancingPolicy(new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+                .withLoadBalancingPolicy(CassandraLoadBalancingPolicies.getLoadBalancingPolicy(storeConfiguration.getLoadBalancingPolicyName()))
                 .withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
                 .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.valueOf(storeConfiguration.getConsistency())))
