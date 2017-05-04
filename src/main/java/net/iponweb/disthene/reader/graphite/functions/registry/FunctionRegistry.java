@@ -45,7 +45,9 @@ public class FunctionRegistry {
         registry.put("diffSeries", DiffSeriesFunction.class);
         registry.put("divideSeries", DivideSeriesFunction.class);
         registry.put("drawAsInfinite", DrawAsInfiniteFunction.class);
+        registry.put("grep", GrepFunction.class);
         registry.put("group", GroupFunction.class);
+        registry.put("exclude", ExcludeFunction.class);
         registry.put("highestAverage", HighestAverageFunction.class);
         registry.put("highestCurrent", HighestCurrentFunction.class);
         registry.put("highestMax", HighestMaxFunction.class);
