@@ -1,7 +1,9 @@
 package net.iponweb.disthene.reader.config;
 
+import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * @author Andrei Ivanov
@@ -18,6 +20,7 @@ public class StoreConfiguration {
     private double connectTimeout;
     private int maxRequests;
     private String consistency = "ONE";
+    private String loadBalancingPolicyName = CassandraLoadBalancingPolicies.tokenDcAwareRoundRobinPolicy;
 
     public String getUserName() {
         return userName;
@@ -107,6 +110,14 @@ public class StoreConfiguration {
         this.consistency = consistency;
     }
 
+    public String getLoadBalancingPolicyName() {
+        return loadBalancingPolicyName;
+    }
+
+    public void setLoadBalancingPolicyName(String policy) {
+        this.loadBalancingPolicyName = policy;
+    }
+
     @Override
     public String toString() {
         return "StoreConfiguration{" +
@@ -121,6 +132,7 @@ public class StoreConfiguration {
                 ", connectTimeout=" + connectTimeout +
                 ", maxRequests=" + maxRequests +
                 ", consistency='" + consistency + '\'' +
+                ", loadBalancigPolicyName='" + loadBalancingPolicyName + '\'' +
                 '}';
     }
 }
