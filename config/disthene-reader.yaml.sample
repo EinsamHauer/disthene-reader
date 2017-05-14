@@ -18,6 +18,7 @@ store:
   connectTimeout: 10
   maxRequests: 128
   loadBalancingPolicyName: 'TokenDcAwareRoundRobinPolicy'
+  protocolVersion: "V2"
 index:
   name: "disthene"
   cluster:

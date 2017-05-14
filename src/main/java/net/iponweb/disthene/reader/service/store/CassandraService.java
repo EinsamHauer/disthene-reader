@@ -1,17 +1,12 @@
 package net.iponweb.disthene.reader.service.store;
 
 import com.datastax.driver.core.*;
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
-import com.datastax.driver.core.policies.TokenAwarePolicy;
-import com.datastax.driver.core.policies.WhiteListPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
 import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import org.apache.log4j.Logger;
 
-import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * @author Andrei Ivanov
@@ -39,8 +34,8 @@ public class CassandraService {
         PoolingOptions poolingOptions = new PoolingOptions();
         poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, storeConfiguration.getMaxConnections());
         poolingOptions.setMaxConnectionsPerHost(HostDistance.REMOTE, storeConfiguration.getMaxConnections());
-        poolingOptions.setMaxSimultaneousRequestsPerConnectionThreshold(HostDistance.REMOTE, storeConfiguration.getMaxRequests());
-        poolingOptions.setMaxSimultaneousRequestsPerConnectionThreshold(HostDistance.LOCAL, storeConfiguration.getMaxRequests());
+        poolingOptions.setMaxRequestsPerConnection(HostDistance.REMOTE, storeConfiguration.getMaxRequests());
+        poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, storeConfiguration.getMaxRequests());
 
         Cluster.Builder builder = Cluster.builder()
                 .withSocketOptions(socketOptions)
@@ -49,7 +44,7 @@ public class CassandraService {
                 .withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
                 .withPoolingOptions(poolingOptions)
                 .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.valueOf(storeConfiguration.getConsistency())))
-                .withProtocolVersion(ProtocolVersion.V2)
+                .withProtocolVersion(ProtocolVersion.valueOf(storeConfiguration.getProtocolVersion()))
                 .withPort(storeConfiguration.getPort());
 
         if ( storeConfiguration.getUserName() != null && storeConfiguration.getUserPassword() != null) {
