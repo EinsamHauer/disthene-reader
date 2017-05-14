@@ -26,7 +26,7 @@ public class CassandraLoadBalancingPolicies {
                 break;
             default:
                 throw new IllegalArgumentException("Cassandra load balancing policy can be " + tokenAwarePolicy + " ," + tokenLatencyAwarePolicy
-                       + " ," + dcAwareRoundRobinPolicy);
+                       + " ," + tokenDcAwareRoundRobinPolicy);
         }
         return loadBalancingPolicy;
     }

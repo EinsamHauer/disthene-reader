@@ -132,7 +132,7 @@ public class StoreConfiguration {
                 ", connectTimeout=" + connectTimeout +
                 ", maxRequests=" + maxRequests +
                 ", consistency='" + consistency + '\'' +
-                ", loadBalancigPolicyName='" + loadBalancingPolicyName + '\'' +
+                ", loadBalancingPolicyName='" + loadBalancingPolicyName + '\'' +
                 '}';
     }
 }

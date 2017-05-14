@@ -11,7 +11,6 @@ import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 import org.yaml.snakeyaml.Yaml;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -21,8 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Andrei Ivanov
@@ -50,7 +47,7 @@ public class DistheneReader {
     private StatsService statsService;
     private ThrottlingService throttlingService;
 
-    public DistheneReader(String configLocation, String throttlingConfigLocation) {
+    private DistheneReader(String configLocation, String throttlingConfigLocation) {
         this.configLocation = configLocation;
         this.throttlingConfigLocation = throttlingConfigLocation;
     }
