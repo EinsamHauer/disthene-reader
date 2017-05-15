@@ -169,7 +169,7 @@ public class RenderParameters {
         }
 
         // parse until
-        if (queryStringDecoder.parameters().get("until") != null) {
+        if ((queryStringDecoder.parameters().get("until") != null) || (queryStringDecoder.parameters().get("until").get(0).equals("now"))) {
             try {
                 parameters.setUntil(parseExtendedTime(queryStringDecoder.parameters().get("until").get(0), parameters.getTz()));
             } catch (NumberFormatException e) {
@@ -611,12 +611,11 @@ public class RenderParameters {
             }
             // calc offset as (now) - (number * unit value)
             return (System.currentTimeMillis() / 1000L) - (Long.valueOf(value) * unitValue);
+        } else if ("now".equals(timeString.toLowerCase())) {
+            return System.currentTimeMillis() / 1000L;
         } else {
             return new DateTime(Long.valueOf(timeString) * 1000, tz).getMillis() / 1000L;
         }
-
-
-
     }
 
 }
