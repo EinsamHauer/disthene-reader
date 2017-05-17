@@ -71,6 +71,8 @@ IMPLEMENTED
   'sortByMaxima' : sortByMaxima,
   'sortByMinima' : sortByMinima,
   'averageOutsidePercentile' : averageOutsidePercentile,
+  'exclude' : exclude,
+  'grep' : grep,
 
   # Data Filter functions
   'removeAboveValue' : removeAboveValue,
@@ -99,7 +101,9 @@ IMPLEMENTED
   'aggregateLine' : aggregateLine,
   'group' : group,
   'aliasSub' : aliasSub,
-  'threshold' : threshold
+  'threshold' : threshold,
+  'groupByNodes' : groupByNodes,
+  'groupByNode' : groupByNode
 
 NOT IMPLEMENTED
 ========================================================================================================================
@@ -128,8 +132,6 @@ WILL NOT BE IMPLEMENTED???
   'fallbackSeries' : fallbackSeries,
   'removeBetweenPercentile' : removeBetweenPercentile,
   'useSeriesAbove': useSeriesAbove,
-  'exclude' : exclude,
-  'grep' : grep,
   'removeEmptySeries' : removeEmptySeries,
 
   # Special functions
@@ -141,7 +143,6 @@ WILL NOT BE IMPLEMENTED???
   'cumulative' : cumulative,        ***seems to be useful only in some corner cases***
   'consolidateBy' : consolidateBy,  ***seems to be useful only in some corner cases***
   'changed' : changed,              ***seems to be useful only in some corner cases***
-  'groupByNode' : groupByNode,      ***seems to be useful only in some corner cases***
   'substr' : substr,                ***seems to be useful only in some corner cases***
 
   # test functions
