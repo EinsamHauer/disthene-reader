@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
+import com.google.common.base.Joiner;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
@@ -31,13 +32,20 @@ public class AliasByNodeFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        int node = ((Double) arguments.get(1)).intValue();
+        int[] nodes = new int[arguments.size() - 1];
+        for (int i = 1; i < arguments.size(); i++) {
+            nodes[i - 1] = ((Double) arguments.get(i)).intValue();
+        }
 
         for (TimeSeries ts : processedArguments) {
             String[] split = ts.getName().split("\\.");
-            if (node >= 0 && node < split.length) {
-                ts.setName(split[node]);
+            List<String> parts = new ArrayList<String>();
+            for (int node : nodes) {
+                if (node >= 0 && node < split.length) {
+                    parts.add(split[node]);
+                }
             }
+            ts.setName(Joiner.on(".").join(parts));
         }
 
         return processedArguments;
@@ -45,8 +53,11 @@ public class AliasByNodeFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() != 2) throw new InvalidArgumentException("aliasByNode: number of arguments is " + arguments.size() + ". Must be two.");
+        if (arguments.size() < 2) throw new InvalidArgumentException("aliasByNode: number of arguments is " + arguments.size() + ". Must be at least two.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("aliasByNode: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("aliasByNode: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+        for (int i = 1; i < arguments.size(); i++) {
+            if (!(arguments.get(i) instanceof Double))
+                throw new InvalidArgumentException("groupByNodes: argument " + i + " is " + arguments.get(i).getClass().getName() + ". Must be a number");
+        }
     }
 }
