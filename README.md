@@ -35,7 +35,6 @@ The following functions are not implemented:
 * cumulative
 * consolidateBy
 * changed
-* groupByNode
 * substr
 * time
 * sin
