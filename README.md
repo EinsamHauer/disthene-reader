@@ -26,8 +26,6 @@ The following functions are not implemented:
 * fallbackSeries
 * removeBetweenPercentile
 * useSeriesAbove
-* exclude
-* grep
 * removeEmptySeries
 * map
 * mapSeries
