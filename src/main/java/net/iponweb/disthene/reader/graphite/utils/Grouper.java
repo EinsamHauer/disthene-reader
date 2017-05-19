@@ -14,7 +14,7 @@ import java.util.Map;
 public class Grouper {
 
     interface AggregationMethod {
-        public Double apply(List<Double> points);
+        Double apply(List<Double> points);
     }
     
     private static ImmutableMap<String, AggregationMethod> aggregationMap;
@@ -69,7 +69,7 @@ public class Grouper {
                 for (TimeSeries ts : bucket.getValue()) {
                     points.add(ts.getValues()[i]);
                 }
-                values[i] = (Double) aggregationMap.get(aggregator).apply(points);
+                values[i] = aggregationMap.get(aggregator).apply(points);
             }
             timeSeries.setValues(values);
             timeSeries.setName(bucket.getKey());
@@ -89,7 +89,7 @@ public class Grouper {
 
     private String getBucketName(String name, int[] positions) {
         String[] split = name.split("\\.");
-        List<String> parts = new ArrayList<String>();
+        List<String> parts = new ArrayList<>();
         for (int position : positions) {
             parts.add(split[position]);
         }

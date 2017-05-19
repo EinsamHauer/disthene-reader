@@ -1,7 +1,6 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
@@ -37,10 +36,7 @@ public class GroupByNodeFunction extends DistheneFunction {
 
         int[] positions = {((Double) arguments.get(1)).intValue()};
         
-        Grouper grouper = new Grouper(processedArguments, callbackName);
-        List<TimeSeries> resultTimeSeries = grouper.byNodesIndex(positions);
-
-        return resultTimeSeries;
+        return new Grouper(processedArguments, callbackName).byNodesIndex(positions);
     }
 
     @Override

@@ -39,10 +39,7 @@ public class GroupByNodesFunction extends DistheneFunction {
             positions[i - 2] = ((Double) arguments.get(i)).intValue();
         }
         
-        Grouper grouper = new Grouper(processedArguments, callbackName);
-        List<TimeSeries> resultTimeSeries = grouper.byNodesIndex(positions);
-
-        return resultTimeSeries;
+        return new Grouper(processedArguments, callbackName).byNodesIndex(positions);
     }
 
     @Override

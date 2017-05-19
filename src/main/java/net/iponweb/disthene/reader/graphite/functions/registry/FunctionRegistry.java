@@ -121,6 +121,7 @@ public class FunctionRegistry {
         }
 
         try {
+            @SuppressWarnings("unchecked")
             Constructor<DistheneFunction> constructor = (Constructor<DistheneFunction>) registry.get(name).getConstructor(String.class);
             DistheneFunction function = constructor.newInstance(name);
             function.setFrom(from);
