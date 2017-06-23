@@ -169,7 +169,7 @@ public class RenderParameters {
         }
 
         // parse until
-        if ((queryStringDecoder.parameters().get("until") != null)) {
+        if ((!queryStringDecoder.parameters().get("until").toLowerCase().equals("now")) && (queryStringDecoder.parameters().get("until") != null)) {
             try {
                 parameters.setUntil(parseExtendedTime(queryStringDecoder.parameters().get("until").get(0), parameters.getTz()));
             } catch (NumberFormatException e) {
