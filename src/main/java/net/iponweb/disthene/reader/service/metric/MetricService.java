@@ -48,8 +48,7 @@ public class MetricService {
     }
 
     public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException {
-        List<String> paths = indexService.getPaths(tenant, wildcards);
-        Collections.sort(paths);
+        Map<String, String> paths = indexService.getPaths(tenant, wildcards);
 
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
@@ -76,7 +75,10 @@ public class MetricService {
 
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
-        for (final String path : paths) {
+        for (Map.Entry<String, String> entry : paths.entrySet()) {
+
+            final String path = entry.getKey();
+
             Function<ResultSet, SinglePathResult> serializeFunction =
                     new Function<ResultSet, SinglePathResult>() {
                         public SinglePathResult apply(ResultSet resultSet) {
@@ -89,7 +91,7 @@ public class MetricService {
 
             futures.add(
                     Futures.transform(
-                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
+                            cassandraService.executeAsync(tenant, entry.getValue(), bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
                             serializeFunction,
                             executorService
                     )
@@ -115,7 +117,7 @@ public class MetricService {
     }
 
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
-        List<String> paths = indexService.getPaths(tenant, wildcards);
+        Map<String, String> paths = indexService.getPaths(tenant, wildcards);
 
         statsService.incRenderPathsRead(tenant, paths.size());
 
@@ -128,7 +130,6 @@ public class MetricService {
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
 
-        // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
         Long timestamp = effectiveFrom;
         int index = 0;
@@ -149,7 +150,10 @@ public class MetricService {
 
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
-        for (final String path : paths) {
+        for (Map.Entry<String, String> entry : paths.entrySet()) {
+
+            final String path = entry.getKey();
+
             Function<ResultSet, SinglePathResult> serializeFunction =
                     new Function<ResultSet, SinglePathResult>() {
                         public SinglePathResult apply(ResultSet resultSet) {
@@ -159,10 +163,9 @@ public class MetricService {
                         }
                     };
 
-
             futures.add(
                     Futures.transform(
-                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
+                            cassandraService.executeAsync(tenant, entry.getValue(), bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
                             serializeFunction,
                             executorService
                     )
