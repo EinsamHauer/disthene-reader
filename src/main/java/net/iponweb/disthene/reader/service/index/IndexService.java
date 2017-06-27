@@ -15,7 +15,10 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 /**
@@ -41,44 +44,42 @@ public class IndexService {
         }
     }
 
-    public List<String> getPaths(String tenant, List<String> wildcards) {
+    public Map<String, String> getPaths(String tenant, List<String> wildcards) {
         List<String> regExs = new ArrayList<>();
-        List<String> result = new ArrayList<>();
-
         for(String wildcard : wildcards) {
-            if (WildcardUtil.isPlainPath(wildcard)) {
-                result.add(wildcard);
-            } else {
-                regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
-            }
+            regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
+        }
+        String regEx = Joiner.on("|").skipNulls().join(regExs);
+
+        Map<String, String> result = new HashMap<>();
+
+        SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
+                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                .setSize(indexConfiguration.getScroll())
+                .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
+                        FilterBuilders.termFilter("tenant", tenant)))
+                .addField("path")
+                .addField("origin")
+                .execute().actionGet();
+
+        // if total hits exceeds maximum - abort right away returning empty array
+        if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
+            return result;
         }
 
-        logger.debug("getPaths plain paths: " + result.size() + ", wildcard paths: " + regExs.size());
+        while (response.getHits().getHits().length > 0) {
+            for (SearchHit hit : response.getHits()) {
+                String path = (String) hit.field("path").getValue();
 
-        if (regExs.size() > 0) {
-            String regEx = Joiner.on("|").skipNulls().join(regExs);
-
-            SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                    .setSize(indexConfiguration.getScroll())
-                    .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
-                            FilterBuilders.termFilter("tenant", tenant)))
-                    .addField("path")
-                    .execute().actionGet();
-
-            // if total hits exceeds maximum - abort right away returning empty array
-            if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
-                return Collections.emptyList();
-            }
-
-            while (response.getHits().getHits().length > 0) {
-                for (SearchHit hit : response.getHits()) {
-                    result.add((String) hit.field("path").getValue());
+                if (hit.getFields().containsKey("origin")) {
+                    result.put(path, (String) hit.field("origin").getValue());
+                } else {
+                    result.put(path, path);
                 }
-                response = client.prepareSearchScroll(response.getScrollId())
-                        .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                        .execute().actionGet();
             }
+            response = client.prepareSearchScroll(response.getScrollId())
+                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                    .execute().actionGet();
         }
 
         return result;

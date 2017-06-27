@@ -103,8 +103,12 @@ public class RenderHandler implements DistheneReaderHandler {
             statsService.incTimedOutRequests(parameters.getTenant());
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
         } catch (EvaluationException | LogarithmicScaleNotAllowed e) {
+            // TODO: distinguish the bad request (bad params, non-existent function,.. ) from internal error
+            // e.printStackTrace(System.out);
             throw e;
         } catch (Exception e) {
+            // TODO: distinguish the bad request (bad params, non-existent function,.. ) from internal error
+            // e.printStackTrace(System.out);
             logger.error(e);
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
