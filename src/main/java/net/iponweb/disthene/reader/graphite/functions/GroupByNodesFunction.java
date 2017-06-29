@@ -5,7 +5,6 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
-import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.utils.Grouper;
@@ -47,7 +46,7 @@ public class GroupByNodesFunction extends DistheneFunction {
         if (arguments.size() < 3)
             throw new InvalidArgumentException("groupByNodes: number of arguments is " + arguments.size() + ". Must be a least two.");
 
-        if (!(arguments.get(0) instanceof PathTarget))
+        if (!(arguments.get(0) instanceof Target))
             throw new InvalidArgumentException("groupByNodes: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
 
         if (!(arguments.get(1) instanceof String))
