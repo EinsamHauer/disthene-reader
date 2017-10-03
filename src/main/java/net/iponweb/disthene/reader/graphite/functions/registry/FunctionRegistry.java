@@ -77,7 +77,9 @@ public class FunctionRegistry {
         registry.put("minSeries", MinSeriesFunction.class);
         registry.put("mostDeviant", MostDeviantFunction.class);
         registry.put("movingAverage", MovingAverageFunction.class);
+        registry.put("movingMax", MovingMaxFunction.class);
         registry.put("movingMedian", MovingMedianFunction.class);
+        registry.put("movingMin", MovingMinFunction.class);
         registry.put("multiplySeries", MultiplySeriesFunction.class);
         registry.put("multiplySeriesWithWildcards", MultiplySeriesWithWildcardsFunction.class);
         registry.put("nonNegativeDerivative", NonNegativeDerivativeFunction.class);
