@@ -42,7 +42,7 @@ public class IndexService {
         }
     }
 
-    public List<String> getPaths(String tenant, List<String> wildcards) {
+    public List<String> getPaths(String tenant, List<String> wildcards) throws TooMuchDataExpectedException {
         List<String> regExs = new ArrayList<>();
         List<String> result = new ArrayList<>();
 
@@ -69,7 +69,8 @@ public class IndexService {
 
             // if total hits exceeds maximum - abort right away returning empty array
             if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
-                return Collections.emptyList();
+                logger.debug("Total number of paths exceeds the limit: " + response.getHits().totalHits());
+                throw new TooMuchDataExpectedException("Total number of paths exceeds the limit: " + response.getHits().totalHits() + " (the limit is " + indexConfiguration.getMaxPaths() + ")");
             }
 
             while (response.getHits().getHits().length > 0) {
