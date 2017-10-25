@@ -35,6 +35,7 @@ public class FunctionRegistry {
         registry.put("averageSeriesWithWildcards", AverageSeriesWithWildcardsFunction.class);
         registry.put("avg", AverageSeriesFunction.class);
         registry.put("cactiStyle", CactiStyleFunction.class);
+        registry.put("changed", ChangedFunction.class);
         registry.put("color", ColorFunction.class);
         registry.put("constantLine", ConstantLineFunction.class);
         registry.put("countSeries", CountSeriesFunction.class);

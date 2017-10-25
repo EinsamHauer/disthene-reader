@@ -2,6 +2,7 @@ package net.iponweb.disthene.reader.service.index;
 
 import com.google.common.base.Joiner;
 import net.iponweb.disthene.reader.config.IndexConfiguration;
+import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.utils.WildcardUtil;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchResponse;
@@ -84,7 +85,7 @@ public class IndexService {
         return result;
     }
 
-    public String getPathsAsJsonArray(String tenant, String wildcard) {
+    public String getPathsAsJsonArray(String tenant, String wildcard) throws TooMuchDataExpectedException {
         String regEx = WildcardUtil.getPathsRegExFromWildcard(wildcard);
 
         SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
@@ -97,7 +98,8 @@ public class IndexService {
 
         // if total hits exceeds maximum - abort right away returning empty array
         if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
-            return "[]";
+            logger.debug("Total number of paths exceeds the limit: " + response.getHits().totalHits());
+            throw new TooMuchDataExpectedException("Total number of paths exceeds the limit: " + response.getHits().totalHits() + " (the limit is " + indexConfiguration.getMaxPaths() + ")");
         }
 
         List<String> paths = new ArrayList<>();
