@@ -11,5 +11,5 @@ import java.util.concurrent.ExecutionException;
  */
 public interface DistheneReaderHandler {
 
-    FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, EvaluationException, LogarithmicScaleNotAllowed;
+    FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, EvaluationException, LogarithmicScaleNotAllowed, TooMuchDataExpectedException;
 }
