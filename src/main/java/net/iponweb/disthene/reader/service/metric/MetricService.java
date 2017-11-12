@@ -49,7 +49,6 @@ public class MetricService {
 
     public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
         Map<String, String> paths = indexService.getPaths(tenant, wildcards);
-        List<String> paths = indexService.getPaths(tenant, wildcards);
         Collections.sort(paths);
 
         // Calculate rollup etc
