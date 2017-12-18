@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @author Andrei Ivanov
  */
 public class MetricService {
-    final static Logger logger = Logger.getLogger(MetricService.class);
+    private final static Logger logger = Logger.getLogger(MetricService.class);
 
     private IndexService indexService;
     private CassandraService cassandraService;
@@ -77,15 +77,14 @@ public class MetricService {
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<ResultSet, SinglePathResult> serializeFunction =
-                    new Function<ResultSet, SinglePathResult>() {
-                        public SinglePathResult apply(ResultSet resultSet) {
-                            SinglePathResult result = new SinglePathResult(path);
-                            result.makeJson(resultSet, length, timestampIndices);
-                            return result;
-                        }
-                    };
-
+            Function<List<ResultSet>, SinglePathResult> serializeFunction = new Function<List<ResultSet>, SinglePathResult>() {
+                @Override
+                public SinglePathResult apply(List<ResultSet> resultSets) {
+                    SinglePathResult result = new SinglePathResult(path);
+                    result.makeJson(resultSets, length, timestampIndices);
+                    return result;
+                }
+            };
 
             futures.add(
                     Futures.transform(
@@ -150,15 +149,14 @@ public class MetricService {
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<ResultSet, SinglePathResult> serializeFunction =
-                    new Function<ResultSet, SinglePathResult>() {
-                        public SinglePathResult apply(ResultSet resultSet) {
-                            SinglePathResult result = new SinglePathResult(path);
-                            result.makeArray(resultSet, length, timestampIndices);
-                            return result;
-                        }
-                    };
-
+            Function<List<ResultSet>, SinglePathResult> serializeFunction = new Function<List<ResultSet>, SinglePathResult>() {
+                @Override
+                public SinglePathResult apply(List<ResultSet> resultSets) {
+                    SinglePathResult result = new SinglePathResult(path);
+                    result.makeArray(resultSets, length, timestampIndices);
+                    return result;
+                }
+            };
 
             futures.add(
                     Futures.transform(
@@ -208,7 +206,7 @@ public class MetricService {
     }
 
     public Rollup getRollup(long from) {
-        long now = System.currentTimeMillis() / 1000L ;
+        long now = System.currentTimeMillis() / 1000L;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
@@ -240,7 +238,7 @@ public class MetricService {
             return path;
         }
 
-        public String getJson() {
+        String getJson() {
             return json;
         }
 
@@ -248,33 +246,40 @@ public class MetricService {
             return values;
         }
 
-        public boolean isAllNulls() {
+        boolean isAllNulls() {
             return allNulls;
         }
 
-        public void makeJson(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
+        void makeJson(List<ResultSet> resultSets, int length, Map<Long, Integer> timestampIndices) {
             Double values[] = new Double[length];
-            for (Row row : resultSet) {
-                allNulls = false;
-                values[timestampIndices.get(row.getLong("time"))] =
-                        isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
+
+            // todo: in fact we assume here that there will be no simultaneous writes, which may not be true, resulting in a one data point glitch
+            for (ResultSet resultSet : resultSets) {
+                for (Row row : resultSet) {
+                    allNulls = false;
+                    values[timestampIndices.get(row.getLong("time"))] =
+                            isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
+                }
             }
 
             json = new Gson().toJson(values);
         }
 
-        public void makeArray(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
-            if (resultSet.getAvailableWithoutFetching() > 0) {
-                allNulls = false;
-                values = new Double[length];
-                for (Row row : resultSet) {
-                    values[timestampIndices.get(row.getLong("time"))] =
-                            isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
-                }
-            } else {
-                values = new Double[length];
-                for (Map.Entry<Long, Integer> entry : timestampIndices.entrySet()) {
-                    values[entry.getValue()] = null;
+        void makeArray(List<ResultSet> resultSets, int length, Map<Long, Integer> timestampIndices) {
+            values = new Double[length];
+
+            // todo: in fact we assume here that there will be no simultaneous writes, which may not be true, resulting in a one data point glitch
+            for (ResultSet resultSet : resultSets) {
+                if (resultSet.getAvailableWithoutFetching() > 0) {
+                    allNulls = false;
+                    for (Row row : resultSet) {
+                        values[timestampIndices.get(row.getLong("time"))] =
+                                isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
+                    }
+                } else {
+                    for (Map.Entry<Long, Integer> entry : timestampIndices.entrySet()) {
+                        values[entry.getValue()] = null;
+                    }
                 }
             }
         }

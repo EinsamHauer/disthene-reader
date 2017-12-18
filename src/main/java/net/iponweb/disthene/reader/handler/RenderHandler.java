@@ -105,7 +105,7 @@ public class RenderHandler implements DistheneReaderHandler {
         } catch (EvaluationException | LogarithmicScaleNotAllowed e) {
             throw e;
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Unexpected error:", e);
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
 

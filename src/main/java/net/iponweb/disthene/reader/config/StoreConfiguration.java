@@ -22,6 +22,7 @@ public class StoreConfiguration {
     private String consistency = "ONE";
     private String loadBalancingPolicyName = CassandraLoadBalancingPolicies.tokenDcAwareRoundRobinPolicy;
     private String protocolVersion = "V2";
+    private String tenantKeyspace = null;
 
     public String getUserName() {
         return userName;
@@ -127,6 +128,14 @@ public class StoreConfiguration {
         this.protocolVersion = protocolVersion;
     }
 
+    public String getTenantKeyspace() {
+        return tenantKeyspace != null ? tenantKeyspace : keyspace;
+    }
+
+    public void setTenantKeyspace(String tenantKeyspace) {
+        this.tenantKeyspace = tenantKeyspace;
+    }
+
     @Override
     public String toString() {
         return "StoreConfiguration{" +
@@ -143,6 +152,7 @@ public class StoreConfiguration {
                 ", consistency='" + consistency + '\'' +
                 ", loadBalancingPolicyName='" + loadBalancingPolicyName + '\'' +
                 ", protocolVersion='" + protocolVersion + '\'' +
+                ", tenantKeyspace='" + tenantKeyspace + '\'' +
                 '}';
     }
 }

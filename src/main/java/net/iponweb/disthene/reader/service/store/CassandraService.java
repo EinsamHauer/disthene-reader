@@ -2,11 +2,15 @@ package net.iponweb.disthene.reader.service.store;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
 import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Andrei Ivanov
@@ -18,6 +22,8 @@ public class CassandraService {
     private Cluster cluster;
     private Session session;
     private final PreparedStatement statement;
+
+    private TablesRegistry tablesRegistry;
 
     public CassandraService(StoreConfiguration storeConfiguration) {
         String query = "SELECT time, data FROM " +
@@ -64,11 +70,25 @@ public class CassandraService {
 
         session = cluster.connect();
 
+        tablesRegistry = new TablesRegistry(session, storeConfiguration);
+
         statement = session.prepare(query);
     }
 
-    public ResultSetFuture executeAsync(String tenant, String path, int period, int rollup, long from, long to) {
-        return session.executeAsync(statement.bind(path, tenant, period, rollup, from, to));
+    public ListenableFuture<List<ResultSet>> executeAsync(String tenant, String path, int period, int rollup, long from, long to) {
+        List<ResultSetFuture> futures = new ArrayList<>();
+
+        if (tablesRegistry.globalTableExists()) {
+            futures.add(session.executeAsync(statement.bind(path, tenant, period, rollup, from, to)));
+            logger.debug("Global table exists, adding select from it.");
+        }
+
+        if (tablesRegistry.tenantTableExists(tenant, rollup)) {
+            logger.debug("Tenant table exists, adding select from it.");
+            futures.add(session.executeAsync(tablesRegistry.getStatement(tenant, rollup).bind(path, from, to)));
+        }
+
+        return Futures.allAsList(futures);
     }
 
     public void shutdown() {
