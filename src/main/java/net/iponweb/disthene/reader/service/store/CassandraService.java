@@ -80,11 +80,11 @@ public class CassandraService {
 
         if (tablesRegistry.globalTableExists()) {
             futures.add(session.executeAsync(statement.bind(path, tenant, period, rollup, from, to)));
-            logger.debug("Global table exists, adding select from it.");
+            logger.trace("Global table exists, adding select from it.");
         }
 
         if (tablesRegistry.tenantTableExists(tenant, rollup)) {
-            logger.debug("Tenant table exists, adding select from it.");
+            logger.trace("Tenant table exists, adding select from it.");
             futures.add(session.executeAsync(tablesRegistry.getStatement(tenant, rollup).bind(path, from, to)));
         }
 
