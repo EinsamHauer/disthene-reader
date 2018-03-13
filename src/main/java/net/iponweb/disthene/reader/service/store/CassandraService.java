@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Andrei Ivanov
@@ -75,7 +76,7 @@ public class CassandraService {
         statement = session.prepare(query);
     }
 
-    public ListenableFuture<List<ResultSet>> executeAsync(String tenant, String path, int period, int rollup, long from, long to) {
+    public ListenableFuture<List<ResultSet>> executeAsync(String tenant, String path, int period, int rollup, long from, long to) throws ExecutionException {
         List<ResultSetFuture> futures = new ArrayList<>();
 
         if (tablesRegistry.globalTableExists()) {

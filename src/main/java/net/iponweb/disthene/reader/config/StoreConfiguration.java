@@ -23,6 +23,7 @@ public class StoreConfiguration {
     private String loadBalancingPolicyName = CassandraLoadBalancingPolicies.tokenDcAwareRoundRobinPolicy;
     private String protocolVersion = "V2";
     private String tenantKeyspace = null;
+    private int cacheExpiration = 180;
 
     public String getUserName() {
         return userName;
@@ -136,6 +137,14 @@ public class StoreConfiguration {
         this.tenantKeyspace = tenantKeyspace;
     }
 
+    public int getCacheExpiration() {
+        return cacheExpiration;
+    }
+
+    public void setCacheExpiration(int cacheExpiration) {
+        this.cacheExpiration = cacheExpiration;
+    }
+
     @Override
     public String toString() {
         return "StoreConfiguration{" +
@@ -153,6 +162,7 @@ public class StoreConfiguration {
                 ", loadBalancingPolicyName='" + loadBalancingPolicyName + '\'' +
                 ", protocolVersion='" + protocolVersion + '\'' +
                 ", tenantKeyspace='" + tenantKeyspace + '\'' +
+                ", cacheExpiration=" + cacheExpiration +
                 '}';
     }
 }

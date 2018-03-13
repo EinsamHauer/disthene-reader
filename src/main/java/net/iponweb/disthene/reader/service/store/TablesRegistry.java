@@ -3,15 +3,23 @@ package net.iponweb.disthene.reader.service.store;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrei Ivanov
  */
 public class TablesRegistry {
+    private Logger logger = Logger.getLogger(TablesRegistry.class);
+
 
     private static final String TABLE_QUERY = "SELECT COUNT(1) FROM SYSTEM.SCHEMA_COLUMNFAMILIES WHERE KEYSPACE_NAME=? AND COLUMNFAMILY_NAME=?";
     private static final String TABLE_TEMPLATE = "%s_%d_metric";
@@ -24,12 +32,18 @@ public class TablesRegistry {
 
     private final Map<String, PreparedStatement> statements = new HashMap<>();
 
+    private Cache<String, Boolean> tablesCache;
 
-    public TablesRegistry(Session session, StoreConfiguration storeConfiguration) {
+
+    TablesRegistry(Session session, StoreConfiguration storeConfiguration) {
         this.session = session;
         this.storeConfiguration = storeConfiguration;
 
         queryStatement = session.prepare(TABLE_QUERY);
+
+        tablesCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(storeConfiguration.getCacheExpiration(), TimeUnit.SECONDS)
+                .build();
     }
 
     public PreparedStatement getStatement(String tenant, int rollup) {
@@ -46,17 +60,26 @@ public class TablesRegistry {
         return statements.get(table);
     }
 
-    public boolean globalTableExists() {
+    public boolean globalTableExists() throws ExecutionException {
         return checkTable(storeConfiguration.getKeyspace(), storeConfiguration.getColumnFamily());
     }
 
-    public boolean tenantTableExists(String tenant, int rollup) {
+    public boolean tenantTableExists(String tenant, int rollup) throws ExecutionException {
         return checkTable(storeConfiguration.getTenantKeyspace(), String.format(TABLE_TEMPLATE, tenant, rollup));
     }
 
-    private boolean checkTable(String keyspace, String table) {
-        ResultSet resultSet = session.execute(queryStatement.bind(keyspace, table));
-        return resultSet.one().getLong(0) > 0;
+    private boolean checkTable(final String keyspace, final String table) throws ExecutionException {
+        return tablesCache.get(keyspace + "." + table, new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                logger.debug("Table " + keyspace + "." + table + " not found in cache. Checking.");
+                ResultSet resultSet = session.execute(queryStatement.bind(keyspace, table));
+                Boolean result = resultSet.one().getLong(0) > 0;
+                tablesCache.put(keyspace + "." + table, result);
+                logger.debug("Table " + keyspace + "." + table + (result ? " " : " not ")  + "found.");
+                return result;
+            }
+        });
     }
 
 }
