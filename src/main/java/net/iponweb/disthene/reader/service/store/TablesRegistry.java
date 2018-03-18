@@ -10,9 +10,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Andrei Ivanov
@@ -22,7 +20,6 @@ public class TablesRegistry {
 
 
     private static final String TABLE_QUERY = "SELECT COUNT(1) FROM SYSTEM.SCHEMA_COLUMNFAMILIES WHERE KEYSPACE_NAME=? AND COLUMNFAMILY_NAME=?";
-    private static final String TABLE_TEMPLATE = "%s_%d_metric";
     private static final String SELECT_QUERY_TEMPLATE = "SELECT time, data FROM %s.%s where path = ? and time >= ? and time <= ? order by time";
 
 
@@ -31,13 +28,14 @@ public class TablesRegistry {
     private final PreparedStatement queryStatement;
 
     private final Map<String, PreparedStatement> statements = new HashMap<>();
-
     private Cache<String, Boolean> tablesCache;
-
+    private ConcurrentMap<String, String> tenants = new ConcurrentHashMap<>();
+    private String tableTemplate;
 
     TablesRegistry(Session session, StoreConfiguration storeConfiguration) {
         this.session = session;
         this.storeConfiguration = storeConfiguration;
+        this.tableTemplate = storeConfiguration.getTenantTableTemplate();
 
         queryStatement = session.prepare(TABLE_QUERY);
 
@@ -47,7 +45,7 @@ public class TablesRegistry {
     }
 
     public PreparedStatement getStatement(String tenant, int rollup) {
-        String table = String.format(TABLE_TEMPLATE, tenant, rollup);
+        String table = String.format(tableTemplate, getNormalizedTenant(tenant), rollup);
 
         if (statements.containsKey(table)) return statements.get(table);
 
@@ -65,7 +63,7 @@ public class TablesRegistry {
     }
 
     public boolean tenantTableExists(String tenant, int rollup) throws ExecutionException {
-        return checkTable(storeConfiguration.getTenantKeyspace(), String.format(TABLE_TEMPLATE, tenant, rollup));
+        return checkTable(storeConfiguration.getTenantKeyspace(), String.format(tableTemplate, getNormalizedTenant(tenant), rollup));
     }
 
     private boolean checkTable(final String keyspace, final String table) throws ExecutionException {
@@ -80,6 +78,14 @@ public class TablesRegistry {
                 return result;
             }
         });
+    }
+
+    private String getNormalizedTenant(String tenant) {
+        if (tenants.containsKey(tenant)) return tenants.get(tenant);
+
+        String normalizedTenant = tenant.replaceAll("[^0-9a-zA-Z_]", "_");
+        tenants.putIfAbsent(tenant, normalizedTenant);
+        return normalizedTenant;
     }
 
 }

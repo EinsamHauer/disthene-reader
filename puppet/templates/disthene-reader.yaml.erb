@@ -20,6 +20,11 @@ store:
   readTimeout: <%= @store_read_timeout %>
   connectTimeout: <%= @store_connect_timeout %>
   maxRequests: <%= @store_max_requests %>
+  loadBalancingPolicyName: "<%= @store_load_balancing_policy %>"
+  protocolVersion: "<%= @store_protocol_version %>"
+  tenantKeyspace: "<%= @store_tenant_keyspace %>"
+  cacheExpiration: <%= @store_cache_expiration %>
+  tenantTableTemplate: "<%= @store_tenant_table_template %>"
 index:
   name: "<%= @index_name %>"
   cluster:

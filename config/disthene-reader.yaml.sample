@@ -19,6 +19,9 @@ store:
   maxRequests: 128
   loadBalancingPolicyName: 'TokenDcAwareRoundRobinPolicy'
   protocolVersion: "V2"
+  tenantKeyspace: "metric"
+  cacheExpiration: 180
+  tenantTableTemplate: "metric_%s_%d"
 index:
   name: "disthene"
   cluster:

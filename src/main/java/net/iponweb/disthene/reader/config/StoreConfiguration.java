@@ -24,6 +24,7 @@ public class StoreConfiguration {
     private String protocolVersion = "V2";
     private String tenantKeyspace = null;
     private int cacheExpiration = 180;
+    private String tenantTableTemplate = "metric_%s_%d"; //%s - tenant, %d rollup
 
     public String getUserName() {
         return userName;
@@ -145,6 +146,14 @@ public class StoreConfiguration {
         this.cacheExpiration = cacheExpiration;
     }
 
+    public String getTenantTableTemplate() {
+        return tenantTableTemplate;
+    }
+
+    public void setTenantTableTemplate(String tenantTableTemplate) {
+        this.tenantTableTemplate = tenantTableTemplate;
+    }
+
     @Override
     public String toString() {
         return "StoreConfiguration{" +
@@ -163,6 +172,7 @@ public class StoreConfiguration {
                 ", protocolVersion='" + protocolVersion + '\'' +
                 ", tenantKeyspace='" + tenantKeyspace + '\'' +
                 ", cacheExpiration=" + cacheExpiration +
+                ", tenantTableTemplate='" + tenantTableTemplate + '\'' +
                 '}';
     }
 }

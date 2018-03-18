@@ -20,6 +20,11 @@ class disthene_reader (
   $store_read_timeout = '5',
   $store_connect_timeout = '5',
   $store_max_requests = '128',
+  $store_load_balancing_policy = "TokenDcAwareRoundRobinPolicy",
+  $store_protocol_version = "V2",
+  $store_tenant_keyspace = "metric",
+  $store_cache_expiration = 180,
+  $store_tenant_table_template = "metric_%s_%d",
 
   $index_name = 'disthene',
   $index_cluster = [$::ipaddress],
