@@ -276,10 +276,6 @@ public class MetricService {
                         values[timestampIndices.get(row.getLong("time"))] =
                                 isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
                     }
-                } else {
-                    for (Map.Entry<Long, Integer> entry : timestampIndices.entrySet()) {
-                        values[entry.getValue()] = null;
-                    }
                 }
             }
         }

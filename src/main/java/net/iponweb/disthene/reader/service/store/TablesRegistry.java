@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.regex.Pattern;
 
 /**
  * @author Andrei Ivanov
@@ -31,6 +32,7 @@ public class TablesRegistry {
     private Cache<String, Boolean> tablesCache;
     private ConcurrentMap<String, String> tenants = new ConcurrentHashMap<>();
     private String tableTemplate;
+    private Pattern normalizationPattern = Pattern.compile("[^0-9a-zA-Z_]");
 
     TablesRegistry(Session session, StoreConfiguration storeConfiguration) {
         this.session = session;
@@ -83,9 +85,8 @@ public class TablesRegistry {
     private String getNormalizedTenant(String tenant) {
         if (tenants.containsKey(tenant)) return tenants.get(tenant);
 
-        String normalizedTenant = tenant.replaceAll("[^0-9a-zA-Z_]", "_");
+        String normalizedTenant = normalizationPattern.matcher(tenant).replaceAll("_");
         tenants.putIfAbsent(tenant, normalizedTenant);
         return normalizedTenant;
     }
-
 }
