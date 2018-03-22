@@ -229,9 +229,12 @@ public class MetricService {
         String json;
         Double[] values = null;
         boolean allNulls = true;
+        boolean isSumMetric;
 
         private SinglePathResult(String path) {
             this.path = path;
+            // trying to optimize something that JIT should do. Probably redundant
+            this.isSumMetric = isSumMetric(path);
         }
 
         public String getPath() {
@@ -251,30 +254,21 @@ public class MetricService {
         }
 
         void makeJson(List<ResultSet> resultSets, int length, Map<Long, Integer> timestampIndices) {
-            Double values[] = new Double[length];
-
-            // todo: in fact we assume here that there will be no simultaneous writes, which may not be true, resulting in a one data point glitch
-            for (ResultSet resultSet : resultSets) {
-                for (Row row : resultSet) {
-                    allNulls = false;
-                    values[timestampIndices.get(row.getLong("time"))] =
-                            isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
-                }
-            }
-
+            makeArray(resultSets, length, timestampIndices);
             json = new Gson().toJson(values);
         }
 
         void makeArray(List<ResultSet> resultSets, int length, Map<Long, Integer> timestampIndices) {
             values = new Double[length];
 
-            // todo: in fact we assume here that there will be no simultaneous writes, which may not be true, resulting in a one data point glitch
             for (ResultSet resultSet : resultSets) {
-                if (resultSet.getAvailableWithoutFetching() > 0) {
+                for (Row row : resultSet) {
                     allNulls = false;
-                    for (Row row : resultSet) {
-                        values[timestampIndices.get(row.getLong("time"))] =
-                                isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
+                    int index = timestampIndices.get(row.getLong("time"));
+                    if (isSumMetric) {
+                        values[index] = (values[index] != null ? values[index] : 0) + CollectionUtils.unsafeSum(row.getList("data", Double.class));
+                    } else {
+                        values[index] = CollectionUtils.unsafeAverage(row.getList("data", Double.class));
                     }
                 }
             }
