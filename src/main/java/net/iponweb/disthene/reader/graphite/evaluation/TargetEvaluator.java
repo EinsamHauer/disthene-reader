@@ -96,4 +96,15 @@ public class TargetEvaluator {
 
         return bootstrapped;
     }
+
+    // a hack in a way
+    public List<String> getPaths(PathTarget pathTarget) throws EvaluationException {
+        try {
+            return metricService.getPaths(pathTarget.getTenant(), pathTarget.getPath());
+        } catch (TooMuchDataExpectedException e) {
+            logger.error(e.getMessage());
+            logger.debug(e);
+            throw new EvaluationException(e);
+        }
+    }
 }

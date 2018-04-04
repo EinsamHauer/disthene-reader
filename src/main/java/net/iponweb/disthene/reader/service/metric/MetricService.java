@@ -47,6 +47,10 @@ public class MetricService {
         this.statsService = statsService;
     }
 
+    public List<String> getPaths(String tenant, String wildcard) throws TooMuchDataExpectedException {
+        return indexService.getPaths(tenant, Collections.singletonList(wildcard));
+    }
+
     public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
         Collections.sort(paths);

@@ -25,10 +25,10 @@ public class FunctionRegistry {
         registry.put("aliasByMetric", AliasByMetricFunction.class);
         registry.put("aliasSub", AliasSubFunction.class);
         registry.put("alpha", AlphaFunction.class);
+        registry.put("applyByNode", ApplyByNodeFunction.class);
         registry.put("areaBetween", AreaBetweenFunction.class);
         registry.put("asPercent", AsPercentFunction.class);
         registry.put("averageOutsidePercentile", AverageOutsidePercentileFunction.class);
-        registry.put("pct", AsPercentFunction.class);
         registry.put("averageAbove", AverageAboveFunction.class);
         registry.put("averageBelow", AverageBelowFunction.class);
         registry.put("averageSeries", AverageSeriesFunction.class);
@@ -87,6 +87,7 @@ public class FunctionRegistry {
         registry.put("nPercentile", NPercentileFunction.class);
         registry.put("offset", OffsetFunction.class);
         registry.put("offsetToZero", OffsetToZeroFunction.class);
+        registry.put("pct", AsPercentFunction.class);
         registry.put("percentileOfSeries", PercentileOfSeriesFunction.class);
         registry.put("perSecond", PerSecondFunction.class);
         registry.put("pow", PowFunction.class);
