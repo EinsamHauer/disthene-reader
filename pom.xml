@@ -66,8 +66,8 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.0</version>
-            <scope>compile</scope>
+            <version>4.7.1</version>
+            <!--<scope>compile</scope>-->
         </dependency>
         <dependency>
             <groupId>com.rubiconproject.oss</groupId>
@@ -87,7 +87,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.0</version>
+                <version>4.7</version>
                 <configuration>
                     <sourceDirectory>src</sourceDirectory>
                     <visitor>true</visitor>

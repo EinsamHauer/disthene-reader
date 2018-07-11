@@ -59,6 +59,7 @@ public class FunctionRegistry {
         registry.put("holtWintersConfidenceArea", HoltWintersConfidenceAreaFunction.class);
         registry.put("holtWintersConfidenceBands", HoltWintersConfidenceBandsFunction.class);
         registry.put("holtWintersForecast", HoltWintersForecastFunction.class);
+        registry.put("identity", IdentityFunction.class);
         registry.put("integral", IntegralFunction.class);
         registry.put("invert", InvertFunction.class);
         registry.put("isNonNull", IsNonNullFunction.class);
