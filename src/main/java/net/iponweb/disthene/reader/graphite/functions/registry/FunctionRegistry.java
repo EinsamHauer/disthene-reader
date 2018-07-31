@@ -97,6 +97,7 @@ public class FunctionRegistry {
         registry.put("removeAboveValue", RemoveAboveValueFunction.class);
         registry.put("removeBelowPercentile", RemoveBelowPercentileFunction.class);
         registry.put("removeBelowValue", RemoveBelowValueFunction.class);
+        registry.put("round", RoundFunction.class);
         registry.put("scale", ScaleFunction.class);
         registry.put("scaleToSeconds", ScaleToSecondsFunction.class);
         registry.put("secondYAxis", SecondYAxisFunction.class);
