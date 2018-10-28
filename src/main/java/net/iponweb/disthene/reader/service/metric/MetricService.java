@@ -54,7 +54,9 @@ public class MetricService {
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = getRollup(from);
+
+    	// FIXME: after deployment remove second parameter
+        Rollup bestRollup = getRollup(from, effectiveTo);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -122,7 +124,9 @@ public class MetricService {
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = getRollup(from);
+
+    	// FIXME: after deployment remove second parameter
+        Rollup bestRollup = getRollup(from, effectiveTo);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -207,14 +211,17 @@ public class MetricService {
         return timeSeries;
     }
 
-    public Rollup getRollup(long from) {
+    // FIXME: after deployment remove second parameter
+    public Rollup getRollup(long from, long to) {
         long now = System.currentTimeMillis() / 1000L ;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
 
 	// DELETE ME -- BEGIN
-	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > 1541592000 ? 
+	//long deployTime = 1541592000;
+	long deployTime =   1540740415;
+	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > deployTime || to > deployTime ? 
 							 new AbstractMap.SimpleEntry<>(60, 21600) : 
 					 		 new AbstractMap.SimpleEntry<>(3600, 360);
 	/*

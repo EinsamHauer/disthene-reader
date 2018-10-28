@@ -5,6 +5,7 @@ import net.iponweb.disthene.reader.config.IndexConfiguration;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.utils.WildcardUtil;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -16,10 +17,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
 
 /**
@@ -45,48 +43,45 @@ public class IndexService {
         }
     }
 
-    public Map<String, String> getPaths(String tenant, List<String> wildcards) throws TooMuchDataExpectedException {
+    public List<String> getPaths(String tenant, List<String> wildcards) throws TooMuchDataExpectedException {
         List<String> regExs = new ArrayList<>();
+        List<String> result = new ArrayList<>();
+
         for(String wildcard : wildcards) {
-            regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
-        }
-        String regEx = Joiner.on("|").skipNulls().join(regExs);
-
-        Map<String, String> result = new HashMap<>();
-
-        SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                .setSize(indexConfiguration.getScroll())
-                .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
-                        FilterBuilders.termFilter("tenant", tenant)))
-                .addField("path")
-                .addField("origin")
-                .execute().actionGet();
-
-        // if total hits exceeds maximum - abort right away returning empty array
-        if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
-            return result;
+            if (WildcardUtil.isPlainPath(wildcard)) {
+                result.add(wildcard);
+            } else {
+                regExs.add(WildcardUtil.getPathsRegExFromWildcard(wildcard));
+            }
         }
 
-        while (response.getHits().getHits().length > 0) {
+        logger.debug("getPaths plain paths: " + result.size() + ", wildcard paths: " + regExs.size());
+
+        if (regExs.size() > 0) {
+            String regEx = Joiner.on("|").skipNulls().join(regExs);
+
+            SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
+                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                    .setSize(indexConfiguration.getScroll())
+                    .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
+                            FilterBuilders.termFilter("tenant", tenant)))
+                    .addField("path")
+                    .execute().actionGet();
+
             // if total hits exceeds maximum - abort right away returning empty array
             if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
                 logger.debug("Total number of paths exceeds the limit: " + response.getHits().totalHits());
                 throw new TooMuchDataExpectedException("Total number of paths exceeds the limit: " + response.getHits().totalHits() + " (the limit is " + indexConfiguration.getMaxPaths() + ")");
             }
 
-            for (SearchHit hit : response.getHits()) {
-                String path = (String) hit.field("path").getValue();
-
-                if (hit.getFields().containsKey("origin")) {
-                    result.put(path, (String) hit.field("origin").getValue());
-                } else {
-                    result.put(path, path);
+            while (response.getHits().getHits().length > 0) {
+                for (SearchHit hit : response.getHits()) {
+                    result.add((String) hit.field("path").getValue());
                 }
+                response = client.prepareSearchScroll(response.getScrollId())
+                        .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                        .execute().actionGet();
             }
-            response = client.prepareSearchScroll(response.getScrollId())
-                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                    .execute().actionGet();
         }
 
         return result;
@@ -139,6 +134,55 @@ public class IndexService {
 
         return Joiner.on(",").skipNulls().join(paths);
     }
+
+    public String getPathsWithStats(String tenant, String wildcard) throws TooMuchDataExpectedException {
+        String regEx = WildcardUtil.getPathsRegExFromWildcard(wildcard);
+
+        SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
+                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                .setSize(indexConfiguration.getScroll())
+                .setQuery(QueryBuilders.filteredQuery(
+                        QueryBuilders.regexpQuery("path", regEx),
+                        FilterBuilders.termFilter("tenant", tenant)))
+                .addField("path")
+                .execute().actionGet();
+
+        // if total hits exceeds maximum - abort right away returning empty array
+        if (response.getHits().totalHits() > indexConfiguration.getMaxPaths()) {
+            logger.debug("Total number of paths exceeds the limit: " + response.getHits().totalHits());
+            throw new TooMuchDataExpectedException("Total number of paths exceeds the limit: " + response.getHits().totalHits() + " (the limit is " + indexConfiguration.getMaxPaths() + ")");
+        }
+
+        List<String> paths = new ArrayList<>();
+        while (response.getHits().getHits().length > 0) {
+            for (SearchHit hit : response.getHits()) {
+                paths.add(String.valueOf(hit.field("path").getValue()));
+            }
+            response = client.prepareSearchScroll(response.getScrollId())
+                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
+                    .execute().actionGet();
+        }
+
+        Collections.sort(paths);
+
+        // we got the paths. Now let's get the counts
+        List<String> result = new ArrayList<>();
+        for (String path : paths) {
+            CountResponse countResponse = client.prepareCount(indexConfiguration.getIndex())
+                    .setQuery(QueryBuilders.filteredQuery(
+                            QueryBuilders.regexpQuery("path", path + "\\..*"),
+                            FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("tenant", tenant))
+                                .must(FilterBuilders.termFilter("leaf", true))))
+                    .execute().actionGet();
+            long count = countResponse.getCount();
+            result.add("{\"path\": \"" + path + "\",\"count\":" + countResponse.getCount() + "}");
+        }
+
+
+        return "[" + joiner.join(result) + "]";
+    }
+
 
     public void shutdown() {
         client.close();
