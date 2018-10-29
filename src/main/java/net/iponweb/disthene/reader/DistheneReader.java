@@ -35,6 +35,7 @@ public class DistheneReader {
     private static final String PING_PATH = "^/ping\\/?$";
     private static final String RENDER_PATH = "^/render\\/?$";
     private static final String SEARCH_PATH = "^/search\\/?$";
+    private static final String PATHS_STATS_PATH = "^/path_stats\\/?$";
 
     private static Logger logger;
 
@@ -109,6 +110,10 @@ public class DistheneReader {
             logger.info("Creating search handler");
             SearchHandler searchHandler = new SearchHandler(indexService, statsService);
             readerServer.registerHandler(SEARCH_PATH, searchHandler);
+
+            logger.info("Creating path stats handler");
+            PathStatsHandler pathStatsHandler = new PathStatsHandler(indexService, statsService);
+            readerServer.registerHandler(PATHS_STATS_PATH, pathStatsHandler);
 
             logger.info("Starting reader");
             readerServer.run();
