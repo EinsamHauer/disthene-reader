@@ -219,8 +219,7 @@ public class MetricService {
         List<Rollup> survivals = new ArrayList<>();
 
 	// DELETE ME -- BEGIN
-	//long deployTime = 1541592000;
-	long deployTime =   1540740415;
+	long deployTime = 1541592000;
 	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > deployTime || to > deployTime ? 
 							 new AbstractMap.SimpleEntry<>(60, 21600) : 
 					 		 new AbstractMap.SimpleEntry<>(3600, 360);
