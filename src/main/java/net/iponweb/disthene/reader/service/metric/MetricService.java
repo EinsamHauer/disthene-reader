@@ -48,13 +48,15 @@ public class MetricService {
     }
 
     public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
-        Map<String, String> paths = indexService.getPaths(tenant, wildcards);
+        List<String> paths = indexService.getPaths(tenant, wildcards);
         Collections.sort(paths);
 
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = getRollup(from);
+
+    	// FIXME: after deployment remove second parameter
+        Rollup bestRollup = getRollup(from, effectiveTo);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -76,10 +78,7 @@ public class MetricService {
 
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
-        for (Map.Entry<String, String> entry : paths.entrySet()) {
-
-            final String path = entry.getKey();
-
+        for (final String path : paths) {
             Function<ResultSet, SinglePathResult> serializeFunction =
                     new Function<ResultSet, SinglePathResult>() {
                         public SinglePathResult apply(ResultSet resultSet) {
@@ -92,7 +91,7 @@ public class MetricService {
 
             futures.add(
                     Futures.transform(
-                            cassandraService.executeAsync(tenant, entry.getValue(), bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
+                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
                             serializeFunction,
                             executorService
                     )
@@ -118,19 +117,22 @@ public class MetricService {
     }
 
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
-        Map<String, String> paths = indexService.getPaths(tenant, wildcards);
+        List<String> paths = indexService.getPaths(tenant, wildcards);
 
         statsService.incRenderPathsRead(tenant, paths.size());
 
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-        Rollup bestRollup = getRollup(from);
+
+    	// FIXME: after deployment remove second parameter
+        Rollup bestRollup = getRollup(from, effectiveTo);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
 
+        // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
         Long timestamp = effectiveFrom;
         int index = 0;
@@ -151,10 +153,7 @@ public class MetricService {
 
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
-        for (Map.Entry<String, String> entry : paths.entrySet()) {
-
-            final String path = entry.getKey();
-
+        for (final String path : paths) {
             Function<ResultSet, SinglePathResult> serializeFunction =
                     new Function<ResultSet, SinglePathResult>() {
                         public SinglePathResult apply(ResultSet resultSet) {
@@ -164,9 +163,10 @@ public class MetricService {
                         }
                     };
 
+
             futures.add(
                     Futures.transform(
-                            cassandraService.executeAsync(tenant, entry.getValue(), bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
+                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
                             serializeFunction,
                             executorService
                     )
@@ -211,11 +211,37 @@ public class MetricService {
         return timeSeries;
     }
 
-    public Rollup getRollup(long from) {
+    // FIXME: after deployment remove second parameter
+    public Rollup getRollup(long from, long to) {
         long now = System.currentTimeMillis() / 1000L ;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
+
+	// DELETE ME -- BEGIN
+	long deployTime = 1541592000;
+	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > deployTime || to > deployTime ? 
+							 new AbstractMap.SimpleEntry<>(60, 21600) : 
+					 		 new AbstractMap.SimpleEntry<>(3600, 360);
+	/*
+	//And then I realised that this is Java7 :C
+	return distheneReaderConfiguration
+		.getReader()
+		.getRollups()
+		.stream()
+		.filter(roll -> roll.getRollup() == desiredRoll.getKey() && roll.getPeriod() == desiredRoll.getKey())
+		.findAny()
+		.orElse(null);
+	*/
+	
+        for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
+            if (rollup.getRollup() == desiredRoll.getKey() && rollup.getPeriod() == desiredRoll.getValue()) {
+		logger.debug("prefering rollup: " + rollup);
+		return rollup;
+	    }
+	}
+	// DELETE ME -- END
+
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
             if (now - rollup.getPeriod() * rollup.getRollup() <= from) {
                 survivals.add(rollup);
