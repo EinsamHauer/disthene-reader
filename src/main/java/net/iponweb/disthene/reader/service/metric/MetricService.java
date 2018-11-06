@@ -220,7 +220,7 @@ public class MetricService {
 
 	// DELETE ME -- BEGIN
 	long deployTime = 1541548800;
-	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > deployTime || to > deployTime ? 
+	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > deployTime ? 
 							 new AbstractMap.SimpleEntry<>(60, 21600) : 
 					 		 new AbstractMap.SimpleEntry<>(3600, 360);
 	/*
