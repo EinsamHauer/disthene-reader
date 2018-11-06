@@ -224,9 +224,6 @@ public class MetricService {
 							 new AbstractMap.SimpleEntry<>(60, 21600) : 
 					 		 new AbstractMap.SimpleEntry<>(3600, 360);
 	/*
-							 new AbstractMap.SimpleEntry<>(60, 21600) : 
-					 		 new AbstractMap.SimpleEntry<>(3600, 360);
-	/*
 	//And then I realised that this is Java7 :C
 	return distheneReaderConfiguration
 		.getReader()
