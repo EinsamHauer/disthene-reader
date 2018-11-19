@@ -209,7 +209,6 @@ public class MetricService {
         return timeSeries;
     }
 
-    // FIXME: after deployment remove second parameter
     public Rollup getRollup(long from) {
         long now = System.currentTimeMillis() / 1000L ;
 
