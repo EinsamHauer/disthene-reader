@@ -55,8 +55,7 @@ public class MetricService {
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
 
-    	// FIXME: after deployment remove second parameter
-        Rollup bestRollup = getRollup(from, effectiveTo);
+        Rollup bestRollup = getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -125,8 +124,7 @@ public class MetricService {
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
 
-    	// FIXME: after deployment remove second parameter
-        Rollup bestRollup = getRollup(from, effectiveTo);
+        Rollup bestRollup = getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
@@ -211,36 +209,11 @@ public class MetricService {
         return timeSeries;
     }
 
-    // FIXME: after deployment remove second parameter
-    public Rollup getRollup(long from, long to) {
+    public Rollup getRollup(long from) {
         long now = System.currentTimeMillis() / 1000L ;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
-
-	// DELETE ME -- BEGIN
-	long deployTime = 1541548800;
-	AbstractMap.SimpleEntry<Integer, Integer> desiredRoll = from > deployTime ? 
-							 new AbstractMap.SimpleEntry<>(60, 21600) : 
-					 		 new AbstractMap.SimpleEntry<>(3600, 360);
-	/*
-	//And then I realised that this is Java7 :C
-	return distheneReaderConfiguration
-		.getReader()
-		.getRollups()
-		.stream()
-		.filter(roll -> roll.getRollup() == desiredRoll.getKey() && roll.getPeriod() == desiredRoll.getKey())
-		.findAny()
-		.orElse(null);
-	*/
-	
-        for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
-            if (rollup.getRollup() == desiredRoll.getKey() && rollup.getPeriod() == desiredRoll.getValue()) {
-		logger.debug("prefering rollup: " + rollup);
-		return rollup;
-	    }
-	}
-	// DELETE ME -- END
 
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
             if (now - rollup.getPeriod() * rollup.getRollup() <= from) {

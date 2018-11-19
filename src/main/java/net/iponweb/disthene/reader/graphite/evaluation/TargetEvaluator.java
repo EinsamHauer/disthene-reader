@@ -54,8 +54,7 @@ public class TargetEvaluator {
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
 
-    	// FIXME: after deployment remove second parameter
-        Rollup bestRollup = metricService.getRollup(from, effectiveTo);
+        Rollup bestRollup = metricService.getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
 
