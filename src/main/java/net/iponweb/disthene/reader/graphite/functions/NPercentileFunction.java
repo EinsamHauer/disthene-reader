@@ -24,8 +24,7 @@ public class NPercentileFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -33,7 +32,7 @@ public class NPercentileFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        double percentile = ((Double) arguments.get(1)).doubleValue();
+        double percentile = (Double) arguments.get(1);
 
         int length = processedArguments.get(0).getValues().length;
 

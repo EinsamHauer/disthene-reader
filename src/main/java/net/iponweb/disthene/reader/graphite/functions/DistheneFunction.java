@@ -61,7 +61,7 @@ public abstract class DistheneFunction extends Target {
         this.to = to;
     }
 
-    protected String getResultingName(TimeSeries timeSeries) {
+    String getResultingName(TimeSeries timeSeries) {
         return name + "(" + timeSeries.getName() + ")";
     }
 

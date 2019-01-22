@@ -6,7 +6,6 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
@@ -27,8 +26,7 @@ public class LegendValueFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -50,7 +48,7 @@ public class LegendValueFunction extends DistheneFunction {
         ValueFormatter formatter = getContext().getFormatter();
 
         for (TimeSeries ts : processedArguments) {
-            StringBuilder sb = new StringBuilder("");
+            StringBuilder sb = new StringBuilder();
             List<Double> valuesArray = Arrays.asList(ts.getValues());
             for (String aggregation : aggregations) {
                 switch (aggregation) {

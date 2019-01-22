@@ -2,7 +2,6 @@ package net.iponweb.disthene.reader.format;
 
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
@@ -144,8 +143,6 @@ public class ResponseFormatter {
 
     private static FullHttpResponse formatResponseAsGraphplotJson(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) {
         List<String> results = new ArrayList<>();
-
-        Gson gson = new Gson();
 
         // consolidate data points
         consolidate(timeSeriesList, renderParameters.getMaxDataPoints());

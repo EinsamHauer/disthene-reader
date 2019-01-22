@@ -2,7 +2,9 @@ package net.iponweb.disthene.reader.config;
 
 import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -25,6 +27,7 @@ public class StoreConfiguration {
     private String tenantKeyspace = null;
     private int cacheExpiration = 180;
     private String tenantTableTemplate = "metric_%s_%d"; //%s - tenant, %d rollup
+    private Set<Integer> skipGlobalTableRollups = new HashSet<>();
 
     public String getUserName() {
         return userName;
@@ -154,6 +157,14 @@ public class StoreConfiguration {
         this.tenantTableTemplate = tenantTableTemplate;
     }
 
+    public Set<Integer> getSkipGlobalTableRollups() {
+        return skipGlobalTableRollups;
+    }
+
+    public void setSkipGlobalTableRollups(Set<Integer> skipGlobalTableRollups) {
+        this.skipGlobalTableRollups = skipGlobalTableRollups;
+    }
+
     @Override
     public String toString() {
         return "StoreConfiguration{" +
@@ -173,6 +184,7 @@ public class StoreConfiguration {
                 ", tenantKeyspace='" + tenantKeyspace + '\'' +
                 ", cacheExpiration=" + cacheExpiration +
                 ", tenantTableTemplate='" + tenantTableTemplate + '\'' +
+                ", skipGlobalTableRollups=" + skipGlobalTableRollups +
                 '}';
     }
 }

@@ -6,7 +6,6 @@ import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.graphite.utils.HoltWinters;
 
 import java.util.ArrayList;

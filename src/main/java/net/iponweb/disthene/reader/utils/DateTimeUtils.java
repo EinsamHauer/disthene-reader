@@ -1,7 +1,5 @@
 package net.iponweb.disthene.reader.utils;
 
-import sun.misc.Regexp;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

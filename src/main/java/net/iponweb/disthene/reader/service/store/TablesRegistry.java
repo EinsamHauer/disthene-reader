@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * @author Andrei Ivanov
  */
-public class TablesRegistry {
+class TablesRegistry {
     private Logger logger = Logger.getLogger(TablesRegistry.class);
 
 
@@ -46,7 +46,7 @@ public class TablesRegistry {
                 .build();
     }
 
-    public PreparedStatement getStatement(String tenant, int rollup) {
+    PreparedStatement getStatement(String tenant, int rollup) {
         String table = String.format(tableTemplate, getNormalizedTenant(tenant), rollup);
 
         if (statements.containsKey(table)) return statements.get(table);
@@ -60,11 +60,11 @@ public class TablesRegistry {
         return statements.get(table);
     }
 
-    public boolean globalTableExists() throws ExecutionException {
+    boolean globalTableExists() throws ExecutionException {
         return checkTable(storeConfiguration.getKeyspace(), storeConfiguration.getColumnFamily());
     }
 
-    public boolean tenantTableExists(String tenant, int rollup) throws ExecutionException {
+    boolean tenantTableExists(String tenant, int rollup) throws ExecutionException {
         return checkTable(storeConfiguration.getTenantKeyspace(), String.format(tableTemplate, getNormalizedTenant(tenant), rollup));
     }
 

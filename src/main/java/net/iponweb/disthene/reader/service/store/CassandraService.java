@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -24,6 +25,7 @@ public class CassandraService {
     private Session session;
     private final PreparedStatement statement;
 
+    private Set<Integer> skipGlobalTableRollups;
     private TablesRegistry tablesRegistry;
 
     public CassandraService(StoreConfiguration storeConfiguration) {
@@ -71,6 +73,8 @@ public class CassandraService {
 
         session = cluster.connect();
 
+        skipGlobalTableRollups = storeConfiguration.getSkipGlobalTableRollups();
+
         tablesRegistry = new TablesRegistry(session, storeConfiguration);
 
         statement = session.prepare(query);
@@ -79,7 +83,7 @@ public class CassandraService {
     public ListenableFuture<List<ResultSet>> executeAsync(String tenant, String path, int period, int rollup, long from, long to) throws ExecutionException {
         List<ResultSetFuture> futures = new ArrayList<>();
 
-        if (tablesRegistry.globalTableExists()) {
+        if (!skipGlobalTableRollups.contains(rollup) && tablesRegistry.globalTableExists()) {
             futures.add(session.executeAsync(statement.bind(path, tenant, period, rollup, from, to)));
             logger.trace("Global table exists, adding select from it.");
         }

@@ -84,7 +84,7 @@ public class Grouper {
     }
 
     public static String[] getAvailableAggregationMethods() {
-        return aggregationMap.keySet().toArray(new String[aggregationMap.size()]);
+        return aggregationMap.keySet().toArray(new String[0]);
     }
 
     private String getBucketName(String name, int[] positions) {

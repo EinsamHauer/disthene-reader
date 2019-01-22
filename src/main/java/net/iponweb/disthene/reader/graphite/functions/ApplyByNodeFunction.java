@@ -4,21 +4,17 @@ import com.google.common.base.Joiner;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
-import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
-import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteLexer;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
-import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**

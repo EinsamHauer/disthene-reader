@@ -7,13 +7,10 @@ import java.util.List;
  * @author Andrei Ivanov
  */
 public class XAxisConfigProvider {
-    public static final long SEC = 1;
-    public static final long MIN = 60;
-    public static final long HOUR = MIN * 60;
-    public static final long DAY = HOUR * 24;
-    public static final long WEEK = DAY * 7;
-    public static final long MONTH = DAY * 31;
-    public static final long YEAR = DAY * 365;
+    static final long SEC = 1;
+    static final long MIN = 60;
+    static final long HOUR = MIN * 60;
+    static final long DAY = HOUR * 24;
 
     private static List<XAxisConfig> configs = new ArrayList<>();
 
@@ -26,7 +23,7 @@ public class XAxisConfigProvider {
         configs.add(new XAxisConfig(1.2, MIN, 1, MIN, 4, MIN, 2, "HH:mm", 3 * HOUR));
         configs.add(new XAxisConfig(2, MIN, 1, MIN, 10, MIN, 5, "HH:mm", 6 * HOUR));
         configs.add(new XAxisConfig(5, MIN, 2, MIN, 10, MIN, 10, "HH:mm", 12 * HOUR));
-        configs.add(new XAxisConfig(10, MIN, 5, MIN, 20, MIN, 20, "HH:mm", 1 * DAY));
+        configs.add(new XAxisConfig(10, MIN, 5, MIN, 20, MIN, 20, "HH:mm", DAY));
         configs.add(new XAxisConfig(30, MIN, 10, HOUR, 1, HOUR, 1, "HH:mm", 2 * DAY));
         configs.add(new XAxisConfig(60, MIN, 30, HOUR, 2, HOUR, 2, "HH:mm", 2 * DAY));
         configs.add(new XAxisConfig(100, HOUR, 2, HOUR, 4, HOUR, 4, "EEE ha", 6 * DAY));

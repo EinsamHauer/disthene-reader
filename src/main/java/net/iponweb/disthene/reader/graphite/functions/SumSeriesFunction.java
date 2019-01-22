@@ -1,6 +1,5 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
-import com.google.common.base.Joiner;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;

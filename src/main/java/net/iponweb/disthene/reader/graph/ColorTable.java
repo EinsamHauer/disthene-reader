@@ -93,7 +93,7 @@ public class ColorTable {
             int a = name.length() > 6 ? Integer.parseInt(name.substring(6, 8), 16) : 255;
                 return new Color(r, g, b, a);
         } else {
-            return colorMap.get(name != null ? name.toLowerCase() : null);
+            return colorMap.get(name.toLowerCase());
         }
     }
 

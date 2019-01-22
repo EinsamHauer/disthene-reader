@@ -9,7 +9,6 @@ import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**

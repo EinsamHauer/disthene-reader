@@ -1,17 +1,13 @@
 package net.iponweb.disthene.reader.handler;
 
 import com.google.common.base.Joiner;
-import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
-import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import org.apache.log4j.Logger;
-
-import java.nio.charset.Charset;
 
 /**
  * @author Andrei Ivanov
@@ -20,7 +16,7 @@ public class SearchHandler implements DistheneReaderHandler {
 
     private final static int SEARCH_LIMIT = 100;
 
-    final static Logger logger = Logger.getLogger(SearchHandler.class);
+    private final static Logger logger = Logger.getLogger(SearchHandler.class);
 
     private IndexService indexService;
     private StatsService statsService;
@@ -47,7 +43,7 @@ public class SearchHandler implements DistheneReaderHandler {
         return response;
     }
 
-    private SearchParameters parse(HttpRequest request) throws MissingParameterException, UnsupportedMethodException {
+    private SearchParameters parse(HttpRequest request) throws MissingParameterException {
         //todo: do it in some beautiful way
         String parameterString;
         if (request.getMethod().equals(HttpMethod.POST)) {
@@ -90,11 +86,11 @@ public class SearchHandler implements DistheneReaderHandler {
             this.tenant = tenant;
         }
 
-        public String getQuery() {
+        String getQuery() {
             return query;
         }
 
-        public void setQuery(String query) {
+        void setQuery(String query) {
             this.query = query;
         }
     }

@@ -26,8 +26,7 @@ public class HitcountFunction extends DistheneFunction {
         // parse interval
         int interval = (int) Math.abs(DateTimeUtils.parseTimeOffset((String) arguments.get(1)));
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 

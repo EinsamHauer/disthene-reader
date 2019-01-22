@@ -26,8 +26,7 @@ public class HighestCurrentFunction extends DistheneFunction {
         int number = ((Double) arguments.get(1)).intValue();
         if (number <= 0) return Collections.emptyList();
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -48,9 +47,7 @@ public class HighestCurrentFunction extends DistheneFunction {
         List<TimeSeries> result = new ArrayList<>();
 
         for(Map.Entry<Double, List<TimeSeries>> entry : sorted.entrySet()) {
-            for (TimeSeries ts : entry.getValue()) {
-                result.add(ts);
-            }
+            result.addAll(entry.getValue());
             if (result.size() >= number) break;
         }
 

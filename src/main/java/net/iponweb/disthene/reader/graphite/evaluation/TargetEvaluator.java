@@ -9,7 +9,6 @@ import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
-import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import org.apache.log4j.Logger;
@@ -23,7 +22,7 @@ import java.util.concurrent.ExecutionException;
  * @author Andrei Ivanov
  */
 public class TargetEvaluator {
-    final static Logger logger = Logger.getLogger(TargetEvaluator.class);
+    private final static Logger logger = Logger.getLogger(TargetEvaluator.class);
 
     private MetricService metricService;
 
@@ -43,10 +42,6 @@ public class TargetEvaluator {
             logger.debug(e);
             throw new EvaluationException(e);
         }
-    }
-
-    public List<TimeSeries> visit(DistheneFunction function) throws EvaluationException {
-        return function.evaluate(this);
     }
 
     //todo: the logic below is duplicated several times - fix it!
@@ -69,8 +64,7 @@ public class TargetEvaluator {
     public List<TimeSeries> bootstrap(Target target, List<TimeSeries> original, long period) throws EvaluationException {
         if (original.size() == 0) return new ArrayList<>();
 
-        List<TimeSeries> bootstrapped = new ArrayList<>();
-        bootstrapped.addAll(eval(target.previous(period)));
+        List<TimeSeries> bootstrapped = new ArrayList<>(eval(target.previous(period)));
 
         if (bootstrapped.size() != original.size()) throw new InvalidNumberOfSeriesException();
         if (!TimeSeriesUtils.checkAlignment(bootstrapped)) throw new TimeSeriesNotAlignedException();
@@ -85,7 +79,7 @@ public class TargetEvaluator {
                 for (int i = 0; i < ts.getValues().length; i++) {
                     values.addAll(Collections.nCopies(ratio, ts.getValues()[i]));
                 }
-                ts.setValues(values.toArray(new Double[values.size()]));
+                ts.setValues(values.toArray(new Double[0]));
             }
         }
 

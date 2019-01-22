@@ -1,6 +1,5 @@
 package net.iponweb.disthene.reader.handler;
 
-import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.Attribute;
@@ -15,14 +14,13 @@ import net.iponweb.disthene.reader.service.stats.StatsService;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
  * @author Andrei Ivanov
  */
 public class PathStatsHandler implements DistheneReaderHandler {
 
-    final static Logger logger = Logger.getLogger(PathStatsHandler.class);
+    private final static Logger logger = Logger.getLogger(PathStatsHandler.class);
 
     private IndexService indexService;
     private StatsService statsService;
@@ -98,11 +96,11 @@ public class PathStatsHandler implements DistheneReaderHandler {
             this.tenant = tenant;
         }
 
-        public String getQuery() {
+        String getQuery() {
             return query;
         }
 
-        public void setQuery(String query) {
+        void setQuery(String query) {
             this.query = query;
         }
     }

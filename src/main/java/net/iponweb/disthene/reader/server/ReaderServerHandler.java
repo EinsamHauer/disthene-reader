@@ -9,7 +9,6 @@ import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -20,11 +19,11 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author Andrei Ivanov
  */
 public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
-    final static Logger logger = Logger.getLogger(ReaderServerHandler.class);
+    private final static Logger logger = Logger.getLogger(ReaderServerHandler.class);
 
-    private Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
+    private Map<Pattern, DistheneReaderHandler> handlers;
 
-    public ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
+    ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
         this.handlers = handlers;
     }
 
@@ -87,7 +86,7 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 

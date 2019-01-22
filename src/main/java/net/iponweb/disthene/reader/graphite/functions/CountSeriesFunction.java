@@ -45,7 +45,7 @@ public class CountSeriesFunction extends DistheneFunction {
         Double[] values = new Double[length];
 
         for (int i = 0; i < length; i++) {
-            values[i] = Double.valueOf(processedArguments.size());
+            values[i] = (double) processedArguments.size();
         }
 
         resultTimeSeries.setValues(values);
