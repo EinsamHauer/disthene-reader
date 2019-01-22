@@ -12,6 +12,7 @@ import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.representer.Representer;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
@@ -48,6 +49,14 @@ public class DistheneReader {
     private StatsService statsService;
     private ThrottlingService throttlingService;
 
+    private static Yaml yaml;
+    static {
+        Representer representer = new Representer();
+        representer.getPropertyUtils().setSkipMissingProperties(true);
+        yaml = new Yaml(representer);
+    }
+
+
     private DistheneReader(String configLocation, String throttlingConfigLocation) {
         this.configLocation = configLocation;
         this.throttlingConfigLocation = throttlingConfigLocation;
@@ -55,7 +64,6 @@ public class DistheneReader {
 
     private void run() {
         try {
-            Yaml yaml = new Yaml();
             InputStream in = Files.newInputStream(Paths.get(configLocation));
             DistheneReaderConfiguration distheneReaderConfiguration = yaml.loadAs(in, DistheneReaderConfiguration.class);
             in.close();
@@ -185,7 +193,6 @@ public class DistheneReader {
                 ThrottlingConfiguration throttlingConfiguration;
                 File file = new File(throttlingConfigLocation);
                 if(file.exists() && !file.isDirectory()) {
-                    Yaml yaml = new Yaml();
                     logger.info("Loading throttling configuration");
                     InputStream in = Files.newInputStream(Paths.get(throttlingConfigLocation));
                     throttlingConfiguration = yaml.loadAs(in, ThrottlingConfiguration.class);
