@@ -39,7 +39,7 @@ public class DateTimeUtils {
         } else if (s.startsWith("w")) {
             return 604800;
         } else if (s.startsWith("mon")) {
-            return 18144000;
+            return 2592000;
         } else if (s.startsWith("y")) {
             return 31536000;
         } else {
