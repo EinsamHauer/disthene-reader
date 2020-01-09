@@ -18,7 +18,7 @@ import java.nio.charset.Charset;
  */
 public class PathsHandler implements DistheneReaderHandler {
 
-    final static Logger logger = Logger.getLogger(PathsHandler.class);
+    private final static Logger logger = Logger.getLogger(PathsHandler.class);
 
     private IndexService indexService;
     private StatsService statsService;
@@ -40,15 +40,15 @@ public class PathsHandler implements DistheneReaderHandler {
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(pathsAsJsonArray.getBytes()));
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
 
     private PathsParameters parse(HttpRequest request) throws MissingParameterException, UnsupportedMethodException {
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
 
-        if (request.getMethod().equals(HttpMethod.GET)) {
+        if (request.method().equals(HttpMethod.GET)) {
             PathsParameters parameters = new PathsParameters();
             if (queryStringDecoder.parameters().get("tenant") != null) {
                 parameters.setTenant(queryStringDecoder.parameters().get("tenant").get(0));
@@ -64,7 +64,7 @@ public class PathsHandler implements DistheneReaderHandler {
             }
 
             return parameters;
-        } else if (request.getMethod().equals(HttpMethod.POST)) {
+        } else if (request.method().equals(HttpMethod.POST)) {
             ((HttpContent) request).content().resetReaderIndex();
             PathsParameters parameters = new Gson().fromJson(((HttpContent) request).content().toString(Charset.defaultCharset()), PathsParameters.class);
             if (parameters.getTenant() == null) {
@@ -77,7 +77,7 @@ public class PathsHandler implements DistheneReaderHandler {
             }
             return parameters;
         } else {
-            throw new UnsupportedMethodException("Method is not supported: " + request.getMethod().name());
+            throw new UnsupportedMethodException("Method is not supported: " + request.method().name());
         }
     }
 

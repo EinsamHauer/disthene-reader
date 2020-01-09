@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * @author Andrei Ivanov
  */
 public class RenderParameters {
-    final static Logger logger = Logger.getLogger(RenderParameters.class);
+    private final static Logger logger = Logger.getLogger(RenderParameters.class);
 
     final private static Pattern EXTENDED_TIME_PATTERN = Pattern.compile("-*([0-9]+)([a-zA-Z]+)");
 
@@ -65,7 +65,7 @@ public class RenderParameters {
         return until;
     }
 
-    public void setUntil(Long until) {
+    private void setUntil(Long until) {
         this.until = until;
     }
 
@@ -81,7 +81,7 @@ public class RenderParameters {
         return tz;
     }
 
-    public void setTz(DateTimeZone tz) {
+    private void setTz(DateTimeZone tz) {
         this.tz = tz;
     }
 
@@ -89,18 +89,13 @@ public class RenderParameters {
         return maxDataPoints;
     }
 
-    public void setMaxDataPoints(int maxDataPoints) {
+    private void setMaxDataPoints(int maxDataPoints) {
         this.maxDataPoints = maxDataPoints;
-    }
-
-    public void setImageParameters(ImageParameters imageParameters) {
-        this.imageParameters = imageParameters;
     }
 
     public ImageParameters getImageParameters() {
         return imageParameters;
     }
-
 
     @Override
     public String toString() {
@@ -118,13 +113,13 @@ public class RenderParameters {
     public static RenderParameters parse(HttpRequest request) throws ParameterParsingException {
         //todo: do it in some beautiful way
         String parameterString;
-        if (request.getMethod().equals(HttpMethod.POST)) {
+        if (request.method().equals(HttpMethod.POST)) {
             ((HttpContent) request).content().resetReaderIndex();
             byte[] bytes = new byte[((HttpContent) request).content().readableBytes()];
             ((HttpContent) request).content().readBytes(bytes);
             parameterString = "/render/?" + new String(bytes);
         } else {
-            parameterString = request.getUri();
+            parameterString = request.uri();
         }
         logger.debug(parameterString);
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(parameterString);
@@ -216,7 +211,7 @@ public class RenderParameters {
         //*************************************************************************************************************
         if (queryStringDecoder.parameters().get("areaAlpha") != null) {
             try {
-                Float areaAlpha = Float.valueOf(queryStringDecoder.parameters().get("areaAlpha").get(0));
+                float areaAlpha = Float.parseFloat(queryStringDecoder.parameters().get("areaAlpha").get(0));
                 if (areaAlpha < 0.) areaAlpha = 0f;
                 if (areaAlpha > 1.) areaAlpha = 1f;
                 parameters.getImageParameters().setAreaAlpha(areaAlpha);
@@ -357,7 +352,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("logBase") != null) {
             try {
-                Double logBase = Double.valueOf(queryStringDecoder.parameters().get("logBase").get(0));
+                double logBase = Double.parseDouble(queryStringDecoder.parameters().get("logBase").get(0));
                 if (logBase > 0 && logBase != 1) {
                     parameters.getImageParameters().setLogBase(logBase);
                 }
@@ -589,7 +584,7 @@ public class RenderParameters {
         if (matcher.matches()) {
             String value = matcher.group(1);
             String unit = matcher.group(2);
-            Long unitValue;
+            long unitValue;
 
             // calc unit value
             if (unit.startsWith("s")) {

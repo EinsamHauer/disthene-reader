@@ -42,21 +42,21 @@ public class SearchHandler implements DistheneReaderHandler {
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(pathsAsString.getBytes()));
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/plain");
-        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
 
     private SearchParameters parse(HttpRequest request) throws MissingParameterException, UnsupportedMethodException {
         //todo: do it in some beautiful way
         String parameterString;
-        if (request.getMethod().equals(HttpMethod.POST)) {
+        if (request.method().equals(HttpMethod.POST)) {
             ((HttpContent) request).content().resetReaderIndex();
             byte[] bytes = new byte[((HttpContent) request).content().readableBytes()];
             ((HttpContent) request).content().readBytes(bytes);
             parameterString = "/render/?" + new String(bytes);
         } else {
-            parameterString = request.getUri();
+            parameterString = request.uri();
         }
 
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(parameterString);
