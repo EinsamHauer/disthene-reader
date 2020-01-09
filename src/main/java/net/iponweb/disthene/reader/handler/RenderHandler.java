@@ -35,7 +35,7 @@ import java.util.concurrent.*;
  */
 public class RenderHandler implements DistheneReaderHandler {
 
-    final static Logger logger = Logger.getLogger(RenderHandler.class);
+    private final static Logger logger = Logger.getLogger(RenderHandler.class);
 
     private TargetEvaluator evaluator;
     private StatsService statsService;

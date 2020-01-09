@@ -38,15 +38,15 @@ public class MetricsHandler implements DistheneReaderHandler {
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(metricService.getMetricsAsJson(parameters.getTenant(), parameters.getPath(), parameters.getFrom(), parameters.getTo()).getBytes()));
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
 
     private MetricsParameters parse(HttpRequest request) throws ParameterParsingException, UnsupportedMethodException {
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
 
-        if (request.getMethod().equals(HttpMethod.GET)) {
+        if (request.method().equals(HttpMethod.GET)) {
             MetricsParameters parameters = new MetricsParameters();
             if (queryStringDecoder.parameters().get("tenant") != null) {
                 parameters.setTenant(queryStringDecoder.parameters().get("tenant").get(0));
@@ -74,7 +74,7 @@ public class MetricsHandler implements DistheneReaderHandler {
             }
 
             return parameters;
-        } else if (request.getMethod().equals(HttpMethod.POST)) {
+        } else if (request.method().equals(HttpMethod.POST)) {
             MetricsParameters parameters =
                     new Gson().fromJson(((HttpContent) request).content().toString(Charset.defaultCharset()), MetricsParameters.class);
             if (parameters.getTenant() == null) {
@@ -93,7 +93,7 @@ public class MetricsHandler implements DistheneReaderHandler {
             }
             return parameters;
         } else {
-            throw new UnsupportedMethodException("Method is not supported: " + request.getMethod().name());
+            throw new UnsupportedMethodException("Method is not supported: " + request.method().name());
         }
     }
 

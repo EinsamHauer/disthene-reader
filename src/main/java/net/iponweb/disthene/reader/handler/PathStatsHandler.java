@@ -42,15 +42,15 @@ public class PathStatsHandler implements DistheneReaderHandler {
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(pathsAsJsonArray.getBytes()));
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
 
         return response;
     }
 
     private PathStatsParameters parse(HttpRequest request) throws MissingParameterException, UnsupportedMethodException {
-        if (request.getMethod().equals(HttpMethod.GET)) {
-            QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+        if (request.method().equals(HttpMethod.GET)) {
+            QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
 
             PathStatsParameters parameters = new PathStatsParameters();
             if (queryStringDecoder.parameters().get("tenant") != null) {
@@ -67,7 +67,7 @@ public class PathStatsHandler implements DistheneReaderHandler {
             }
 
             return parameters;
-        } else if (request.getMethod().equals(HttpMethod.POST)) {
+        } else if (request.method().equals(HttpMethod.POST)) {
             PathStatsParameters parameters = new PathStatsParameters();
             ((HttpContent) request).content().resetReaderIndex();
             HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
@@ -76,11 +76,11 @@ public class PathStatsHandler implements DistheneReaderHandler {
                 parameters.setTenant(((Attribute) decoder.getBodyHttpData("tenant")).getValue());
                 parameters.setQuery(((Attribute) decoder.getBodyHttpData("query")).getValue());
             } catch (IOException e) {
-                throw new MissingParameterException("Some of the parameters are missing: " + request.getMethod().name());
+                throw new MissingParameterException("Some of the parameters are missing: " + request.method().name());
             }
             return parameters;
         } else {
-            throw new UnsupportedMethodException("Method is not supported: " + request.getMethod().name());
+            throw new UnsupportedMethodException("Method is not supported: " + request.method().name());
         }
     }
 

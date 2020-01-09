@@ -118,13 +118,13 @@ public class RenderParameters {
     public static RenderParameters parse(HttpRequest request) throws ParameterParsingException {
         //todo: do it in some beautiful way
         String parameterString;
-        if (request.getMethod().equals(HttpMethod.POST)) {
+        if (request.method().equals(HttpMethod.POST)) {
             ((HttpContent) request).content().resetReaderIndex();
             byte[] bytes = new byte[((HttpContent) request).content().readableBytes()];
             ((HttpContent) request).content().readBytes(bytes);
             parameterString = "/render/?" + new String(bytes);
         } else {
-            parameterString = request.getUri();
+            parameterString = request.uri();
         }
         logger.debug(parameterString);
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(parameterString);
