@@ -74,9 +74,9 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
         } catch (EvaluationException | ParameterParsingException | LogarithmicScaleNotAllowed e) {
             FullHttpResponse response;
             if (e.getCause() != null) {
-                response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getCause().getMessage()).getBytes()));
+                response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getCause().getMessage()).getBytes()));
             } else {
-                response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
+                response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             }
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
