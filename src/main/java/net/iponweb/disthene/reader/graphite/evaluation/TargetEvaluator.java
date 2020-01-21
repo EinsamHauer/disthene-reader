@@ -46,7 +46,7 @@ public class TargetEvaluator {
 
     //todo: the logic below is duplicated several times - fix it!
     public TimeSeries getEmptyTimeSeries(long from, long to) {
-        Long now = System.currentTimeMillis() * 1000;
+        long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
         Rollup bestRollup = metricService.getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());

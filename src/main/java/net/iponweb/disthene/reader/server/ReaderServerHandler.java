@@ -6,6 +6,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
+import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
 import org.apache.log4j.Logger;
 
@@ -69,7 +71,7 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             } else {
                 ctx.write(response).addListener(ChannelFutureListener.CLOSE);
             }
-        } catch (EvaluationException e) {
+        } catch (EvaluationException | ParameterParsingException | LogarithmicScaleNotAllowed e) {
             FullHttpResponse response;
             if (e.getCause() != null) {
                 response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getCause().getMessage()).getBytes()));

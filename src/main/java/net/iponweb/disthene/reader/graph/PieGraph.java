@@ -1,7 +1,6 @@
 package net.iponweb.disthene.reader.graph;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
-import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 
@@ -25,7 +24,7 @@ public class PieGraph extends Graph {
     }
 
     @Override
-    public byte[] drawGraph() throws LogarithmicScaleNotAllowed {
+    public byte[] drawGraph() {
         // aggregate data
         List<Slice> slices = new ArrayList<>();
         double total = 0.;

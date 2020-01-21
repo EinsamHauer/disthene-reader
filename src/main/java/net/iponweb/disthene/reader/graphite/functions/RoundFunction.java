@@ -31,7 +31,7 @@ public class RoundFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        Integer precision = ((Double) arguments.get(1)).intValue();
+        int precision = ((Double) arguments.get(1)).intValue();
 
         int length = processedArguments.get(0).getValues().length;
 

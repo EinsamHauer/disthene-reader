@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class MetricsHandler implements DistheneReaderHandler {
 
-    final static Logger logger = Logger.getLogger(MetricsHandler.class);
+    private final static Logger logger = Logger.getLogger(MetricsHandler.class);
 
     private MetricService metricService;
 
@@ -43,7 +43,7 @@ public class MetricsHandler implements DistheneReaderHandler {
         return response;
     }
 
-    private MetricsParameters parse(HttpRequest request) throws ParameterParsingException, UnsupportedMethodException {
+    private MetricsParameters parse(HttpRequest request) throws ParameterParsingException {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
 
         if (request.method().equals(HttpMethod.GET)) {

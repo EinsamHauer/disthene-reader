@@ -56,10 +56,10 @@ public class MetricService {
         Collections.sort(paths);
 
         // Calculate rollup etc
-        Long now = System.currentTimeMillis() * 1000;
+        long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
         Rollup bestRollup = getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
@@ -123,10 +123,10 @@ public class MetricService {
         statsService.incRenderPathsRead(tenant, paths.size());
 
         // Calculate rollup etc
-        Long now = System.currentTimeMillis() * 1000;
+        long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
         Rollup bestRollup = getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);

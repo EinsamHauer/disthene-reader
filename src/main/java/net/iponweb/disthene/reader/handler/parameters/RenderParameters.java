@@ -216,7 +216,7 @@ public class RenderParameters {
         //*************************************************************************************************************
         if (queryStringDecoder.parameters().get("areaAlpha") != null) {
             try {
-                Float areaAlpha = Float.valueOf(queryStringDecoder.parameters().get("areaAlpha").get(0));
+                float areaAlpha = Float.parseFloat(queryStringDecoder.parameters().get("areaAlpha").get(0));
                 if (areaAlpha < 0.) areaAlpha = 0f;
                 if (areaAlpha > 1.) areaAlpha = 1f;
                 parameters.getImageParameters().setAreaAlpha(areaAlpha);
@@ -357,7 +357,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("logBase") != null) {
             try {
-                Double logBase = Double.valueOf(queryStringDecoder.parameters().get("logBase").get(0));
+                double logBase = Double.parseDouble(queryStringDecoder.parameters().get("logBase").get(0));
                 if (logBase > 0 && logBase != 1) {
                     parameters.getImageParameters().setLogBase(logBase);
                 }
@@ -589,7 +589,7 @@ public class RenderParameters {
         if (matcher.matches()) {
             String value = matcher.group(1);
             String unit = matcher.group(2);
-            Long unitValue;
+            long unitValue;
 
             // calc unit value
             if (unit.startsWith("s")) {

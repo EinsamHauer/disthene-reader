@@ -46,7 +46,7 @@ public class AbsoluteFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() > 1 || arguments.size() == 0) throw new InvalidArgumentException("absolute: number of arguments is " + arguments.size() + ". Must be one.");
+        if (arguments.size() != 1) throw new InvalidArgumentException("absolute: number of arguments is " + arguments.size() + ". Must be one.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("absolute: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
     }
 }

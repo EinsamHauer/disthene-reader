@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 public class WildcardUtil {
 
     public static boolean isPlainPath(String path) {
-        char noPlainChars[] = {'*', '?', '{', '(', '['};
+        char[] noPlainChars = {'*', '?', '{', '(', '['};
         return !(StringUtils.containsAny(path, noPlainChars));
     }
 

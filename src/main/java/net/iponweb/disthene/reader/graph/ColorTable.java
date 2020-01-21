@@ -11,33 +11,34 @@ import java.util.regex.Pattern;
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("WeakerAccess")
 public class ColorTable {
 
-    private static Map<String, Color> colorMap = new HashMap<>();
-    private static List<Color> colorRotationList = new ArrayList<>();
+    private final static Map<String, Color> colorMap = new HashMap<>();
+    private final static List<Color> colorRotationList = new ArrayList<>();
 
-    public static Color BLACK = new Color(0, 0, 0);
-    public static Color WHITE = new Color(255, 255, 255);
-    public static Color BLUE = new Color(100, 100, 255);
-    public static Color GREEN = new Color(0, 200, 0);
-    public static Color RED = new Color(200, 0, 50);
-    public static Color YELLOW = new Color(255, 255, 0);
-    public static Color ORANGE = new Color(255, 165, 0);
-    public static Color PURPLE = new Color(200, 100, 255);
-    public static Color BROWN = new Color(150, 100, 50);
-    public static Color CYAN = new Color(0, 255, 255);
-    public static Color AQUA = new Color(0, 150, 150);
-    public static Color GRAY = new Color(175, 175, 175);
-    public static Color MAGENTA = new Color(255, 0, 255);
-    public static Color PINK = new Color(255, 100, 100);
-    public static Color GOLD = new Color(200, 200, 0);
-    public static Color ROSE = new Color(200, 150, 200);
-    public static Color DARK_BLUE = new Color(0, 0, 255);
-    public static Color DARK_GREEN = new Color(0, 255, 0);
-    public static Color DARK_RED = new Color(255, 0, 0);
-    public static Color DARK_GRAY = new Color(111, 111, 111);
+    public final static Color BLACK = new Color(0, 0, 0);
+    public final static Color WHITE = new Color(255, 255, 255);
+    public final static Color BLUE = new Color(100, 100, 255);
+    public final static Color GREEN = new Color(0, 200, 0);
+    public final static Color RED = new Color(200, 0, 50);
+    public final static Color YELLOW = new Color(255, 255, 0);
+    public final static Color ORANGE = new Color(255, 165, 0);
+    public final static Color PURPLE = new Color(200, 100, 255);
+    public final static Color BROWN = new Color(150, 100, 50);
+    public final static Color CYAN = new Color(0, 255, 255);
+    public final static Color AQUA = new Color(0, 150, 150);
+    public final static Color GRAY = new Color(175, 175, 175);
+    public final static Color MAGENTA = new Color(255, 0, 255);
+    public final static Color PINK = new Color(255, 100, 100);
+    public final static Color GOLD = new Color(200, 200, 0);
+    public final static Color ROSE = new Color(200, 150, 200);
+    public final static Color DARK_BLUE = new Color(0, 0, 255);
+    public final static Color DARK_GREEN = new Color(0, 255, 0);
+    public final static Color DARK_RED = new Color(255, 0, 0);
+    public final static Color DARK_GRAY = new Color(111, 111, 111);
 
-    public static Color INVISIBLE = new Color(0, 0, 0, 0);
+    public final static Color INVISIBLE = new Color(0, 0, 0, 0);
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^([A-Fa-f0-9]){6,8}$");
 

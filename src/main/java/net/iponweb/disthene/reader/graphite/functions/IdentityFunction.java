@@ -1,7 +1,6 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
-import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 
@@ -18,7 +17,7 @@ public class IdentityFunction extends DistheneFunction {
     }
 
     @Override
-    public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
+    public List<TimeSeries> evaluate(TargetEvaluator evaluator) {
         TimeSeries ts = evaluator.getEmptyTimeSeries(from, to);
         int rawStep = (int) ((to - from) / ts.getValues().length);
         int step = (int) (Math.round(rawStep / 60.) * 60);
@@ -31,7 +30,6 @@ public class IdentityFunction extends DistheneFunction {
     }
 
     @Override
-    public void checkArguments() throws InvalidArgumentException {
-//        if (arguments.size() != 0) throw new InvalidArgumentException("identity: number of arguments is " + arguments.size() + ". Must be zero.");
+    public void checkArguments() {
     }
 }

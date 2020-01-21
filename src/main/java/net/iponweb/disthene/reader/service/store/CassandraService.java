@@ -19,14 +19,14 @@ import java.util.concurrent.ExecutionException;
  */
 public class CassandraService {
 
-    private Logger logger = Logger.getLogger(CassandraService.class);
+    private final Logger logger = Logger.getLogger(CassandraService.class);
 
-    private Cluster cluster;
-    private Session session;
+    private final Cluster cluster;
+    private final Session session;
     private final PreparedStatement statement;
 
-    private Set<Integer> skipGlobalTableRollups;
-    private TablesRegistry tablesRegistry;
+    private final Set<Integer> skipGlobalTableRollups;
+    private final TablesRegistry tablesRegistry;
 
     public CassandraService(StoreConfiguration storeConfiguration) {
         String query = "SELECT time, data FROM " +
