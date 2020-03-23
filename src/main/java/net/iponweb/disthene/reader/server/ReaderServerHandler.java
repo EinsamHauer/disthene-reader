@@ -57,7 +57,6 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-
             if (handler != null) {
                 response = handler.handle(request);
             } else {
@@ -84,6 +83,8 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             logger.debug("Invalid request: ", e);
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+        } finally {
+            ((HttpContent) message).content().release();
         }
     }
 
