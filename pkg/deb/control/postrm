@@ -1,4 +1,1 @@
 #!/bin/sh -e
-if [ "$1" = "purge" ] ; then
-	update-rc.d disthene-reader remove >/dev/null
-fi
