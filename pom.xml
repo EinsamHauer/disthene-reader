@@ -4,7 +4,7 @@
     <groupId>net.iponweb.disthene.reader</groupId>
     <artifactId>disthene-reader</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.14</version>
+    <version>1.0.12+systemd</version>
     <name>disthene-reader</name>
     <url>http://maven.apache.org</url>
     <dependencies>
