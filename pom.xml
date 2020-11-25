@@ -4,7 +4,7 @@
     <groupId>net.iponweb.disthene.reader</groupId>
     <artifactId>disthene-reader</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.12</version>
+    <version>1.0.12+systemd</version>
     <name>disthene-reader</name>
     <url>http://maven.apache.org</url>
     <dependencies>
@@ -187,23 +187,13 @@
                                 </data>
 
                                 <data>
-                                    <src>${basedir}/pkg/deb/init.sh</src>
-                                    <dst>disthene-reader</dst>
+                                    <src>${basedir}/pkg/deb/disthene-reader.service</src>
+                                    <dst>disthene-reader.service</dst>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/etc/init.d</prefix>
-                                        <filemode>755</filemode>
-                                    </mapper>
-                                </data>
-
-                                <data>
-                                    <src>${basedir}/pkg/deb/disthene-reader</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/usr/bin</prefix>
-                                        <filemode>755</filemode>
+                                        <prefix>/lib/systemd/system/</prefix>
+                                        <filemode>644</filemode>
                                     </mapper>
                                 </data>
 

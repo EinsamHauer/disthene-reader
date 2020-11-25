@@ -96,7 +96,7 @@ class disthene_reader (
   service { 'disthene-reader':
     ensure     => running,
     hasrestart => true,
-    restart    => '/etc/init.d/disthene-reader reload',
+    restart    => '/bin/systemctl reload disthene-reader.service',
     require    => [Package['disthene-reader'],
       File['disthene_reader_config'],
     ],

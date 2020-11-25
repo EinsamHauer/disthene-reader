@@ -1,4 +1,2 @@
 #!/bin/sh -e
-if [ -x "/etc/init.d/disthene-reader" ]; then
-	invoke-rc.d disthene-reader stop || exit $?
-fi
+systemctl stop disthene-reader || exit $?

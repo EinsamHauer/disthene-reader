@@ -1,12 +1,16 @@
 # JAVA_OPTS
-JAVA_OPTS="-server"
-JAVA_OPTS="-Xms<%= @java_xms %> -Xmx<%= @java_xmx %>"
-JAVA_OPTS="$JAVA_OPTS <%= @java_extra_options %>"
+JAVA_OPTS="-Xms<%= @java_xms %> -Xmx<%= @java_xmx %> <%= @java_extra_options %>"
+
+# DISTHENE_OPTS
+OPTS=""
 
 # Alternative path to config file
 # default is /etc/disthene-reader/disthene-reader.yaml
-# DISTHENE_CONFIG_FILE=
+# OPTS="-c /etc/disthene-reader/disthene-reader.yaml"
 
 # Alternative path to log4j config file
 # default is /etc/disthene-reader/disthene-reader-log4j.xml
-# DISTHENE_LOG_CONFIG_FILE=
+# OPTS="-l /etc/disthene-reader/disthene-reader-log4j.xml"
+#
+# Alternative path to config and log4j config files together
+# OPTS="-c /etc/disthene-reader/disthene-reader.yaml -l /etc/disthene-reader/disthene-reader-log4j.xml"
