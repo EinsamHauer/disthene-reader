@@ -10,12 +10,12 @@ import java.util.Map;
  */
 public class FontTable {
 
-    private static Map<String, Font> fontMap = new HashMap<>();
+    private static final Map<String, Font> fontMap = new HashMap<>();
 
     private static Font HELVETICA = new Font(Font.SANS_SERIF, Font.PLAIN, 1);
     private static Font COURIER = new Font(Font.SANS_SERIF, Font.PLAIN, 1);
     private static Font TIMES = new Font(Font.SANS_SERIF, Font.PLAIN, 1);
-    private static Font SANS = new Font(Font.SANS_SERIF, Font.PLAIN, 1);
+    private static final Font SANS = new Font(Font.SANS_SERIF, Font.PLAIN, 1);
 
     static {
         try {

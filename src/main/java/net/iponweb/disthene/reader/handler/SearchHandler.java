@@ -18,8 +18,8 @@ public class SearchHandler implements DistheneReaderHandler {
 
     private final static Logger logger = Logger.getLogger(SearchHandler.class);
 
-    private IndexService indexService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final StatsService statsService;
 
     public SearchHandler(IndexService indexService, StatsService statsService) {
         this.indexService = indexService;
@@ -74,7 +74,7 @@ public class SearchHandler implements DistheneReaderHandler {
         return parameters;
     }
 
-    private class SearchParameters {
+    private static class SearchParameters {
         private String tenant;
         private String query;
 

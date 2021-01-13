@@ -12,7 +12,7 @@ public class XAxisConfigProvider {
     static final long HOUR = MIN * 60;
     static final long DAY = HOUR * 24;
 
-    private static List<XAxisConfig> configs = new ArrayList<>();
+    private static final List<XAxisConfig> configs = new ArrayList<>();
 
     static {
         configs.add(new XAxisConfig(0, SEC, 5, MIN, 1, SEC, 5, "HH:mm:ss", 10 * MIN));

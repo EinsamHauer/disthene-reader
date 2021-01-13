@@ -23,14 +23,14 @@ import java.util.regex.Pattern;
 public class ReaderServer {
     public static final int MAX_CONTENT_LENGTH = 104857600;
 
-    private Logger logger = Logger.getLogger(ReaderServer.class);
+    private final Logger logger = Logger.getLogger(ReaderServer.class);
 
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    private ReaderConfiguration configuration;
+    private final ReaderConfiguration configuration;
 
-    private Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
+    private final Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
 
     public ReaderServer(ReaderConfiguration configuration) {
         this.configuration = configuration;

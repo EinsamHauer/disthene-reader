@@ -17,7 +17,7 @@ public class Grouper {
         Double apply(List<Double> points);
     }
     
-    private static ImmutableMap<String, AggregationMethod> aggregationMap;
+    private static final ImmutableMap<String, AggregationMethod> aggregationMap;
     static {
         AggregationMethod avg = new AggregationMethod() { public Double apply(List<Double> points) { return CollectionUtils.average(points);}};
         AggregationMethod sum = new AggregationMethod() { public Double apply(List<Double> points) { return CollectionUtils.sum(points);}};
@@ -36,8 +36,8 @@ public class Grouper {
         .build();
     }
 
-    private List<TimeSeries> timeSeries;
-    private String aggregator;
+    private final List<TimeSeries> timeSeries;
+    private final String aggregator;
 
     public Grouper(List<TimeSeries> ts, String aggregatorName) {
         timeSeries = ts;

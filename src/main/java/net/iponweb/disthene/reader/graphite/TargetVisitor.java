@@ -14,10 +14,10 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
  */
 public class TargetVisitor extends GraphiteBaseVisitor<Target> {
 
-    private String tenant;
-    private Long from;
-    private Long to;
-    private EvaluationContext context;
+    private final String tenant;
+    private final Long from;
+    private final Long to;
+    private final EvaluationContext context;
 
     public TargetVisitor(String tenant, Long from, Long to, EvaluationContext context) {
         this.tenant = tenant;
@@ -46,7 +46,7 @@ public class TargetVisitor extends GraphiteBaseVisitor<Target> {
                 } else if (arg instanceof GraphiteParser.ArgNumberContext) {
                     function.addArg(Double.parseDouble(arg.getText()));
                 } else if (arg instanceof GraphiteParser.ArgStringContext) {
-                    function.addArg(arg.getText().replaceAll("^[\"\']|[\"\']$", ""));
+                    function.addArg(arg.getText().replaceAll("^[\"']|[\"']$", ""));
                 }
             }
 

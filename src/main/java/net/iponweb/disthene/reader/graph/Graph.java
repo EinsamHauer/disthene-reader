@@ -35,12 +35,12 @@ public abstract class Graph {
 
     private static final double[] PRETTY_VALUES = {0.1, 0.2, 0.25, 0.5, 1.0, 1.2, 1.25, 1.5, 2.0, 2.25, 2.5};
 
-    protected ImageParameters imageParameters;
-    protected RenderParameters renderParameters;
+    protected final ImageParameters imageParameters;
+    protected final RenderParameters renderParameters;
 
-    protected List<DecoratedTimeSeries> data = new ArrayList<>();
-    protected List<DecoratedTimeSeries> dataLeft = new ArrayList<>();
-    protected List<DecoratedTimeSeries> dataRight = new ArrayList<>();
+    protected final List<DecoratedTimeSeries> data = new ArrayList<>();
+    protected final List<DecoratedTimeSeries> dataLeft = new ArrayList<>();
+    protected final List<DecoratedTimeSeries> dataRight = new ArrayList<>();
     protected boolean secondYAxis = false;
 
     protected int xMin;
@@ -91,8 +91,8 @@ public abstract class Graph {
     protected long xMinorGridStep;
     protected long xMajorGridStep;
 
-    protected BufferedImage image;
-    protected Graphics2D g2d;
+    protected final BufferedImage image;
+    protected final Graphics2D g2d;
 
     public static Graph getInstance(GraphType type, RenderParameters renderParameters, List<TimeSeries> data) {
         if (type.equals(GraphType.PIE)) {
@@ -433,7 +433,7 @@ public abstract class Graph {
             for (DecoratedTimeSeries ts : dataLeft) {
                 if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
                     double mm = GraphUtils.safeMin(ts);
-                    yMinValueL = mm < yMinValueL ? mm : yMinValueL;
+                    yMinValueL = Math.min(mm, yMinValueL);
                 }
             }
         }
@@ -444,28 +444,13 @@ public abstract class Graph {
             for (DecoratedTimeSeries ts : dataRight) {
                 if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
                     double mm = GraphUtils.safeMin(ts);
-                    yMinValueR = mm < yMinValueR ? mm : yMinValueR;
+                    yMinValueR = Math.min(mm, yMinValueR);
                 }
             }
         }
 
         yMaxValueL = GraphUtils.safeMax(dataLeft);
         yMaxValueR = GraphUtils.safeMax(dataRight);
-/*
-        if (getStackedData(dataLeft).size() > 0) {
-            yMaxValueL = GraphUtils.maxSum(dataLeft);
-        } else {
-            yMaxValueL = GraphUtils.safeMax(dataLeft);
-        }
-*/
-
-/*
-        if (getStackedData(dataRight).size() > 0) {
-            yMaxValueR = GraphUtils.maxSum(dataRight);
-        } else {
-            yMaxValueR = GraphUtils.safeMax(dataRight);
-        }
-*/
 
         if (yMinValueL == Double.POSITIVE_INFINITY) {
             yMinValueL = 0.0;
@@ -636,7 +621,7 @@ public abstract class Graph {
         for (DecoratedTimeSeries ts : data) {
             if (!ts.hasOption(TimeSeriesOption.DRAW_AS_INFINITE)) {
                 double mm = GraphUtils.safeMin(ts);
-                yMinValue = mm < yMinValue ? mm : yMinValue;
+                yMinValue = Math.min(mm, yMinValue);
             }
         }
 
@@ -647,13 +632,6 @@ public abstract class Graph {
 
         double yMaxValue;
         yMaxValue = GraphUtils.safeMax(data);
-/*
-        if (getStackedData(data).size() > 0) {
-            yMaxValue = GraphUtils.maxSum(data);
-        } else {
-            yMaxValue = GraphUtils.safeMax(data);
-        }
-*/
 
         if (yMaxValue < 0 && imageParameters.isDrawNullAsZero() && seriesWithMissingValues.size() > 0) {
             yMaxValue = 0;
@@ -831,7 +809,7 @@ public abstract class Graph {
         long labelDelta = 1;
         if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.SEC) {
             labelDt = startTime - startTime % xAxisConfig.getLabelStep();
-            labelDelta = (long) xAxisConfig.getLabelStep();
+            labelDelta = xAxisConfig.getLabelStep();
         } else if (xAxisConfig.getLabelUnit() == XAxisConfigProvider.MIN) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
             labelDt = tdt.withSecondOfMinute(0).withMinuteOfHour(tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getLabelStep())).getMillis() / 1000;
@@ -948,7 +926,7 @@ public abstract class Graph {
 
         if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.SEC) {
             majorDt = startTime - startTime % xAxisConfig.getMajorGridStep();
-            majorDelta = (long) xAxisConfig.getMajorGridStep();
+            majorDelta = xAxisConfig.getMajorGridStep();
         } else if (xAxisConfig.getMajorGridUnit() == XAxisConfigProvider.MIN) {
             DateTime tdt = new DateTime(startTime * 1000, renderParameters.getTz());
             majorDt = tdt.withSecondOfMinute(0).withMinuteOfHour(tdt.getMinuteOfHour() - (tdt.getMinuteOfHour() % xAxisConfig.getMajorGridStep())).getMillis() / 1000;
@@ -1003,11 +981,6 @@ public abstract class Graph {
                 if (adjustedValue == null && imageParameters.isDrawNullAsZero()) adjustedValue = 0.;
 
                 if (adjustedValue == null) {
-/*
-                    if (consecutiveNulls == 0) {
-                        path.lineTo(x, y);
-                    }
-*/
                     x += ts.getxStep();
                     consecutiveNulls++;
                     continue;
@@ -1023,7 +996,7 @@ public abstract class Graph {
                     y = getYCoord(adjustedValue);
                 }
 
-                y = y < 0 ? 0 : y;
+                y = Math.max(y, 0);
 
                 if (path.getCurrentPoint() == null) {
                     path.moveTo(x, y);
@@ -1122,7 +1095,7 @@ public abstract class Graph {
                         y = getYCoord(adjustedValue);
                     }
 
-                    y = y < 0 ? 0 : y;
+                    y = Math.max(y, 0);
 
                     if (consecutiveNulls > 0) startX = x;
 

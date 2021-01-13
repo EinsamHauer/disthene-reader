@@ -3,7 +3,7 @@ disthene-reader: cassandra backed metric storage *reader*
 
 ## Motivation
 This is a "dual" project to [disthene](https://github.com/EinsamHauer/disthene). Though the data written by **disthene** can still be read and plotted by combination of **cyanite** & **graphite-api**, this schema introduces quite some overhead at least caused by serializing/deserializing to/from json. In cases when rendering a graph involves 10s of millions of data points this overhead is quite noticable.
-Besides that **graphite-api** as well as original **graphite** rendering could really be a bit faster.
+Besides, that **graphite-api** as well as original **graphite** rendering could really be a bit faster.
 All in all, this project is about read and rendering performance exactly like **disthene** is about write performance.
 
 ## What's in

@@ -22,8 +22,8 @@ public class PathStatsHandler implements DistheneReaderHandler {
 
     private final static Logger logger = Logger.getLogger(PathStatsHandler.class);
 
-    private IndexService indexService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final StatsService statsService;
 
     public PathStatsHandler(IndexService indexService, StatsService statsService) {
         this.indexService = indexService;
@@ -84,7 +84,7 @@ public class PathStatsHandler implements DistheneReaderHandler {
         }
     }
 
-    private class PathStatsParameters {
+    private static class PathStatsParameters {
         private String tenant;
         private String query;
 

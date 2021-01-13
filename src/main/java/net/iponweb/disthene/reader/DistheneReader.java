@@ -40,8 +40,8 @@ public class DistheneReader {
 
     private static Logger logger;
 
-    private String configLocation;
-    private String throttlingConfigLocation;
+    private final String configLocation;
+    private final String throttlingConfigLocation;
     private ReaderServer readerServer;
     private IndexService indexService;
     private CassandraService cassandraService;
@@ -49,7 +49,7 @@ public class DistheneReader {
     private StatsService statsService;
     private ThrottlingService throttlingService;
 
-    private static Yaml yaml;
+    private static final Yaml yaml;
     static {
         Representer representer = new Representer();
         representer.getPropertyUtils().setSkipMissingProperties(true);

@@ -28,7 +28,7 @@ public class SummarizeFunction extends DistheneFunction {
         // parse interval
         int step = (int) Math.abs(DateTimeUtils.parseTimeOffset((String) arguments.get(1)));
 
-        String aggregation = arguments.size() > 2 ? ((String) arguments.get(2)).toLowerCase().replaceAll("[\"\']", "") : "sum";
+        String aggregation = arguments.size() > 2 ? ((String) arguments.get(2)).toLowerCase().replaceAll("[\"']", "") : "sum";
 
         List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
@@ -121,7 +121,7 @@ public class SummarizeFunction extends DistheneFunction {
 
         if (arguments.size() > 2) {
             if (!(arguments.get(2) instanceof String)) throw new InvalidArgumentException("summarize: argument is " + arguments.get(2).getClass().getName() + ". Must be a string");
-            String argument = ((String) arguments.get(2)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(2)).toLowerCase().replaceAll("[\"']", "");
             if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("sum") && !argument.equals("min") && !argument.equals("max")) {
                 throw new InvalidArgumentException("summarize: must be aggregation.");
             }

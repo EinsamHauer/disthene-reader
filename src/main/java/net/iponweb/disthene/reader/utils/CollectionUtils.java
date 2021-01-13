@@ -1,9 +1,6 @@
 package net.iponweb.disthene.reader.utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -130,9 +127,7 @@ public class CollectionUtils {
     }
 
     public static void constant(Double[] values, Double constant) {
-        for (int i = 0; i < values.length; i++) {
-            values[i] = constant;
-        }
+        Arrays.fill(values, constant);
     }
 
     private static List<Double> filterNulls(Collection<Double> values) {

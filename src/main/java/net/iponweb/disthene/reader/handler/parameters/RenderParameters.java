@@ -31,14 +31,14 @@ public class RenderParameters {
     final private static Pattern EXTENDED_TIME_PATTERN = Pattern.compile("-*([0-9]+)([a-zA-Z]+)");
 
     private String tenant;
-    private List<String> targets = new ArrayList<>();
+    private final List<String> targets = new ArrayList<>();
     private Long from;
     private Long until;
     private Format format;
     private DateTimeZone tz;
     private int maxDataPoints = Integer.MAX_VALUE;
 
-    private ImageParameters imageParameters = new ImageParameters();
+    private final ImageParameters imageParameters = new ImageParameters();
 
 
     public String getTenant() {
@@ -91,10 +91,6 @@ public class RenderParameters {
 
     public void setMaxDataPoints(int maxDataPoints) {
         this.maxDataPoints = maxDataPoints;
-    }
-
-    public void setImageParameters(ImageParameters imageParameters) {
-        this.imageParameters = imageParameters;
     }
 
     public ImageParameters getImageParameters() {
@@ -204,7 +200,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("maxDataPoints") != null) {
             try {
-                parameters.setMaxDataPoints(Integer.valueOf(queryStringDecoder.parameters().get("maxDataPoints").get(0)));
+                parameters.setMaxDataPoints(Integer.parseInt(queryStringDecoder.parameters().get("maxDataPoints").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("fontSize format : " + queryStringDecoder.parameters().get("fontSize").get(0));
             }
@@ -275,7 +271,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("fontSize") != null) {
             try {
-                parameters.getImageParameters().setFontSize(Float.valueOf(queryStringDecoder.parameters().get("fontSize").get(0)));
+                parameters.getImageParameters().setFontSize(Float.parseFloat(queryStringDecoder.parameters().get("fontSize").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("fontSize format : " + queryStringDecoder.parameters().get("fontSize").get(0));
             }
@@ -316,7 +312,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("height") != null) {
             try {
-                parameters.getImageParameters().setHeight(Integer.valueOf(queryStringDecoder.parameters().get("height").get(0)));
+                parameters.getImageParameters().setHeight(Integer.parseInt(queryStringDecoder.parameters().get("height").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("Height format : " + queryStringDecoder.parameters().get("height").get(0));
             }
@@ -373,9 +369,9 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("margin") != null) {
             try {
-                Double margin = Double.valueOf(queryStringDecoder.parameters().get("margin").get(0));
+                double margin = Double.parseDouble(queryStringDecoder.parameters().get("margin").get(0));
                 if (margin > 0) {
-                    parameters.getImageParameters().setMargin(margin.intValue());
+                    parameters.getImageParameters().setMargin((int) margin);
                 }
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("margin format : " + queryStringDecoder.parameters().get("margin").get(0));
@@ -389,9 +385,9 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("minorY") != null) {
             try {
-                Double minorY = Double.valueOf(queryStringDecoder.parameters().get("minorY").get(0));
+                double minorY = Double.parseDouble(queryStringDecoder.parameters().get("minorY").get(0));
                 if (minorY >= 0) {
-                    parameters.getImageParameters().setMinorY(minorY.intValue());
+                    parameters.getImageParameters().setMinorY((int) minorY);
                 }
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("minorY format : " + queryStringDecoder.parameters().get("minorY").get(0));
@@ -400,9 +396,9 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("minXStep") != null) {
             try {
-                Double minXStep = Double.valueOf(queryStringDecoder.parameters().get("minXStep").get(0));
+                double minXStep = Double.parseDouble(queryStringDecoder.parameters().get("minXStep").get(0));
                 if (minXStep >= 0) {
-                    parameters.getImageParameters().setMinXStep(minXStep.intValue());
+                    parameters.getImageParameters().setMinXStep((int) minXStep);
                 }
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("minXStep format : " + queryStringDecoder.parameters().get("minXStep").get(0));
@@ -476,7 +472,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("width") != null) {
             try {
-                parameters.getImageParameters().setWidth(Integer.valueOf(queryStringDecoder.parameters().get("width").get(0)));
+                parameters.getImageParameters().setWidth(Integer.parseInt(queryStringDecoder.parameters().get("width").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("Width format : " + queryStringDecoder.parameters().get("width").get(0));
             }
@@ -492,7 +488,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yMax") != null) {
             try {
-                parameters.getImageParameters().setyMax(Double.valueOf(queryStringDecoder.parameters().get("yMax").get(0)));
+                parameters.getImageParameters().setyMax(Double.parseDouble(queryStringDecoder.parameters().get("yMax").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yMax format : " + queryStringDecoder.parameters().get("yMax").get(0));
             }
@@ -500,7 +496,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yMaxLeft") != null) {
             try {
-                parameters.getImageParameters().setyMaxLeft(Double.valueOf(queryStringDecoder.parameters().get("yMaxLeft").get(0)));
+                parameters.getImageParameters().setyMaxLeft(Double.parseDouble(queryStringDecoder.parameters().get("yMaxLeft").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yMaxLeft format : " + queryStringDecoder.parameters().get("yMaxLeft").get(0));
             }
@@ -508,7 +504,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yMaxRight") != null) {
             try {
-                parameters.getImageParameters().setyMaxRight(Double.valueOf(queryStringDecoder.parameters().get("yMaxRight").get(0)));
+                parameters.getImageParameters().setyMaxRight(Double.parseDouble(queryStringDecoder.parameters().get("yMaxRight").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yMaxRight format : " + queryStringDecoder.parameters().get("yMaxRight").get(0));
             }
@@ -516,7 +512,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yMin") != null) {
             try {
-                parameters.getImageParameters().setyMin(Double.valueOf(queryStringDecoder.parameters().get("yMin").get(0)));
+                parameters.getImageParameters().setyMin(Double.parseDouble(queryStringDecoder.parameters().get("yMin").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yMin format : " + queryStringDecoder.parameters().get("yMin").get(0));
             }
@@ -524,7 +520,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yMinLeft") != null) {
             try {
-                parameters.getImageParameters().setyMinLeft(Double.valueOf(queryStringDecoder.parameters().get("yMinLeft").get(0)));
+                parameters.getImageParameters().setyMinLeft(Double.parseDouble(queryStringDecoder.parameters().get("yMinLeft").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yMinLeft format : " + queryStringDecoder.parameters().get("yMinLeft").get(0));
             }
@@ -532,7 +528,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yMinRight") != null) {
             try {
-                parameters.getImageParameters().setyMinRight(Double.valueOf(queryStringDecoder.parameters().get("yMinRight").get(0)));
+                parameters.getImageParameters().setyMinRight(Double.parseDouble(queryStringDecoder.parameters().get("yMinRight").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yMinRight format : " + queryStringDecoder.parameters().get("yMinRight").get(0));
             }
@@ -540,7 +536,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yStep") != null) {
             try {
-                parameters.getImageParameters().setyStep(Double.valueOf(queryStringDecoder.parameters().get("yStep").get(0)));
+                parameters.getImageParameters().setyStep(Double.parseDouble(queryStringDecoder.parameters().get("yStep").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yStep format : " + queryStringDecoder.parameters().get("yStep").get(0));
             }
@@ -548,7 +544,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yStepLeft") != null) {
             try {
-                parameters.getImageParameters().setyStepLeft(Double.valueOf(queryStringDecoder.parameters().get("yStepLeft").get(0)));
+                parameters.getImageParameters().setyStepLeft(Double.parseDouble(queryStringDecoder.parameters().get("yStepLeft").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yStepLeft format : " + queryStringDecoder.parameters().get("yStepLeft").get(0));
             }
@@ -556,7 +552,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("yStepRight") != null) {
             try {
-                parameters.getImageParameters().setyStepRight(Double.valueOf(queryStringDecoder.parameters().get("yStepRight").get(0)));
+                parameters.getImageParameters().setyStepRight(Double.parseDouble(queryStringDecoder.parameters().get("yStepRight").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("yStepRight format : " + queryStringDecoder.parameters().get("yStepRight").get(0));
             }
@@ -574,7 +570,7 @@ public class RenderParameters {
 
         if (queryStringDecoder.parameters().get("connectedLimit") != null) {
             try {
-                parameters.getImageParameters().setConnectedLimit(Integer.valueOf(queryStringDecoder.parameters().get("connectedLimit").get(0)));
+                parameters.getImageParameters().setConnectedLimit(Integer.parseInt(queryStringDecoder.parameters().get("connectedLimit").get(0)));
             } catch (NumberFormatException e) {
                 throw new InvalidParameterValueException("ConnectedLimit format : " + queryStringDecoder.parameters().get("connectedLimit").get(0));
             }
@@ -610,11 +606,11 @@ public class RenderParameters {
                 unitValue = 60L;
             }
             // calc offset as (now) - (number * unit value)
-            return (System.currentTimeMillis() / 1000L) - (Long.valueOf(value) * unitValue);
-        } else if ("now".equals(timeString.toLowerCase())) {
+            return (System.currentTimeMillis() / 1000L) - (Long.parseLong(value) * unitValue);
+        } else if ("now".equalsIgnoreCase(timeString)) {
             return System.currentTimeMillis() / 1000L;
         } else {
-            return new DateTime(Long.valueOf(timeString) * 1000, tz).getMillis() / 1000L;
+            return new DateTime(Long.parseLong(timeString) * 1000, tz).getMillis() / 1000L;
         }
     }
 

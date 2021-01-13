@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  */
 public class GraphiteUtils {
 
-    private static double THRESHOLD =  0.00000000001;
+    private static final double THRESHOLD =  0.00000000001;
 
     public static double formatUnitValue(double value, double step, UnitSystem unitSystem) {
         value = magicRound(value);
@@ -33,15 +33,6 @@ public class GraphiteUtils {
     }
 
     public static double formatUnitValue(double value, UnitSystem unitSystem) {
-/*
-        // Firstly, round the value a bit
-        if (value > 0 && value < 1.0) {
-            BigDecimal bd = BigDecimal.valueOf(value);
-            value = bd.setScale(bd.scale() - 1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-        }
-
-*/
-
         for (Unit unit : unitSystem.getPrefixes()) {
             if (Math.abs(value) >= unit.getValue()) {
                 double v2 = value / unit.getValue();
@@ -88,7 +79,7 @@ public class GraphiteUtils {
         if (!DoubleMath.isMathematicalInteger(value)) {
             // precision is just like in graphite (scale check redundant but let it be)
             if (bigDecimal.precision() > 12 && bigDecimal.scale() > 0) {
-                int roundTo = bigDecimal.scale() - bigDecimal.precision() + 12 > 0 ? bigDecimal.scale() - bigDecimal.precision() + 12 : 0;
+                int roundTo = Math.max(bigDecimal.scale() - bigDecimal.precision() + 12, 0);
                 bigDecimal = bigDecimal.setScale(roundTo, BigDecimal.ROUND_HALF_UP);
             }
         }

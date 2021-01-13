@@ -1,7 +1,6 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
-import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 
 import java.util.Collections;

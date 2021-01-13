@@ -22,7 +22,7 @@ public class MetricsHandler implements DistheneReaderHandler {
 
     private final static Logger logger = Logger.getLogger(MetricsHandler.class);
 
-    private MetricService metricService;
+    private final MetricService metricService;
 
     public MetricsHandler(MetricService metricService) {
         this.metricService = metricService;
@@ -97,7 +97,7 @@ public class MetricsHandler implements DistheneReaderHandler {
         }
     }
 
-    private class MetricsParameters {
+    private static class MetricsParameters {
 
         private String tenant;
         private List<String> path = new ArrayList<>();

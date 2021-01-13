@@ -37,7 +37,7 @@ public class LegendValueFunction extends DistheneFunction {
         UnitSystem unitSystem = UnitSystem.NONE;
         List<String> aggregations = new ArrayList<>();
         for (int i = 1; i < arguments.size(); i++) {
-            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"']", "");
             if (argument.equals("last") || argument.equals("avg") || argument.equals("total") || argument.equals("min") || argument.equals("max")) {
                 aggregations.add(argument);
             } else {
@@ -107,7 +107,7 @@ public class LegendValueFunction extends DistheneFunction {
             if (!(arguments.get(i) instanceof String))
                 throw new InvalidArgumentException("legendValue: argument is " + arguments.get(i).getClass().getName() + ". Must be a string");
 
-            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"']", "");
 
             if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("total") && !argument.equals("min") && !argument.equals("max")) {
                 if ((i != arguments.size() - 1) || (i == 1))

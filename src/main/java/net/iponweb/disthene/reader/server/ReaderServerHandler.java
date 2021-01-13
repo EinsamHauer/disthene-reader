@@ -23,7 +23,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
     private final static Logger logger = Logger.getLogger(ReaderServerHandler.class);
 
-    private Map<Pattern, DistheneReaderHandler> handlers;
+    private final Map<Pattern, DistheneReaderHandler> handlers;
 
     ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
         this.handlers = handlers;

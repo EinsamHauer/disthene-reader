@@ -37,13 +37,13 @@ public class RenderHandler implements DistheneReaderHandler {
 
     private final static Logger logger = Logger.getLogger(RenderHandler.class);
 
-    private TargetEvaluator evaluator;
-    private StatsService statsService;
-    private ThrottlingService throttlingService;
-    private ReaderConfiguration readerConfiguration;
+    private final TargetEvaluator evaluator;
+    private final StatsService statsService;
+    private final ThrottlingService throttlingService;
+    private final ReaderConfiguration readerConfiguration;
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private TimeLimiter timeLimiter = new SimpleTimeLimiter(executor);
+    private final TimeLimiter timeLimiter = new SimpleTimeLimiter(executor);
 
 
     public RenderHandler(MetricService metricService, StatsService statsService, ThrottlingService throttlingService, ReaderConfiguration readerConfiguration) {

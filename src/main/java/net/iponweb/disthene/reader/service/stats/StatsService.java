@@ -18,13 +18,13 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class StatsService {
 
-    private Logger logger = Logger.getLogger(StatsService.class);
+    private final Logger logger = Logger.getLogger(StatsService.class);
 
-    private StatsConfiguration statsConfiguration;
+    private final StatsConfiguration statsConfiguration;
 
-    private ConcurrentMap<String, StatsRecord> stats = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, StatsRecord> stats = new ConcurrentHashMap<>();
 
-    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public StatsService(StatsConfiguration statsConfiguration) {
         this.statsConfiguration = statsConfiguration;
@@ -134,7 +134,7 @@ public class StatsService {
         scheduler.shutdown();
     }
 
-    private class StatsRecord {
+    private static class StatsRecord {
         private AtomicLong renderRequests = new AtomicLong(0);
         private AtomicLong renderPathsRead = new AtomicLong(0);
         private AtomicLong renderPointsRead = new AtomicLong(0);

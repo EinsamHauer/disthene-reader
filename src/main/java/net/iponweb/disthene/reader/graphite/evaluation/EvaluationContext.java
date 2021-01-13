@@ -7,7 +7,7 @@ import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
  */
 public class EvaluationContext {
 
-    private ValueFormatter formatter;
+    private final ValueFormatter formatter;
 
     public EvaluationContext(ValueFormatter formatter) {
         this.formatter = formatter;

@@ -32,13 +32,13 @@ import java.util.concurrent.TimeUnit;
 public class MetricService {
     private final static Logger logger = Logger.getLogger(MetricService.class);
 
-    private IndexService indexService;
-    private CassandraService cassandraService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final CassandraService cassandraService;
+    private final StatsService statsService;
 
-    private DistheneReaderConfiguration distheneReaderConfiguration;
+    private final DistheneReaderConfiguration distheneReaderConfiguration;
 
-    private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
     public MetricService(IndexService indexService, CassandraService cassandraService, StatsService statsService, DistheneReaderConfiguration distheneReaderConfiguration) {
         this.indexService = indexService;
@@ -57,7 +57,7 @@ public class MetricService {
 
         // Calculate rollup etc
         long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, now);
         Rollup bestRollup = getRollup(from);
         long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
@@ -66,7 +66,7 @@ public class MetricService {
 
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
+        long timestamp = effectiveFrom;
         int index = 0;
         while (timestamp <= effectiveTo) {
             timestampIndices.put(timestamp, index++);
@@ -124,7 +124,7 @@ public class MetricService {
 
         // Calculate rollup etc
         long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, now);
         Rollup bestRollup = getRollup(from);
         long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
@@ -133,7 +133,7 @@ public class MetricService {
 
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
+        long timestamp = effectiveFrom;
         int index = 0;
         while (timestamp <= effectiveTo) {
             timestampIndices.put(timestamp, index++);
@@ -229,11 +229,11 @@ public class MetricService {
     }
 
     private static class SinglePathResult {
-        String path;
+        final String path;
         String json;
         Double[] values = null;
         boolean allNulls = true;
-        boolean isSumMetric;
+        final boolean isSumMetric;
 
         private SinglePathResult(String path) {
             this.path = path;

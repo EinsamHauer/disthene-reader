@@ -123,11 +123,11 @@ public class PieGraph extends Graph {
 
     }
 
-    private class Slice {
-        private String name;
-        private Double value;
+    private static class Slice {
+        private final String name;
+        private final Double value;
         private Double percent;
-        private Color color;
+        private final Color color;
         private double midAngle;
 
         public Slice(String name, Double value, Color color) {

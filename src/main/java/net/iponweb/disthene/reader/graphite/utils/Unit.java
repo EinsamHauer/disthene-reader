@@ -4,8 +4,8 @@ package net.iponweb.disthene.reader.graphite.utils;
  * @author Andrei Ivanov
  */
 public class Unit {
-    private String prefix;
-    private Double value;
+    private final String prefix;
+    private final Double value;
 
     public Unit(String prefix, Double value) {
         this.prefix = prefix;

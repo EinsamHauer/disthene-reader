@@ -26,9 +26,9 @@ import java.util.List;
 public class IndexService {
     final static Logger logger = Logger.getLogger(IndexService.class);
 
-    private IndexConfiguration indexConfiguration;
-    private TransportClient client;
-    private Joiner joiner = Joiner.on(",").skipNulls();
+    private final IndexConfiguration indexConfiguration;
+    private final TransportClient client;
+    private final Joiner joiner = Joiner.on(",").skipNulls();
 
     public IndexService(IndexConfiguration indexConfiguration) {
         this.indexConfiguration = indexConfiguration;
@@ -175,7 +175,6 @@ public class IndexService {
                                 .must(FilterBuilders.termFilter("tenant", tenant))
                                 .must(FilterBuilders.termFilter("leaf", true))))
                     .execute().actionGet();
-            long count = countResponse.getCount();
             result.add("{\"path\": \"" + path + "\",\"count\":" + countResponse.getCount() + "}");
         }
 

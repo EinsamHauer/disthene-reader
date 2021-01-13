@@ -17,22 +17,22 @@ import java.util.regex.Pattern;
  * @author Andrei Ivanov
  */
 class TablesRegistry {
-    private Logger logger = Logger.getLogger(TablesRegistry.class);
+    private final Logger logger = Logger.getLogger(TablesRegistry.class);
 
 
     private static final String TABLE_QUERY = "SELECT COUNT(1) FROM SYSTEM.SCHEMA_COLUMNFAMILIES WHERE KEYSPACE_NAME=? AND COLUMNFAMILY_NAME=?";
     private static final String SELECT_QUERY_TEMPLATE = "SELECT time, data FROM %s.%s where path = ? and time >= ? and time <= ? order by time";
 
 
-    private Session session;
-    private StoreConfiguration storeConfiguration;
+    private final Session session;
+    private final StoreConfiguration storeConfiguration;
     private final PreparedStatement queryStatement;
 
     private final Map<String, PreparedStatement> statements = new HashMap<>();
-    private Cache<String, Boolean> tablesCache;
-    private ConcurrentMap<String, String> tenants = new ConcurrentHashMap<>();
-    private String tableTemplate;
-    private Pattern normalizationPattern = Pattern.compile("[^0-9a-zA-Z_]");
+    private final Cache<String, Boolean> tablesCache;
+    private final ConcurrentMap<String, String> tenants = new ConcurrentHashMap<>();
+    private final String tableTemplate;
+    private final Pattern normalizationPattern = Pattern.compile("[^0-9a-zA-Z_]");
 
     TablesRegistry(Session session, StoreConfiguration storeConfiguration) {
         this.session = session;

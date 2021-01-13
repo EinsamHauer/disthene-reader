@@ -14,7 +14,7 @@ public class TimeSeries {
 
     private Double[] values = new Double[0];
 
-    private Map<TimeSeriesOption, Object> options = new HashMap<>();
+    private final Map<TimeSeriesOption, Object> options = new HashMap<>();
 
     public TimeSeries(String name, Long from, Long to, int step) {
         this.name = name;

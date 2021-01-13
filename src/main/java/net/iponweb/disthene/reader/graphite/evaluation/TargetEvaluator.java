@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 public class TargetEvaluator {
     private final static Logger logger = Logger.getLogger(TargetEvaluator.class);
 
-    private MetricService metricService;
+    private final MetricService metricService;
 
     public TargetEvaluator(MetricService metricService) {
         this.metricService = metricService;
@@ -47,9 +47,9 @@ public class TargetEvaluator {
     //todo: the logic below is duplicated several times - fix it!
     public TimeSeries getEmptyTimeSeries(long from, long to) {
         long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, now);
         Rollup bestRollup = metricService.getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
 
         int length = (int) ((effectiveTo - effectiveFrom) / bestRollup.getRollup() + 1);
