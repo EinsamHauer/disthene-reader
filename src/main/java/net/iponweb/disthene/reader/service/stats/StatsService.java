@@ -1,5 +1,8 @@
 package net.iponweb.disthene.reader.service.stats;
 
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.UniformReservoir;
 import com.google.common.util.concurrent.AtomicDouble;
 import net.iponweb.disthene.reader.config.StatsConfiguration;
 import org.apache.log4j.Logger;
@@ -23,6 +26,8 @@ public class StatsService {
     private final StatsConfiguration statsConfiguration;
 
     private final ConcurrentMap<String, StatsRecord> stats = new ConcurrentHashMap<>();
+
+    private final StatsRecord globalStats = new StatsRecord();
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -52,37 +57,45 @@ public class StatsService {
 
     public void incRenderRequests(String tenant) {
         getStatsRecord(tenant).incRenderRequests();
+        globalStats.incRenderRequests();
     }
 
     public void incRenderPointsRead(String tenant, int inc) {
         getStatsRecord(tenant).incRenderPointsRead(inc);
+        globalStats.incRenderPointsRead(inc);
     }
 
     public void incRenderPathsRead(String tenant, int inc) {
         getStatsRecord(tenant).incRenderPathsRead(inc);
+        globalStats.incRenderPathsRead(inc);
     }
 
     public void incPathsRequests(String tenant) {
         getStatsRecord(tenant).incPathsRequests();
+        globalStats.incPathsRequests();
     }
 
     public void incThrottleTime(String tenant, double value) {
         getStatsRecord(tenant).incThrottled(value);
+        globalStats.incThrottled(value);
     }
 
     public void incTimedOutRequests(String tenant) {
         getStatsRecord(tenant).incTimedOutRequests();
+        globalStats.incTimedOutRequests();
     }
 
+    public void addResponseTime(String tenant, long millis) {
+        getStatsRecord(tenant).addResponseTime(millis);
+        globalStats.addResponseTime(millis);
+    }
 
     private synchronized void flush() {
-        Map<String, StatsRecord> statsToFlush = new HashMap<>();
+        Map<String, StatsSnapshot> statsToFlush = new HashMap<>();
 
         for (ConcurrentMap.Entry<String, StatsRecord> entry : stats.entrySet()) {
             statsToFlush.put(entry.getKey(), entry.getValue().reset());
         }
-
-
 
         long timestamp = DateTime.now(DateTimeZone.UTC).withSecondOfMinute(0).withMillisOfSecond(0).getMillis() / 1000L;
 
@@ -90,38 +103,40 @@ public class StatsService {
             Socket connection = new Socket(statsConfiguration.getCarbonHost(), statsConfiguration.getCarbonPort());
             DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
 
-            long totalRenderRequests = 0;
-            long totalRenderPathsRead = 0;
-            long totalRenderPointsRead = 0;
-            long totalPathsRequests = 0;
-            double totalThrottled = 0;
-            long totalTimedOutRequests = 0;
-
-            for (Map.Entry<String, StatsRecord> entry : statsToFlush.entrySet()) {
+            for (Map.Entry<String, StatsSnapshot> entry : statsToFlush.entrySet()) {
                 String tenant = entry.getKey();
-                StatsRecord statsRecord = entry.getValue();
+                StatsSnapshot statsSnapshot = entry.getValue();
 
-                totalRenderRequests += statsRecord.getRenderRequests();
-                totalRenderPathsRead += statsRecord.getRenderPathsRead();
-                totalRenderPointsRead += statsRecord.getRenderPointsRead();
-                totalPathsRequests += statsRecord.getPathsRequests();
-                totalThrottled += statsRecord.getThrottled();
-                totalTimedOutRequests += statsRecord.getTimedOutRequests();
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsSnapshot.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsSnapshot.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsSnapshot.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsRecord.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsRecord.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsRecord.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsRecord.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".throttled " + statsRecord.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsRecord.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                // response response time
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + totalRenderPathsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + totalTimedOutRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            StatsSnapshot statsSnapshot = globalStats.reset();
+
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + statsSnapshot.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + statsSnapshot.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + statsSnapshot.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+
+            // response response time
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             dos.flush();
             connection.close();
@@ -135,31 +150,34 @@ public class StatsService {
     }
 
     private static class StatsRecord {
-        private AtomicLong renderRequests = new AtomicLong(0);
-        private AtomicLong renderPathsRead = new AtomicLong(0);
-        private AtomicLong renderPointsRead = new AtomicLong(0);
-        private AtomicLong pathsRequests = new AtomicLong(0);
-        private AtomicDouble throttled = new AtomicDouble(0);
-        private AtomicLong timedOutRequests = new AtomicLong(0);
+        private final AtomicLong renderRequests = new AtomicLong(0);
+        private final AtomicLong renderPathsRead = new AtomicLong(0);
+        private final AtomicLong renderPointsRead = new AtomicLong(0);
+        private final AtomicLong pathsRequests = new AtomicLong(0);
+        private final AtomicDouble throttled = new AtomicDouble(0);
+        private final AtomicLong timedOutRequests = new AtomicLong(0);
+        private Histogram responseTimes = new Histogram(new UniformReservoir());
+        private final AtomicLong totalResponseTime = new AtomicLong(0);
 
         public StatsRecord() {
-        }
-
-        public StatsRecord(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests, double throttled, long timedOut) {
-            this.renderRequests = new AtomicLong(renderRequests);
-            this.renderPathsRead = new AtomicLong(renderPathsRead);
-            this.renderPointsRead = new AtomicLong(renderPointsRead);
-            this.pathsRequests = new AtomicLong(pathsRequests);
-            this.throttled = new AtomicDouble(throttled);
-            this.timedOutRequests = new AtomicLong(timedOut);
         }
 
         /**
          * Resets the stats to zeroes and returns a snapshot of the record
          * @return snapshot of the record
          */
-        public StatsRecord reset() {
-            return new StatsRecord(renderRequests.getAndSet(0), renderPathsRead.getAndSet(0), renderPointsRead.getAndSet(0), pathsRequests.getAndSet(0), throttled.getAndSet(0), timedOutRequests.getAndSet(0));
+        public StatsSnapshot reset() {
+            long renderRequestsSnapshot = renderRequests.getAndSet(0);
+            long renderPathsReadSnapshot = renderPathsRead.getAndSet(0);
+            long renderPointsReadSnapshot = renderPointsRead.getAndSet(0);
+            long pathsRequestsSnapshot = pathsRequests.getAndSet(0);
+            double throttledSnapshot = throttled.getAndSet(0);
+            long timedOutRequestsSnapshot = timedOutRequests.getAndSet(0);
+            Snapshot responseTimesSnapshot = responseTimes.getSnapshot();
+            responseTimes = new Histogram(new UniformReservoir());
+            long totalResponseTimeSnapshot = totalResponseTime.getAndSet(0);
+
+            return new StatsSnapshot(renderRequestsSnapshot, renderPathsReadSnapshot, renderPointsReadSnapshot, pathsRequestsSnapshot, throttledSnapshot, timedOutRequestsSnapshot, responseTimesSnapshot, totalResponseTimeSnapshot);
         }
 
         public void incRenderRequests() {
@@ -186,30 +204,76 @@ public class StatsService {
             timedOutRequests.addAndGet(1);
         }
 
+        public void addResponseTime(long millis) {
+            responseTimes.update(millis);
+            totalResponseTime.addAndGet(millis);
+        }
+    }
+
+    private static class StatsSnapshot {
+        private final long renderRequests;
+        private final long renderPathsRead;
+        private final long renderPointsRead;
+        private final long pathsRequests;
+        private final double throttled;
+        private final long timedOutRequests;
+        private final Snapshot responseTimes;
+        private final long totalResponseTime;
+
+        public StatsSnapshot(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests, double throttled, long timedOutRequests, Snapshot responseTimes, long totalResponseTime) {
+            this.renderRequests = renderRequests;
+            this.renderPathsRead = renderPathsRead;
+            this.renderPointsRead = renderPointsRead;
+            this.pathsRequests = pathsRequests;
+            this.throttled = throttled;
+            this.timedOutRequests = timedOutRequests;
+            this.responseTimes = responseTimes;
+            this.totalResponseTime = totalResponseTime;
+        }
+
         public long getRenderRequests() {
-            return renderRequests.get();
+            return renderRequests;
         }
 
         public long getRenderPathsRead() {
-            return renderPathsRead.get();
+            return renderPathsRead;
         }
 
         public long getRenderPointsRead() {
-            return renderPointsRead.get();
+            return renderPointsRead;
         }
 
         public long getPathsRequests() {
-            return pathsRequests.get();
+            return pathsRequests;
         }
 
         public double getThrottled() {
-            return throttled.get();
+            return throttled;
         }
 
         public long getTimedOutRequests() {
-            return timedOutRequests.get();
+            return timedOutRequests;
         }
 
+        public long getTotalResponseTime() {
+            return totalResponseTime;
+        }
+
+        public double getResponseTimesMedian() {
+            return responseTimes.getMedian();
+        }
+
+        public double getResponseTimes75thPercentile() {
+            return responseTimes.get75thPercentile();
+        }
+
+        public double getResponseTimes95thPercentile() {
+            return responseTimes.get95thPercentile();
+        }
+
+        public double getResponseTimes99thPercentile() {
+            return responseTimes.get99thPercentile();
+        }
     }
 
 }

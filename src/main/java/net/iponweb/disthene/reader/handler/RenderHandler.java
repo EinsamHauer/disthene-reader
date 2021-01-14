@@ -110,7 +110,10 @@ public class RenderHandler implements DistheneReaderHandler {
         }
 
         timer.stop();
+        statsService.addResponseTime(parameters.getTenant(), timer.elapsed(TimeUnit.MILLISECONDS));
+
         logger.debug("Request took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + parameters + ")");
+
 
         return response;
     }
