@@ -19,10 +19,10 @@ public class Grouper {
     
     private static final ImmutableMap<String, AggregationMethod> aggregationMap;
     static {
-        AggregationMethod avg = new AggregationMethod() { public Double apply(List<Double> points) { return CollectionUtils.average(points);}};
-        AggregationMethod sum = new AggregationMethod() { public Double apply(List<Double> points) { return CollectionUtils.sum(points);}};
-        AggregationMethod min = new AggregationMethod() { public Double apply(List<Double> points) { return CollectionUtils.min(points);}};
-        AggregationMethod max = new AggregationMethod() { public Double apply(List<Double> points) { return CollectionUtils.max(points);}};
+        AggregationMethod avg = CollectionUtils::average;
+        AggregationMethod sum = CollectionUtils::sum;
+        AggregationMethod min = CollectionUtils::min;
+        AggregationMethod max = CollectionUtils::max;
 
         aggregationMap = ImmutableMap.<String, AggregationMethod>builder()
             .put("sum", sum)
@@ -49,7 +49,7 @@ public class Grouper {
 
         for (TimeSeries ts : timeSeries) {
             String bucketName = getBucketName(ts.getName(), indexes);
-            if (!buckets.containsKey(bucketName)) buckets.put(bucketName, new ArrayList<TimeSeries>());
+            if (!buckets.containsKey(bucketName)) buckets.put(bucketName, new ArrayList<>());
             buckets.get(bucketName).add(ts);
         }
         

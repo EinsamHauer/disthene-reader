@@ -41,7 +41,7 @@ public class MostDeviantFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double stdev = CollectionUtils.stdev(Arrays.asList(ts.getValues()));
             if (stdev != null) {
-                if (sorted.get(stdev) == null) sorted.put(stdev, new ArrayList<TimeSeries>());
+                sorted.computeIfAbsent(stdev, k -> new ArrayList<>());
                 sorted.get(stdev).add(ts);
             }
         }

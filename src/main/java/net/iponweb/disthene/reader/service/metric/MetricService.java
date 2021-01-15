@@ -2,7 +2,6 @@ package net.iponweb.disthene.reader.service.metric;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -20,15 +19,18 @@ import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import org.apache.log4j.Logger;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 public class MetricService {
     private final static Logger logger = Logger.getLogger(MetricService.class);
 
@@ -56,8 +58,7 @@ public class MetricService {
         Collections.sort(paths);
 
         // Calculate rollup etc
-        long now = System.currentTimeMillis() * 1000;
-        long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = getRollup(from);
         long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
@@ -81,19 +82,16 @@ public class MetricService {
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<List<ResultSet>, SinglePathResult> serializeFunction = new Function<List<ResultSet>, SinglePathResult>() {
-                @Override
-                public SinglePathResult apply(List<ResultSet> resultSets) {
-                    SinglePathResult result = new SinglePathResult(path);
-                    result.makeJson(resultSets, length, timestampIndices);
-                    return result;
-                }
+            Function<List<ResultSet>, SinglePathResult> serializeFunction = resultSets -> {
+                SinglePathResult result = new SinglePathResult(path);
+                result.makeJson(resultSets, length, timestampIndices);
+                return result;
             };
 
             futures.add(
                     Futures.transform(
                             cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
-                            serializeFunction,
+                            serializeFunction::apply,
                             executorService
                     )
             );
@@ -118,13 +116,15 @@ public class MetricService {
     }
 
     public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+        Stopwatch indexTimer = Stopwatch.createStarted();
         List<String> paths = indexService.getPaths(tenant, wildcards);
+        indexTimer.stop();
+        statsService.addIndexResponseTime(tenant, indexTimer.elapsed(TimeUnit.MILLISECONDS));
 
         statsService.incRenderPathsRead(tenant, paths.size());
 
         // Calculate rollup etc
-        long now = System.currentTimeMillis() * 1000;
-        long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = getRollup(from);
         long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
@@ -153,25 +153,22 @@ public class MetricService {
         // Now let's query C*
         List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<List<ResultSet>, SinglePathResult> serializeFunction = new Function<List<ResultSet>, SinglePathResult>() {
-                @Override
-                public SinglePathResult apply(List<ResultSet> resultSets) {
-                    SinglePathResult result = new SinglePathResult(path);
-                    result.makeArray(resultSets, length, timestampIndices);
-                    return result;
-                }
+            Function<List<ResultSet>, SinglePathResult> serializeFunction = resultSets -> {
+                SinglePathResult result = new SinglePathResult(path);
+                result.makeArray(resultSets, length, timestampIndices);
+                return result;
             };
 
             futures.add(
                     Futures.transform(
                             cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
-                            serializeFunction,
+                            serializeFunction::apply,
                             executorService
                     )
             );
         }
 
-        Stopwatch timer = Stopwatch.createStarted();
+        Stopwatch cassandraTimer = Stopwatch.createStarted();
 
         futures = Futures.inCompletionOrder(futures);
 
@@ -187,16 +184,14 @@ public class MetricService {
         }
 
         logger.debug("Number of series fetched: " + timeSeries.size());
-        timer.stop();
-        logger.debug("Fetching from Cassandra took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
+        cassandraTimer.stop();
+
+        statsService.addStoreResponseTime(tenant, cassandraTimer.elapsed(TimeUnit.MILLISECONDS));
+
+        logger.debug("Fetching from Cassandra took " + cassandraTimer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
 
         // sort it by path
-        Collections.sort(timeSeries, new Comparator<TimeSeries>() {
-            @Override
-            public int compare(TimeSeries ts1, TimeSeries ts2) {
-                return ts1.getName().compareTo(ts2.getName());
-            }
-        });
+        timeSeries.sort(Comparator.comparing(TimeSeries::getName));
 
         int totalPoints = 0;
 
@@ -215,7 +210,7 @@ public class MetricService {
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
-            if (now - rollup.getPeriod() * rollup.getRollup() <= from) {
+            if (now - (long) rollup.getPeriod() * rollup.getRollup() <= from) {
                 survivals.add(rollup);
             }
         }

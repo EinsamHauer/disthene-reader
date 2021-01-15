@@ -39,7 +39,7 @@ public class LowestAverageFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double average = CollectionUtils.average(Arrays.asList(ts.getValues()));
             if (average != null) {
-                if (sorted.get(average) == null) sorted.put(average, new ArrayList<TimeSeries>());
+                sorted.computeIfAbsent(average, k -> new ArrayList<>());
                 sorted.get(average).add(ts);
             }
         }

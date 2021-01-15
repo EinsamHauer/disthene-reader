@@ -13,6 +13,7 @@ import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import org.apache.log4j.Logger;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,8 +47,7 @@ public class TargetEvaluator {
 
     //todo: the logic below is duplicated several times - fix it!
     public TimeSeries getEmptyTimeSeries(long from, long to) {
-        long now = System.currentTimeMillis() * 1000;
-        long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = metricService.getRollup(from);
         long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());

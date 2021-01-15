@@ -33,6 +33,7 @@ import java.util.concurrent.*;
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 public class RenderHandler implements DistheneReaderHandler {
 
     private final static Logger logger = Logger.getLogger(RenderHandler.class);
@@ -92,12 +93,7 @@ public class RenderHandler implements DistheneReaderHandler {
 
         FullHttpResponse response;
         try {
-            response = timeLimiter.callWithTimeout(new Callable<FullHttpResponse>() {
-                @Override
-                public FullHttpResponse call() throws EvaluationException, LogarithmicScaleNotAllowed {
-                    return handleInternal(targets, parameters);
-                }
-            }, readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS, true);
+            response = timeLimiter.callWithTimeout(() -> handleInternal(targets, parameters), readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS, true);
         } catch (UncheckedTimeoutException e) {
             logger.debug("Request timed out: " + parameters);
             statsService.incTimedOutRequests(parameters.getTenant());

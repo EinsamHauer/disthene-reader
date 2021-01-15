@@ -276,12 +276,7 @@ public abstract class Graph {
         // Check if there's enough room to use two columns
         boolean rightSideLabels = false;
         int padding = 5;
-        String longestLegend = Collections.max(legends, new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                return s1.length() - s2.length();
-            }
-        });
+        String longestLegend = Collections.max(legends, Comparator.comparingInt(String::length));
         // Double it to check if there's enough room for 2 columns
         String testSizeName = longestLegend + " " + longestLegend;
         int testBoxSize = fontMetrics.getHeight() - 1;

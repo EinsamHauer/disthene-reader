@@ -43,7 +43,7 @@ public class AverageSeriesWithWildcardsFunction extends DistheneFunction {
 
         for (TimeSeries ts : processedArguments) {
             String bucketName = getBucketName(ts.getName(), positions);
-            if (!buckets.containsKey(bucketName)) buckets.put(bucketName, new ArrayList<TimeSeries>());
+            if (!buckets.containsKey(bucketName)) buckets.put(bucketName, new ArrayList<>());
             buckets.get(bucketName).add(ts);
         }
 

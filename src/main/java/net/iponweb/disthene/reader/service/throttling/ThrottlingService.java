@@ -10,6 +10,7 @@ import java.util.Map;
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 public class ThrottlingService {
     final static Logger logger = Logger.getLogger(ThrottlingService.class);
 

@@ -33,7 +33,7 @@ public class SortByNameFunction extends DistheneFunction {
         SortedMap<String, List<TimeSeries>> sorted = new TreeMap<>();
 
         for(TimeSeries ts : processedArguments) {
-            if (sorted.get(ts.getName()) == null) sorted.put(ts.getName(), new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(ts.getName(), k -> new ArrayList<>());
             sorted.get(ts.getName()).add(ts);
         }
 

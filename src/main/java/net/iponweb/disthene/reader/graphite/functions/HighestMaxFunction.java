@@ -39,7 +39,7 @@ public class HighestMaxFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double max = CollectionUtils.max(Arrays.asList(ts.getValues()));
             if (max != null) {
-                if (sorted.get(max) == null) sorted.put(max, new ArrayList<TimeSeries>());
+                sorted.computeIfAbsent(max, k -> new ArrayList<>());
                 sorted.get(max).add(ts);
             }
         }

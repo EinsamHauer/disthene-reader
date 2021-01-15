@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 public class CassandraService {
 
     private final Logger logger = Logger.getLogger(CassandraService.class);

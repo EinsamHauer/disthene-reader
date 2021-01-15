@@ -76,7 +76,7 @@ public class IndexService {
 
             while (response.getHits().getHits().length > 0) {
                 for (SearchHit hit : response.getHits()) {
-                    result.add((String) hit.field("path").getValue());
+                    result.add(hit.field("path").getValue());
                 }
                 response = client.prepareSearchScroll(response.getScrollId())
                         .setScroll(new TimeValue(indexConfiguration.getTimeout()))
@@ -129,7 +129,7 @@ public class IndexService {
 
         List<String> paths = new ArrayList<>();
         for (SearchHit hit : response.getHits()) {
-            paths.add((String) hit.field("path").getValue());
+            paths.add(hit.field("path").getValue());
         }
 
         return Joiner.on(",").skipNulls().join(paths);

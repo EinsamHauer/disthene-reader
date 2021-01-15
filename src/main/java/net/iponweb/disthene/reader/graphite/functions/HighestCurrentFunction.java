@@ -39,7 +39,7 @@ public class HighestCurrentFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double last = CollectionUtils.last(Arrays.asList(ts.getValues()));
             if (last != null) {
-                if (sorted.get(last) == null) sorted.put(last, new ArrayList<TimeSeries>());
+                sorted.computeIfAbsent(last, k -> new ArrayList<>());
                 sorted.get(last).add(ts);
             }
         }

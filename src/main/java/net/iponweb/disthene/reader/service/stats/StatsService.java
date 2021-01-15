@@ -34,12 +34,7 @@ public class StatsService {
     public StatsService(StatsConfiguration statsConfiguration) {
         this.statsConfiguration = statsConfiguration;
 
-        scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                flush();
-            }
-        }, 60 - ((System.currentTimeMillis() / 1000L) % 60), statsConfiguration.getInterval(), TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::flush, 60 - ((System.currentTimeMillis() / 1000L) % 60), statsConfiguration.getInterval(), TimeUnit.SECONDS);
     }
 
     private StatsRecord getStatsRecord(String tenant) {
@@ -90,6 +85,16 @@ public class StatsService {
         globalStats.addResponseTime(millis);
     }
 
+    public void addStoreResponseTime(String tenant, long millis) {
+        getStatsRecord(tenant).addStoreResponseTime(millis);
+        globalStats.addStoreResponseTime(millis);
+    }
+
+    public void addIndexResponseTime(String tenant, long millis) {
+        getStatsRecord(tenant).addIndexResponseTime(millis);
+        globalStats.addIndexResponseTime(millis);
+    }
+
     private synchronized void flush() {
         Map<String, StatsSnapshot> statsToFlush = new HashMap<>();
 
@@ -120,6 +125,20 @@ public class StatsService {
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
                 dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+
+                // store response response time
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.50 " + statsSnapshot.getStoreResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.75 " + statsSnapshot.getStoreResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.95 " + statsSnapshot.getStoreResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.99 " + statsSnapshot.getStoreResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.total " + statsSnapshot.getTotalStoreResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+
+                // index response response time
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.50 " + statsSnapshot.getIndexResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.75 " + statsSnapshot.getIndexResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.95 " + statsSnapshot.getIndexResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.99 " + statsSnapshot.getIndexResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.total " + statsSnapshot.getTotalIndexResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
             StatsSnapshot statsSnapshot = globalStats.reset();
@@ -130,13 +149,27 @@ public class StatsService {
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             // response response time
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+
+            // store response response time
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.50 " + statsSnapshot.getStoreResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.75 " + statsSnapshot.getStoreResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.95 " + statsSnapshot.getStoreResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.99 " + statsSnapshot.getStoreResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.total " + statsSnapshot.getTotalStoreResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+
+            // index response response time
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.50 " + statsSnapshot.getIndexResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.75 " + statsSnapshot.getIndexResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.95 " + statsSnapshot.getIndexResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.99 " + statsSnapshot.getIndexResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.total " + statsSnapshot.getTotalIndexResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             dos.flush();
             connection.close();
@@ -158,6 +191,10 @@ public class StatsService {
         private final AtomicLong timedOutRequests = new AtomicLong(0);
         private Histogram responseTimes = new Histogram(new UniformReservoir());
         private final AtomicLong totalResponseTime = new AtomicLong(0);
+        private Histogram storeResponseTimes = new Histogram(new UniformReservoir());
+        private final AtomicLong totalStoreResponseTime = new AtomicLong(0);
+        private Histogram indexResponseTimes = new Histogram(new UniformReservoir());
+        private final AtomicLong totalIndexResponseTime = new AtomicLong(0);
 
         public StatsRecord() {
         }
@@ -176,8 +213,18 @@ public class StatsService {
             Snapshot responseTimesSnapshot = responseTimes.getSnapshot();
             responseTimes = new Histogram(new UniformReservoir());
             long totalResponseTimeSnapshot = totalResponseTime.getAndSet(0);
+            Snapshot storeResponseTimesSnapshot = storeResponseTimes.getSnapshot();
+            storeResponseTimes = new Histogram(new UniformReservoir());
+            long totalStoreResponseTimeSnapshot = totalStoreResponseTime.getAndSet(0);
+            Snapshot indexResponseTimesSnapshot = indexResponseTimes.getSnapshot();
+            indexResponseTimes = new Histogram(new UniformReservoir());
+            long totalIndexResponseTimeSnapshot = totalIndexResponseTime.getAndSet(0);
 
-            return new StatsSnapshot(renderRequestsSnapshot, renderPathsReadSnapshot, renderPointsReadSnapshot, pathsRequestsSnapshot, throttledSnapshot, timedOutRequestsSnapshot, responseTimesSnapshot, totalResponseTimeSnapshot);
+            return new StatsSnapshot(renderRequestsSnapshot, renderPathsReadSnapshot, renderPointsReadSnapshot,
+                    pathsRequestsSnapshot, throttledSnapshot, timedOutRequestsSnapshot,
+                    responseTimesSnapshot, totalResponseTimeSnapshot,
+                    storeResponseTimesSnapshot, totalStoreResponseTimeSnapshot,
+                    indexResponseTimesSnapshot, totalIndexResponseTimeSnapshot);
         }
 
         public void incRenderRequests() {
@@ -208,6 +255,16 @@ public class StatsService {
             responseTimes.update(millis);
             totalResponseTime.addAndGet(millis);
         }
+
+        public void addStoreResponseTime(long millis) {
+            storeResponseTimes.update(millis);
+            totalStoreResponseTime.addAndGet(millis);
+        }
+
+        public void addIndexResponseTime(long millis) {
+            indexResponseTimes.update(millis);
+            totalIndexResponseTime.addAndGet(millis);
+        }
     }
 
     private static class StatsSnapshot {
@@ -219,8 +276,16 @@ public class StatsService {
         private final long timedOutRequests;
         private final Snapshot responseTimes;
         private final long totalResponseTime;
+        private final Snapshot storeResponseTimes;
+        private final long totalStoreResponseTime;
+        private final Snapshot indexResponseTimes;
+        private final long totalIndexResponseTime;
 
-        public StatsSnapshot(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests, double throttled, long timedOutRequests, Snapshot responseTimes, long totalResponseTime) {
+        public StatsSnapshot(long renderRequests, long renderPathsRead, long renderPointsRead, long pathsRequests,
+                             double throttled, long timedOutRequests, 
+                             Snapshot responseTimes, long totalResponseTime,
+                             Snapshot storeResponseTimes, long totalStoreResponseTime,
+                             Snapshot indexResponseTimes, long totalIndexResponseTime) {
             this.renderRequests = renderRequests;
             this.renderPathsRead = renderPathsRead;
             this.renderPointsRead = renderPointsRead;
@@ -229,6 +294,10 @@ public class StatsService {
             this.timedOutRequests = timedOutRequests;
             this.responseTimes = responseTimes;
             this.totalResponseTime = totalResponseTime;
+            this.storeResponseTimes = storeResponseTimes;
+            this.totalStoreResponseTime = totalStoreResponseTime;
+            this.indexResponseTimes = indexResponseTimes;
+            this.totalIndexResponseTime = totalIndexResponseTime;
         }
 
         public long getRenderRequests() {
@@ -273,6 +342,46 @@ public class StatsService {
 
         public double getResponseTimes99thPercentile() {
             return responseTimes.get99thPercentile();
+        }
+
+        public long getTotalStoreResponseTime() {
+            return totalStoreResponseTime;
+        }
+
+        public double getStoreResponseTimesMedian() {
+            return storeResponseTimes.getMedian();
+        }
+
+        public double getStoreResponseTimes75thPercentile() {
+            return storeResponseTimes.get75thPercentile();
+        }
+
+        public double getStoreResponseTimes95thPercentile() {
+            return storeResponseTimes.get95thPercentile();
+        }
+
+        public double getStoreResponseTimes99thPercentile() {
+            return storeResponseTimes.get99thPercentile();
+        }
+
+        public long getTotalIndexResponseTime() {
+            return totalIndexResponseTime;
+        }
+
+        public double getIndexResponseTimesMedian() {
+            return indexResponseTimes.getMedian();
+        }
+
+        public double getIndexResponseTimes75thPercentile() {
+            return indexResponseTimes.get75thPercentile();
+        }
+
+        public double getIndexResponseTimes95thPercentile() {
+            return indexResponseTimes.get95thPercentile();
+        }
+
+        public double getIndexResponseTimes99thPercentile() {
+            return indexResponseTimes.get99thPercentile();
         }
     }
 

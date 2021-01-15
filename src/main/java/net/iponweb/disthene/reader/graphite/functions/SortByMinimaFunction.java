@@ -36,7 +36,7 @@ public class SortByMinimaFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double min = CollectionUtils.min(Arrays.asList(ts.getValues()));
             if (min == null) continue;
-            if (sorted.get(min) == null) sorted.put(min, new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(min, k -> new ArrayList<>());
             sorted.get(min).add(ts);
         }
 

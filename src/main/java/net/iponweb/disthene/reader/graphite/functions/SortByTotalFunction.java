@@ -37,7 +37,7 @@ public class SortByTotalFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double total = CollectionUtils.sum(Arrays.asList(ts.getValues()));
             if (total == null) continue;
-            if (sorted.get(total) == null) sorted.put(total, new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(total, k -> new ArrayList<>());
             sorted.get(total).add(ts);
         }
 

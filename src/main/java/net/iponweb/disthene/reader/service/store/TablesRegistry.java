@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 class TablesRegistry {
     private final Logger logger = Logger.getLogger(TablesRegistry.class);
 
@@ -69,16 +70,13 @@ class TablesRegistry {
     }
 
     private boolean checkTable(final String keyspace, final String table) throws ExecutionException {
-        return tablesCache.get(keyspace + "." + table, new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                logger.debug("Table " + keyspace + "." + table + " not found in cache. Checking.");
-                ResultSet resultSet = session.execute(queryStatement.bind(keyspace, table));
-                Boolean result = resultSet.one().getLong(0) > 0;
-                tablesCache.put(keyspace + "." + table, result);
-                logger.debug("Table " + keyspace + "." + table + (result ? " " : " not ")  + "found.");
-                return result;
-            }
+        return tablesCache.get(keyspace + "." + table, () -> {
+            logger.debug("Table " + keyspace + "." + table + " not found in cache. Checking.");
+            ResultSet resultSet = session.execute(queryStatement.bind(keyspace, table));
+            Boolean result = resultSet.one().getLong(0) > 0;
+            tablesCache.put(keyspace + "." + table, result);
+            logger.debug("Table " + keyspace + "." + table + (result ? " " : " not ")  + "found.");
+            return result;
         });
     }
 
