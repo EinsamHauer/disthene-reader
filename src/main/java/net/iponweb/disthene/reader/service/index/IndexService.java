@@ -156,7 +156,7 @@ public class IndexService {
         List<String> paths = new ArrayList<>();
         while (response.getHits().getHits().length > 0) {
             for (SearchHit hit : response.getHits()) {
-                paths.add(String.valueOf(hit.field("path").getValue()));
+                paths.add(hit.field("path").getValue());
             }
             response = client.prepareSearchScroll(response.getScrollId())
                     .setScroll(new TimeValue(indexConfiguration.getTimeout()))
