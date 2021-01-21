@@ -11,7 +11,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -61,8 +60,7 @@ public class IndexService {
             String regEx = Joiner.on("|").skipNulls().join(regExs);
 
             SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                    .setSize(indexConfiguration.getScroll())
+                    .setSize(indexConfiguration.getMaxPaths())
                     .setQuery(QueryBuilders.filteredQuery(QueryBuilders.regexpQuery("path", regEx),
                             FilterBuilders.termFilter("tenant", tenant)))
                     .addField("path")
@@ -74,13 +72,8 @@ public class IndexService {
                 throw new TooMuchDataExpectedException("Total number of paths exceeds the limit: " + response.getHits().totalHits() + " (the limit is " + indexConfiguration.getMaxPaths() + ")");
             }
 
-            while (response.getHits().getHits().length > 0) {
-                for (SearchHit hit : response.getHits()) {
-                    result.add(hit.field("path").getValue());
-                }
-                response = client.prepareSearchScroll(response.getScrollId())
-                        .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                        .execute().actionGet();
+            for (SearchHit hit : response.getHits()) {
+                result.add(hit.field("path").getValue());
             }
         }
 
@@ -91,8 +84,7 @@ public class IndexService {
         String regEx = WildcardUtil.getPathsRegExFromWildcard(wildcard);
 
         SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                .setSize(indexConfiguration.getScroll())
+                .setSize(indexConfiguration.getMaxPaths())
                 .setQuery(QueryBuilders.filteredQuery(
                         QueryBuilders.regexpQuery("path", regEx),
                         FilterBuilders.termFilter("tenant", tenant)))
@@ -105,13 +97,8 @@ public class IndexService {
         }
 
         List<String> paths = new ArrayList<>();
-        while (response.getHits().getHits().length > 0) {
-            for (SearchHit hit : response.getHits()) {
-                paths.add(hit.getSourceAsString());
-            }
-            response = client.prepareSearchScroll(response.getScrollId())
-                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                    .execute().actionGet();
+        for (SearchHit hit : response.getHits()) {
+            paths.add(hit.getSourceAsString());
         }
 
         return "[" + joiner.join(paths) + "]";
@@ -119,7 +106,6 @@ public class IndexService {
 
     public String getSearchPathsAsString(String tenant, String regEx, int limit) {
         SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
                 .setSize(limit)
                 .setQuery(QueryBuilders.filteredQuery(
                         QueryBuilders.regexpQuery("path", regEx),
@@ -139,8 +125,7 @@ public class IndexService {
         String regEx = WildcardUtil.getPathsRegExFromWildcard(wildcard);
 
         SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
-                .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                .setSize(indexConfiguration.getScroll())
+                .setSize(indexConfiguration.getMaxPaths())
                 .setQuery(QueryBuilders.filteredQuery(
                         QueryBuilders.regexpQuery("path", regEx),
                         FilterBuilders.termFilter("tenant", tenant)))
@@ -154,13 +139,8 @@ public class IndexService {
         }
 
         List<String> paths = new ArrayList<>();
-        while (response.getHits().getHits().length > 0) {
-            for (SearchHit hit : response.getHits()) {
-                paths.add(hit.field("path").getValue());
-            }
-            response = client.prepareSearchScroll(response.getScrollId())
-                    .setScroll(new TimeValue(indexConfiguration.getTimeout()))
-                    .execute().actionGet();
+        for (SearchHit hit : response.getHits()) {
+            paths.add(hit.field("path").getValue());
         }
 
         Collections.sort(paths);
