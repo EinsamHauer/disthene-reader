@@ -62,13 +62,13 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             } else {
                 response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
             }
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
 
             if (keepAlive) {
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-                ctx.write(response);
+                ctx.writeAndFlush(response, ctx.voidPromise());
             } else {
-                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+                response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
             }
         } catch (EvaluationException | ParameterParsingException | LogarithmicScaleNotAllowed e) {
             FullHttpResponse response;
@@ -77,12 +77,12 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             } else {
                 response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             }
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
             logger.error("Invalid request: " + e.getMessage());
             logger.debug("Invalid request: ", e);
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } finally {
             ((HttpContent) message).content().release();
         }
