@@ -11,6 +11,7 @@ import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -95,7 +96,12 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error("Exception while processing request", cause);
+        // the check below is mostly because of "Connection reset by peer" exceptions overwhelming the log
+        if (cause instanceof IOException) {
+            logger.trace("Exception while processing request", cause);
+        } else {
+            logger.error("Exception while processing request", cause);
+        }
         ctx.close();
     }
 }
