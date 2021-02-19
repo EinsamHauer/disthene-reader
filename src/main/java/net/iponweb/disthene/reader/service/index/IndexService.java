@@ -83,6 +83,10 @@ public class IndexService {
     public String getPathsAsJsonArray(String tenant, String wildcard) throws TooMuchDataExpectedException {
         String regEx = WildcardUtil.getPathsRegExFromWildcard(wildcard);
 
+        if (!WildcardUtil.regexIsValid(regEx)) {
+            return "[]";
+        }
+
         SearchResponse response = client.prepareSearch(indexConfiguration.getIndex())
                 .setSize(indexConfiguration.getMaxPaths())
                 .setQuery(QueryBuilders.filteredQuery(
