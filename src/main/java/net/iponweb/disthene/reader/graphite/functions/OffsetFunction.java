@@ -48,7 +48,7 @@ public class OffsetFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() > 2 || arguments.size() < 1) throw new InvalidArgumentException("offset: number of arguments is " + arguments.size() + ". Must be two.");
+        if (arguments.size() != 2) throw new InvalidArgumentException("offset: number of arguments is " + arguments.size() + ". Must be two.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("offset: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
         if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("offset: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
     }
