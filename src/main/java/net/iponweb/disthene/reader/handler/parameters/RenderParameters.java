@@ -10,7 +10,8 @@ import net.iponweb.disthene.reader.format.Format;
 import net.iponweb.disthene.reader.graph.ColorTable;
 import net.iponweb.disthene.reader.graph.Graph;
 import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
  * @author Andrei Ivanov
  */
 public class RenderParameters {
-    final static Logger logger = Logger.getLogger(RenderParameters.class);
+    final static Logger logger = LogManager.getLogger(RenderParameters.class);
 
     final private static Pattern EXTENDED_TIME_PATTERN = Pattern.compile("-*([0-9]+)([a-zA-Z]+)");
 

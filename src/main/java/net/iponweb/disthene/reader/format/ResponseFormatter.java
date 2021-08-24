@@ -11,7 +11,6 @@ import net.iponweb.disthene.reader.graph.Graph;
 import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.joda.time.DateTime;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ import java.util.List;
 public class ResponseFormatter {
 
 
-    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException, LogarithmicScaleNotAllowed {
+    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws UnsupportedOperationException, LogarithmicScaleNotAllowed {
         // Let's remove empty series
         List<TimeSeries> filtered = filterAllNulls(timeSeriesList);
 
@@ -33,7 +32,7 @@ public class ResponseFormatter {
             case CSV: return formatResponseAsCSV(filtered, parameters);
             case PNG: return formatResponseAsPng(filtered, parameters);
             case GRAPHPLOT_JSON: return formatResponseAsGraphplotJson(filtered, parameters);
-            default:throw new NotImplementedException();
+            default:throw new UnsupportedOperationException();
         }
     }
 
@@ -43,7 +42,7 @@ public class ResponseFormatter {
         for(TimeSeries timeSeries : timeSeriesList) {
             Double[] values = timeSeries.getValues();
             for(int i = 0; i < values.length; i++) {
-                DateTime dt = new DateTime((timeSeries.getFrom() + i * timeSeries.getStep()) * 1000, renderParameters.getTz());
+                DateTime dt = new DateTime((timeSeries.getFrom() + i * timeSeries.getStep()) * 1000L, renderParameters.getTz());
                 String stringValue;
                 if (values[i] == null) {
                     stringValue = "";

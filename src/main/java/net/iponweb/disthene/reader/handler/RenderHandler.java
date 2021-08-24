@@ -24,7 +24,8 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +36,7 @@ import java.util.concurrent.*;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class RenderHandler implements DistheneReaderHandler {
-
-    private final static Logger logger = Logger.getLogger(RenderHandler.class);
+    private final static Logger logger = LogManager.getLogger(RenderHandler.class);
 
     private final TargetEvaluator evaluator;
     private final StatsService statsService;

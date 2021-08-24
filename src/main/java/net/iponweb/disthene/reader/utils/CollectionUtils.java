@@ -1,5 +1,6 @@
 package net.iponweb.disthene.reader.utils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -140,7 +141,10 @@ public class CollectionUtils {
     }
 
     // faster but unsafe methods assuming all values are not nulls and list is not empty
-    public static Double unsafeSum(Collection<Double> values) {
+    public static Double unsafeSum(@Nullable Collection<Double> values) {
+        // may be null
+        if (values == null) return 0d;
+
         // shortcut if there is only one value
         if (values.size() == 1) return values.iterator().next();
 
@@ -151,7 +155,10 @@ public class CollectionUtils {
         return sum;
     }
 
-    public static Double unsafeAverage(Collection<Double> values) {
+    public static Double unsafeAverage(@Nullable Collection<Double> values) {
+        // may be null
+        if (values == null) return 0d;
+
         // shortcut if there is only one value
         if (values.size() == 1) return values.iterator().next();
 

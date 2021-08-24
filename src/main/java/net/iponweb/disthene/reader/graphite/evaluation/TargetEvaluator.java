@@ -11,8 +11,10 @@ import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +25,7 @@ import java.util.concurrent.ExecutionException;
  * @author Andrei Ivanov
  */
 public class TargetEvaluator {
-    private final static Logger logger = Logger.getLogger(TargetEvaluator.class);
+    private final static Logger logger = LogManager.getLogger(TargetEvaluator.class);
 
     private final MetricService metricService;
 
@@ -38,7 +40,7 @@ public class TargetEvaluator {
     public List<TimeSeries> visit(PathTarget pathTarget) throws EvaluationException {
         try {
             return metricService.getMetricsAsList(pathTarget.getTenant(), Collections.singletonList(pathTarget.getPath()), pathTarget.getFrom(), pathTarget.getTo());
-        } catch (ExecutionException | InterruptedException | TooMuchDataExpectedException e) {
+        } catch (IOException | ExecutionException | InterruptedException | TooMuchDataExpectedException e) {
             logger.error(e.getMessage());
             logger.debug(e);
             throw new EvaluationException(e);
@@ -95,7 +97,7 @@ public class TargetEvaluator {
     public List<String> getPaths(PathTarget pathTarget) throws EvaluationException {
         try {
             return metricService.getPaths(pathTarget.getTenant(), pathTarget.getPath());
-        } catch (TooMuchDataExpectedException e) {
+        } catch (IOException | TooMuchDataExpectedException e) {
             logger.error(e.getMessage());
             logger.debug(e);
             throw new EvaluationException(e);

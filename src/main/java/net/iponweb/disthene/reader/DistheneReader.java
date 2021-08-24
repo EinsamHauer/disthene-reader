@@ -10,7 +10,8 @@ import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
 import org.apache.commons.cli.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.representer.Representer;
 import sun.misc.Signal;
@@ -45,11 +46,11 @@ public class DistheneReader {
     private ReaderServer readerServer;
     private IndexService indexService;
     private CassandraService cassandraService;
-    private MetricService metricService;
     private StatsService statsService;
     private ThrottlingService throttlingService;
 
     private static final Yaml yaml;
+
     static {
         Representer representer = new Representer();
         representer.getPropertyUtils().setSkipMissingProperties(true);
@@ -71,7 +72,7 @@ public class DistheneReader {
 
             ThrottlingConfiguration throttlingConfiguration;
             File file = new File(throttlingConfigLocation);
-            if(file.exists() && !file.isDirectory()) {
+            if (file.exists() && !file.isDirectory()) {
                 logger.info("Loading throttling rules");
                 in = Files.newInputStream(Paths.get(throttlingConfigLocation));
                 throttlingConfiguration = yaml.loadAs(in, ThrottlingConfiguration.class);
@@ -97,7 +98,7 @@ public class DistheneReader {
             cassandraService = new CassandraService(distheneReaderConfiguration.getStore());
 
             logger.info("Creating metric service");
-            metricService = new MetricService(indexService, cassandraService, statsService, distheneReaderConfiguration);
+            MetricService metricService = new MetricService(indexService, cassandraService, statsService, distheneReaderConfiguration);
 
             logger.info("Creating paths handler");
             PathsHandler pathsHandler = new PathsHandler(indexService, statsService);
@@ -126,8 +127,16 @@ public class DistheneReader {
             logger.info("Starting reader");
             readerServer.run();
 
-            Signal.handle(new Signal("TERM"), new SigtermSignalHandler());
-            Signal.handle(new Signal("HUP"), new SighupSignalHandler());
+            try {
+                Signal.handle(new Signal("TERM"), new SigtermSignalHandler());
+            } catch (IllegalArgumentException e) {
+                logger.warn("TERM signal is not available. Will not handle it");
+            }
+            try {
+                Signal.handle(new Signal("HUP"), new SighupSignalHandler());
+            } catch (IllegalArgumentException e) {
+                logger.warn("HUP signal is not available. Will not handle it");
+            }
         } catch (IOException e) {
             logger.error(e);
         } catch (InterruptedException e) {
@@ -145,8 +154,8 @@ public class DistheneReader {
 
         try {
             CommandLine commandLine = parser.parse(options, args);
-            System.getProperties().setProperty("log4j.configuration", "file:" + commandLine.getOptionValue("l", DEFAULT_LOG_CONFIG_LOCATION));
-            logger = Logger.getLogger(DistheneReader.class);
+            System.getProperties().setProperty("log4j.configurationFile", "file:" + commandLine.getOptionValue("l", DEFAULT_LOG_CONFIG_LOCATION));
+            logger = LogManager.getLogger(DistheneReader.class);
 
             new DistheneReader(commandLine.getOptionValue("c", DEFAULT_CONFIG_LOCATION), commandLine.getOptionValue("t", DEFAULT_THROTTLING_CONFIG_LOCATION)).run();
 
@@ -192,7 +201,7 @@ public class DistheneReader {
             try {
                 ThrottlingConfiguration throttlingConfiguration;
                 File file = new File(throttlingConfigLocation);
-                if(file.exists() && !file.isDirectory()) {
+                if (file.exists() && !file.isDirectory()) {
                     logger.info("Loading throttling configuration");
                     InputStream in = Files.newInputStream(Paths.get(throttlingConfigLocation));
                     throttlingConfiguration = yaml.loadAs(in, ThrottlingConfiguration.class);

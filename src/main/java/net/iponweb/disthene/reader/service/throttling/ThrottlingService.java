@@ -2,7 +2,8 @@ package net.iponweb.disthene.reader.service.throttling;
 
 import com.google.common.util.concurrent.RateLimiter;
 import net.iponweb.disthene.reader.config.ThrottlingConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class ThrottlingService {
-    final static Logger logger = Logger.getLogger(ThrottlingService.class);
+    final static Logger logger = LogManager.getLogger(ThrottlingService.class);
 
 
     private ThrottlingConfiguration throttlingConfiguration;

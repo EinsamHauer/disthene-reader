@@ -9,7 +9,6 @@ import java.util.List;
 public class IndexConfiguration {
     private String name;
     private String index;
-    private String type;
     private List<String> cluster = new ArrayList<>();
     private int port;
     private int scroll;
@@ -48,14 +47,6 @@ public class IndexConfiguration {
         this.port = port;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public int getScroll() {
         return scroll;
     }
@@ -85,7 +76,6 @@ public class IndexConfiguration {
         return "IndexConfiguration{" +
                 "name='" + name + '\'' +
                 ", index='" + index + '\'' +
-                ", type='" + type + '\'' +
                 ", cluster=" + cluster +
                 ", port=" + port +
                 ", scroll=" + scroll +

@@ -11,7 +11,8 @@ import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
@@ -19,8 +20,7 @@ import java.io.IOException;
  * @author Andrei Ivanov
  */
 public class PathStatsHandler implements DistheneReaderHandler {
-
-    private final static Logger logger = Logger.getLogger(PathStatsHandler.class);
+    private final static Logger logger = LogManager.getLogger(PathStatsHandler.class);
 
     private final IndexService indexService;
     private final StatsService statsService;
@@ -31,7 +31,7 @@ public class PathStatsHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, TooMuchDataExpectedException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, TooMuchDataExpectedException, IOException {
         PathStatsParameters parameters = parse(request);
 
         statsService.incPathsRequests(parameters.getTenant());

@@ -5,18 +5,21 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
+import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
 
 /**
  * @author Andrei Ivanov
  */
 public class SearchHandler implements DistheneReaderHandler {
+    private final static Logger logger = LogManager.getLogger(SearchHandler.class);
 
     private final static int SEARCH_LIMIT = 100;
-
-    private final static Logger logger = Logger.getLogger(SearchHandler.class);
 
     private final IndexService indexService;
     private final StatsService statsService;
@@ -27,7 +30,7 @@ public class SearchHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, IOException, TooMuchDataExpectedException {
         SearchParameters parameters = parse(request);
 
         statsService.incPathsRequests(parameters.getTenant());

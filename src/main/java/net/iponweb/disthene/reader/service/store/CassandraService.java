@@ -1,124 +1,79 @@
 package net.iponweb.disthene.reader.service.store;
 
-import com.datastax.driver.core.*;
-import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.metadata.Metadata;
+import com.datastax.oss.driver.api.core.metadata.Node;
+import com.datastax.oss.driver.internal.core.loadbalancing.DcInferringLoadBalancingPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
-import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
-import org.apache.log4j.Logger;
+import net.iponweb.disthene.reader.service.index.IndexService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.time.Duration;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
 
 /**
  * @author Andrei Ivanov
  */
-@SuppressWarnings("UnstableApiUsage")
 public class CassandraService {
+    private final static Logger logger = LogManager.getLogger(CassandraService.class);
 
-    private final Logger logger = Logger.getLogger(CassandraService.class);
+    private final CqlSession session;
 
-    private final Cluster cluster;
-    private final Session session;
-    private final PreparedStatement statement;
-
-    private final Set<Integer> skipGlobalTableRollups;
     private final TablesRegistry tablesRegistry;
 
     public CassandraService(StoreConfiguration storeConfiguration) {
-        String query = "SELECT time, data FROM " +
-                            storeConfiguration.getKeyspace() + "." + storeConfiguration.getColumnFamily() +
-                            " where path = ? and tenant = ? and period = ? and rollup = ? and time >= ? and time <= ? order by time";
 
-        SocketOptions socketOptions = new SocketOptions()
-                .setReceiveBufferSize(1024 * 1024)
-                .setSendBufferSize(1024 * 1024)
-                .setTcpNoDelay(false)
-                .setReadTimeoutMillis((int) (storeConfiguration.getReadTimeout() * 1000))
-                .setConnectTimeoutMillis((int) (storeConfiguration.getConnectTimeout() * 1000));
+        DriverConfigLoader loader =
+                DriverConfigLoader.programmaticBuilder()
+                        .withStringList(DefaultDriverOption.CONTACT_POINTS, getContactPoints(storeConfiguration))
+                        .withInt(DefaultDriverOption.CONNECTION_MAX_REQUESTS, storeConfiguration.getMaxRequests())
+                        .withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(storeConfiguration.getReadTimeout()))
+                        .withDuration(DefaultDriverOption.CONNECTION_CONNECT_TIMEOUT, Duration.ofSeconds(storeConfiguration.getConnectTimeout()))
+                        .withString(DefaultDriverOption.REQUEST_CONSISTENCY, storeConfiguration.getConsistency())
+                        .withClass(DefaultDriverOption.LOAD_BALANCING_POLICY_CLASS, DcInferringLoadBalancingPolicy.class)
+                        .build();
 
-        PoolingOptions poolingOptions = new PoolingOptions();
-        poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, storeConfiguration.getMaxConnections());
-        poolingOptions.setMaxConnectionsPerHost(HostDistance.REMOTE, storeConfiguration.getMaxConnections());
-        poolingOptions.setMaxRequestsPerConnection(HostDistance.REMOTE, storeConfiguration.getMaxRequests());
-        poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, storeConfiguration.getMaxRequests());
 
-        Cluster.Builder builder = Cluster.builder()
-                .withSocketOptions(socketOptions)
-                .withCompression(ProtocolOptions.Compression.LZ4)
-                .withLoadBalancingPolicy(CassandraLoadBalancingPolicies.getLoadBalancingPolicy(storeConfiguration.getLoadBalancingPolicyName()))
-                .withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
-                .withPoolingOptions(poolingOptions)
-                .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.valueOf(storeConfiguration.getConsistency())))
-                .withProtocolVersion(ProtocolVersion.valueOf(storeConfiguration.getProtocolVersion()))
-                .withPort(storeConfiguration.getPort());
+        session = CqlSession.builder()
+                .withConfigLoader(loader)
+                .build();
 
-        if ( storeConfiguration.getUserName() != null && storeConfiguration.getUserPassword() != null) {
-            builder = builder.withCredentials(storeConfiguration.getUserName(), storeConfiguration.getUserPassword());
-        }
-
-        for (String cp : storeConfiguration.getCluster()) {
-            builder.addContactPoint(cp);
-        }
-
-        cluster = builder.build();
-        Metadata metadata = cluster.getMetadata();
+        Metadata metadata = session.getMetadata();
         logger.debug("Connected to cluster: " + metadata.getClusterName());
-        for (Host host : metadata.getAllHosts()) {
-            logger.debug(String.format("Datacenter: %s; Host: %s; Rack: %s", host.getDatacenter(), host.getAddress(), host.getRack()));
+        for (Node node : metadata.getNodes().values()) {
+            logger.debug(String.format("Datacenter: %s; Host: %s; Rack: %s",
+                    node.getDatacenter(),
+                    node.getBroadcastAddress().isPresent() ? node.getBroadcastAddress().get().toString() : "unknown", node.getRack()));
         }
-
-        session = cluster.connect();
-
-        skipGlobalTableRollups = storeConfiguration.getSkipGlobalTableRollups();
 
         tablesRegistry = new TablesRegistry(session, storeConfiguration);
-
-        statement = session.prepare(query);
     }
 
-    public ListenableFuture<List<ResultSet>> executeAsync(String tenant, String path, int period, int rollup, long from, long to) throws ExecutionException {
-        List<ResultSetFuture> futures = new ArrayList<>();
-
-        if (!skipGlobalTableRollups.contains(rollup) && tablesRegistry.globalTableExists()) {
-            futures.add(session.executeAsync(statement.bind(path, tenant, period, rollup, from, to)));
-            logger.trace("Global table exists, adding select from it.");
-        }
-
+    public Optional<CompletionStage<AsyncResultSet>> executeAsync(String tenant, String path, int rollup, long from, long to) throws ExecutionException {
         if (tablesRegistry.tenantTableExists(tenant, rollup)) {
             logger.trace("Tenant table exists, adding select from it.");
-            futures.add(session.executeAsync(tablesRegistry.getStatement(tenant, rollup).bind(path, from, to)));
+            return Optional.of(session.executeAsync(tablesRegistry.getStatement(tenant, rollup).bind(path, from, to).setPageSize(Integer.MAX_VALUE)));
         }
 
-        return Futures.allAsList(futures);
+        return Optional.empty();
     }
 
     public void shutdown() {
         logger.info("Closing C* session");
-        logger.info("Waiting for C* queries to be completed");
-        while (getInFlightQueries(session.getState()) > 0) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
-        }
         session.close();
-        logger.info("Closing C* cluster");
-        cluster.close();
     }
 
-    private int getInFlightQueries(Session.State state) {
-        int result = 0;
-        Collection<Host> hosts = state.getConnectedHosts();
-        for(Host host : hosts) {
-            result += state.getInFlightQueries(host);
-        }
-
-        return result;
+    private List<String> getContactPoints(StoreConfiguration storeConfiguration) {
+        return storeConfiguration.getCluster().stream().map(s -> s + ":" + storeConfiguration.getPort()).collect(Collectors.toList());
     }
 
 }

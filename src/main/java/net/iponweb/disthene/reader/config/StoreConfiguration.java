@@ -1,6 +1,5 @@
 package net.iponweb.disthene.reader.config;
 
-import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,11 +17,10 @@ public class StoreConfiguration {
     private String userPassword;
     private int port;
     private int maxConnections;
-    private double readTimeout;
-    private double connectTimeout;
+    private int readTimeout;
+    private int connectTimeout;
     private int maxRequests;
     private String consistency = "ONE";
-    private String loadBalancingPolicyName = CassandraLoadBalancingPolicies.tokenDcAwareRoundRobinPolicy;
     private String protocolVersion = "V2";
     private String tenantKeyspace = null;
     private int cacheExpiration = 180;
@@ -77,19 +75,19 @@ public class StoreConfiguration {
         this.maxConnections = maxConnections;
     }
 
-    public double getReadTimeout() {
+    public int getReadTimeout() {
         return readTimeout;
     }
 
-    public void setReadTimeout(double readTimeout) {
+    public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
     }
 
-    public double getConnectTimeout() {
+    public int getConnectTimeout() {
         return connectTimeout;
     }
 
-    public void setConnectTimeout(double connectTimeout) {
+    public void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
     }
 
@@ -115,14 +113,6 @@ public class StoreConfiguration {
 
     public void setConsistency(String consistency) {
         this.consistency = consistency;
-    }
-
-    public String getLoadBalancingPolicyName() {
-        return loadBalancingPolicyName;
-    }
-
-    public void setLoadBalancingPolicyName(String policy) {
-        this.loadBalancingPolicyName = policy;
     }
 
     public String getProtocolVersion() {
@@ -179,7 +169,6 @@ public class StoreConfiguration {
                 ", connectTimeout=" + connectTimeout +
                 ", maxRequests=" + maxRequests +
                 ", consistency='" + consistency + '\'' +
-                ", loadBalancingPolicyName='" + loadBalancingPolicyName + '\'' +
                 ", protocolVersion='" + protocolVersion + '\'' +
                 ", tenantKeyspace='" + tenantKeyspace + '\'' +
                 ", cacheExpiration=" + cacheExpiration +

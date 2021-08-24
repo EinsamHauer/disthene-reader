@@ -11,7 +11,8 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import net.iponweb.disthene.reader.config.ReaderConfiguration;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class ReaderServer {
     public static final int MAX_CONTENT_LENGTH = 104857600;
 
-    private final Logger logger = Logger.getLogger(ReaderServer.class);
+    private final Logger logger = LogManager.getLogger(ReaderServer.class);
 
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workerGroup = new NioEventLoopGroup();

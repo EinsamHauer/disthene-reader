@@ -1,30 +1,29 @@
 package net.iponweb.disthene.reader.service.metric;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
+import com.spotify.futures.CompletableFutures;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
+import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 /**
@@ -32,7 +31,7 @@ import java.util.function.Function;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class MetricService {
-    private final static Logger logger = Logger.getLogger(MetricService.class);
+    private final static Logger logger = LogManager.getLogger(MetricService.class);
 
     private final IndexService indexService;
     private final CassandraService cassandraService;
@@ -49,11 +48,11 @@ public class MetricService {
         this.statsService = statsService;
     }
 
-    public List<String> getPaths(String tenant, String wildcard) throws TooMuchDataExpectedException {
+    public List<String> getPaths(String tenant, String wildcard) throws TooMuchDataExpectedException, IOException {
         return indexService.getPaths(tenant, Collections.singletonList(wildcard));
     }
 
-    public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
         Collections.sort(paths);
 
@@ -80,42 +79,33 @@ public class MetricService {
 
 
         // Now let's query C*
-        List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
+        List<CompletionStage<SinglePathResult>> completionStages = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<List<ResultSet>, SinglePathResult> serializeFunction = resultSets -> {
+            Function<AsyncResultSet, SinglePathResult> serializeFunction = resultSet -> {
                 SinglePathResult result = new SinglePathResult(path);
-                result.makeJson(resultSets, length, timestampIndices);
+                result.makeJson(resultSet, length, timestampIndices);
                 return result;
             };
 
-            futures.add(
-                    Futures.transform(
-                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
-                            serializeFunction::apply,
-                            executorService
-                    )
-            );
+            cassandraService
+                    .executeAsync(tenant, path, bestRollup.getRollup(), effectiveFrom, effectiveTo)
+                    .ifPresent(asyncResultSetCompletionStage -> completionStages.add(asyncResultSetCompletionStage.thenApplyAsync(serializeFunction, executorService)));
         }
-
-        futures = Futures.inCompletionOrder(futures);
 
         // Build response content JSON
         List<String> singlePathJsons = new ArrayList<>();
-
-        for (ListenableFuture<SinglePathResult> future : futures) {
-            SinglePathResult singlePathResult = future.get();
+        for (SinglePathResult singlePathResult : CompletableFutures.allAsList(completionStages).get()) {
             if (!singlePathResult.isAllNulls()) {
                 singlePathJsons.add("\"" + singlePathResult.getPath() + "\":" + singlePathResult.getJson());
             }
         }
-
 
         return "{\"from\":" + effectiveFrom + ",\"to\":" + effectiveTo + ",\"step\":" + bestRollup.getRollup() +
                 ",\"series\":{" + Joiner.on(",").skipNulls().join(singlePathJsons) + "}}";
 
     }
 
-    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
         Stopwatch indexTimer = Stopwatch.createStarted();
         List<String> paths = indexService.getPaths(tenant, wildcards);
         indexTimer.stop();
@@ -151,31 +141,24 @@ public class MetricService {
         }
 
         // Now let's query C*
-        List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
+        List<CompletionStage<SinglePathResult>> completionStages = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<List<ResultSet>, SinglePathResult> serializeFunction = resultSets -> {
+            Function<AsyncResultSet, SinglePathResult> serializeFunction = resultSets -> {
                 SinglePathResult result = new SinglePathResult(path);
                 result.makeArray(resultSets, length, timestampIndices);
                 return result;
             };
 
-            futures.add(
-                    Futures.transform(
-                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
-                            serializeFunction::apply,
-                            executorService
-                    )
-            );
+            cassandraService
+                    .executeAsync(tenant, path, bestRollup.getRollup(), effectiveFrom, effectiveTo)
+                    .ifPresent(asyncResultSetCompletionStage -> completionStages.add(asyncResultSetCompletionStage.thenApplyAsync(serializeFunction, executorService)));
         }
 
         Stopwatch cassandraTimer = Stopwatch.createStarted();
 
-        futures = Futures.inCompletionOrder(futures);
-
         List<TimeSeries> timeSeries = new ArrayList<>();
 
-        for (ListenableFuture<SinglePathResult> future : futures) {
-            SinglePathResult singlePathResult = future.get();
+        for (SinglePathResult singlePathResult : CompletableFutures.allAsList(completionStages).get()) {
             if (singlePathResult.getValues() != null) {
                 TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
                 ts.setValues(singlePathResult.getValues());
@@ -252,23 +235,21 @@ public class MetricService {
             return allNulls;
         }
 
-        void makeJson(List<ResultSet> resultSets, int length, Map<Long, Integer> timestampIndices) {
-            makeArray(resultSets, length, timestampIndices);
+        private void makeJson(AsyncResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
+            makeArray(resultSet, length, timestampIndices);
             json = new Gson().toJson(values);
         }
 
-        void makeArray(List<ResultSet> resultSets, int length, Map<Long, Integer> timestampIndices) {
+        private void makeArray(AsyncResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
             values = new Double[length];
 
-            for (ResultSet resultSet : resultSets) {
-                for (Row row : resultSet) {
-                    allNulls = false;
-                    int index = timestampIndices.get(row.getLong("time"));
-                    if (isSumMetric) {
-                        values[index] = (values[index] != null ? values[index] : 0) + CollectionUtils.unsafeSum(row.getList("data", Double.class));
-                    } else {
-                        values[index] = CollectionUtils.unsafeAverage(row.getList("data", Double.class));
-                    }
+            for (Row row : resultSet.currentPage()) {
+                allNulls = false;
+                int index = timestampIndices.get(row.getLong("time"));
+                if (isSumMetric) {
+                    values[index] = (values[index] != null ? values[index] : 0) + CollectionUtils.unsafeSum(row.getList("data", Double.class));
+                } else {
+                    values[index] = CollectionUtils.unsafeAverage(row.getList("data", Double.class));
                 }
             }
         }

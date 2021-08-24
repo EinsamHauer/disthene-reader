@@ -5,7 +5,8 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.UniformReservoir;
 import com.google.common.util.concurrent.AtomicDouble;
 import net.iponweb.disthene.reader.config.StatsConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -20,8 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Andrei Ivanov
  */
 public class StatsService {
-
-    private final Logger logger = Logger.getLogger(StatsService.class);
+    private final Logger logger = LogManager.getLogger(StatsService.class);
 
     private final StatsConfiguration statsConfiguration;
 

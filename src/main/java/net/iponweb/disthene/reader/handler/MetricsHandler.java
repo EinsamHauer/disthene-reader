@@ -8,8 +8,10 @@ import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.metric.MetricService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +21,7 @@ import java.util.concurrent.ExecutionException;
  * @author Andrei Ivanov
  */
 public class MetricsHandler implements DistheneReaderHandler {
-
-    private final static Logger logger = Logger.getLogger(MetricsHandler.class);
+    private final static Logger logger = LogManager.getLogger(MetricsHandler.class);
 
     private final MetricService metricService;
 
@@ -29,7 +30,7 @@ public class MetricsHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
         MetricsParameters parameters = parse(request);
 
         logger.debug("Got request: " + parameters);

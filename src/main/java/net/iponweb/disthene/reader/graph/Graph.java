@@ -6,7 +6,8 @@ import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
 import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.handler.parameters.ImageParameters;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormat;
@@ -31,7 +32,7 @@ import java.util.List;
  *         This will probably changed some day. But for now reverse engineering the logic is too comaplicated.
  */
 public abstract class Graph {
-    final static Logger logger = Logger.getLogger(Graph.class);
+    final static Logger logger = LogManager.getLogger(Graph.class);
 
     private static final double[] PRETTY_VALUES = {0.1, 0.2, 0.25, 0.5, 1.0, 1.2, 1.25, 1.5, 2.0, 2.25, 2.5};
 
