@@ -1,6 +1,7 @@
 package net.iponweb.disthene.reader.service.store;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
@@ -34,6 +35,7 @@ public class CassandraService {
 
         DriverConfigLoader loader =
                 DriverConfigLoader.programmaticBuilder()
+                        .withString(DefaultDriverOption.PROTOCOL_COMPRESSION, "lz4")
                         .withStringList(DefaultDriverOption.CONTACT_POINTS, getContactPoints(storeConfiguration))
                         .withInt(DefaultDriverOption.CONNECTION_MAX_REQUESTS, storeConfiguration.getMaxRequests())
                         .withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(storeConfiguration.getReadTimeout()))
@@ -43,9 +45,14 @@ public class CassandraService {
                         .build();
 
 
-        session = CqlSession.builder()
-                .withConfigLoader(loader)
-                .build();
+        CqlSessionBuilder builder = CqlSession.builder()
+                .withConfigLoader(loader);
+
+        if ( storeConfiguration.getUserName() != null && storeConfiguration.getUserPassword() != null ) {
+            builder.withAuthCredentials(storeConfiguration.getUserName(), storeConfiguration.getUserPassword());
+        }
+
+        session = builder.build();
 
         Metadata metadata = session.getMetadata();
         logger.debug("Connected to cluster: " + metadata.getClusterName());

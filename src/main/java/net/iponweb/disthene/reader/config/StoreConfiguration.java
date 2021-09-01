@@ -9,9 +9,9 @@ import java.util.Set;
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("unused")
 public class StoreConfiguration {
     private List<String> cluster = new ArrayList<>();
-    private String keyspace;
     private String columnFamily;
     private String userName;
     private String userPassword;
@@ -21,7 +21,6 @@ public class StoreConfiguration {
     private int connectTimeout;
     private int maxRequests;
     private String consistency = "ONE";
-    private String protocolVersion = "V2";
     private String tenantKeyspace = null;
     private int cacheExpiration = 180;
     private String tenantTableTemplate = "metric_%s_%d"; //%s - tenant, %d rollup
@@ -49,14 +48,6 @@ public class StoreConfiguration {
 
     public void setCluster(List<String> cluster) {
         this.cluster = cluster;
-    }
-
-    public String getKeyspace() {
-        return keyspace;
-    }
-
-    public void setKeyspace(String keyspace) {
-        this.keyspace = keyspace;
     }
 
     public int getPort() {
@@ -115,16 +106,8 @@ public class StoreConfiguration {
         this.consistency = consistency;
     }
 
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
-    public void setProtocolVersion(String protocolVersion) {
-        this.protocolVersion = protocolVersion;
-    }
-
     public String getTenantKeyspace() {
-        return tenantKeyspace != null ? tenantKeyspace : keyspace;
+        return tenantKeyspace;
     }
 
     public void setTenantKeyspace(String tenantKeyspace) {
@@ -159,7 +142,6 @@ public class StoreConfiguration {
     public String toString() {
         return "StoreConfiguration{" +
                 "cluster=" + cluster +
-                ", keyspace='" + keyspace + '\'' +
                 ", columnFamily='" + columnFamily + '\'' +
                 ", userName='" + userName + '\'' +
                 ", userPassword='" + userPassword + '\'' +
@@ -169,7 +151,6 @@ public class StoreConfiguration {
                 ", connectTimeout=" + connectTimeout +
                 ", maxRequests=" + maxRequests +
                 ", consistency='" + consistency + '\'' +
-                ", protocolVersion='" + protocolVersion + '\'' +
                 ", tenantKeyspace='" + tenantKeyspace + '\'' +
                 ", cacheExpiration=" + cacheExpiration +
                 ", tenantTableTemplate='" + tenantTableTemplate + '\'' +

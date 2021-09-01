@@ -23,7 +23,6 @@ store:
   cacheExpiration: 180
   tenantTableTemplate: "metric_%s_%d"
 index:
-  name: "disthene"
   cluster:
     - "es-1"
     - "es-1"
