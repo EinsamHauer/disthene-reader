@@ -193,14 +193,12 @@ store:
   connectTimeout: 10
   maxRequests: 128
 index:
-# ES cluster name, contact points, native port, index name & type
-  name: "disthene"
+# ES contact points, native port, index name & type
   cluster:
     - "es-1"
     - "es-2"
-  port: 9300
+  port: 9200
   index: "disthene"
-  type: "path"
 # Maxim number paths allowed per one wildcard. This is just to prevent abuse
   maxPaths: 50000
 stats:
@@ -223,7 +221,7 @@ Configuration is straight forward as per log4j
 
 The MIT License (MIT)
 
-Copyright (C) 2015 Andrei Ivanov
+Copyright (C) 2021 Andrei Ivanov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

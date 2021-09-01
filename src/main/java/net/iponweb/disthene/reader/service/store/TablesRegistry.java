@@ -38,7 +38,7 @@ class TablesRegistry {
     TablesRegistry(CqlSession session, StoreConfiguration storeConfiguration) {
         this.session = session;
         this.storeConfiguration = storeConfiguration;
-        this.tableTemplate = storeConfiguration.getTenantTableTemplate();
+        this.tableTemplate = storeConfiguration.getTableTemplate();
 
         queryStatement = session.prepare(TABLE_QUERY);
 
@@ -54,7 +54,7 @@ class TablesRegistry {
 
         synchronized (this) {
             if (!statements.containsKey(table)) {
-                statements.put(table, session.prepare(String.format(SELECT_QUERY_TEMPLATE, storeConfiguration.getTenantKeyspace(), table)));
+                statements.put(table, session.prepare(String.format(SELECT_QUERY_TEMPLATE, storeConfiguration.getKeyspace(), table)));
             }
         }
 
@@ -62,7 +62,7 @@ class TablesRegistry {
     }
 
     boolean tenantTableExists(String tenant, int rollup) throws ExecutionException {
-        return checkTable(storeConfiguration.getTenantKeyspace(), String.format(tableTemplate, getNormalizedTenant(tenant), rollup));
+        return checkTable(storeConfiguration.getKeyspace(), String.format(tableTemplate, getNormalizedTenant(tenant), rollup));
     }
 
     private boolean checkTable(final String keyspace, final String table) throws ExecutionException {

@@ -21,9 +21,9 @@ public class StoreConfiguration {
     private int connectTimeout;
     private int maxRequests;
     private String consistency = "ONE";
-    private String tenantKeyspace = null;
+    private String keyspace;
     private int cacheExpiration = 180;
-    private String tenantTableTemplate = "metric_%s_%d"; //%s - tenant, %d rollup
+    private String tableTemplate = "metric_%s_%d"; //%s - tenant, %d rollup
     private Set<Integer> skipGlobalTableRollups = new HashSet<>();
 
     public String getUserName() {
@@ -106,12 +106,12 @@ public class StoreConfiguration {
         this.consistency = consistency;
     }
 
-    public String getTenantKeyspace() {
-        return tenantKeyspace;
+    public String getKeyspace() {
+        return keyspace;
     }
 
-    public void setTenantKeyspace(String tenantKeyspace) {
-        this.tenantKeyspace = tenantKeyspace;
+    public void setKeyspace(String keyspace) {
+        this.keyspace = keyspace;
     }
 
     public int getCacheExpiration() {
@@ -122,12 +122,12 @@ public class StoreConfiguration {
         this.cacheExpiration = cacheExpiration;
     }
 
-    public String getTenantTableTemplate() {
-        return tenantTableTemplate;
+    public String getTableTemplate() {
+        return tableTemplate;
     }
 
-    public void setTenantTableTemplate(String tenantTableTemplate) {
-        this.tenantTableTemplate = tenantTableTemplate;
+    public void setTableTemplate(String tableTemplate) {
+        this.tableTemplate = tableTemplate;
     }
 
     public Set<Integer> getSkipGlobalTableRollups() {
@@ -151,9 +151,9 @@ public class StoreConfiguration {
                 ", connectTimeout=" + connectTimeout +
                 ", maxRequests=" + maxRequests +
                 ", consistency='" + consistency + '\'' +
-                ", tenantKeyspace='" + tenantKeyspace + '\'' +
+                ", tenantKeyspace='" + keyspace + '\'' +
                 ", cacheExpiration=" + cacheExpiration +
-                ", tenantTableTemplate='" + tenantTableTemplate + '\'' +
+                ", tenantTableTemplate='" + tableTemplate + '\'' +
                 ", skipGlobalTableRollups=" + skipGlobalTableRollups +
                 '}';
     }
