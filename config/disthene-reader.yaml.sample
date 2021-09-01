@@ -12,23 +12,18 @@ store:
   userName: 'username'
   userPassword: 'password'
   keyspace: 'metric'
-  columnFamily: 'metric'
   maxConnections: 2048
   readTimeout: 10
   connectTimeout: 10
   maxRequests: 128
-  loadBalancingPolicyName: 'TokenDcAwareRoundRobinPolicy'
-  protocolVersion: "V2"
-  tenantKeyspace: "metric"
   cacheExpiration: 180
-  tenantTableTemplate: "metric_%s_%d"
+  tableTemplate: "metric_%s_%d"
 index:
   cluster:
     - "es-1"
     - "es-1"
-  port: 9300
+  port: 9200
   index: "disthene_paths"
-  type: "path"
   scroll: 50000
   timeout: 120000
   maxPaths: 50000

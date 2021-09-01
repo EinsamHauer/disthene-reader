@@ -12,7 +12,6 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class StoreConfiguration {
     private List<String> cluster = new ArrayList<>();
-    private String columnFamily;
     private String userName;
     private String userPassword;
     private int port;
@@ -90,14 +89,6 @@ public class StoreConfiguration {
         this.maxRequests = maxRequests;
     }
 
-    public String getColumnFamily() {
-        return columnFamily;
-    }
-
-    public void setColumnFamily(String columnFamily) {
-        this.columnFamily = columnFamily;
-    }
-
     public String getConsistency() {
         return consistency;
     }
@@ -142,7 +133,6 @@ public class StoreConfiguration {
     public String toString() {
         return "StoreConfiguration{" +
                 "cluster=" + cluster +
-                ", columnFamily='" + columnFamily + '\'' +
                 ", userName='" + userName + '\'' +
                 ", userPassword='" + userPassword + '\'' +
                 ", port=" + port +
