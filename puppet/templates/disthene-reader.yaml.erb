@@ -15,25 +15,19 @@ store:
 <% end -%>
   port: <%= @store_port %>
   keyspace: "<%= @store_keyspace %>"
-  columnFamily: "<%= @store_column_family %>"
   maxConnections: <%= @store_max_connections %>
   readTimeout: <%= @store_read_timeout %>
   connectTimeout: <%= @store_connect_timeout %>
   maxRequests: <%= @store_max_requests %>
-  loadBalancingPolicyName: "<%= @store_load_balancing_policy %>"
-  protocolVersion: "<%= @store_protocol_version %>"
-  tenantKeyspace: "<%= @store_tenant_keyspace %>"
   cacheExpiration: <%= @store_cache_expiration %>
-  tenantTableTemplate: "<%= @store_tenant_table_template %>"
+  tableTemplate: "<%= @store_table_template %>"
 index:
-  name: "<%= @index_name %>"
   cluster:
 <% @index_cluster.each do |node| -%>
     - "<%= node %>"
 <% end -%>
   port: <%= @index_port %>
   index: "<%= @index_index %>"
-  type: "<%= @index_type %>"
   scroll: <%= @index_scroll %>
   timeout: <%= @index_timeout %>
   maxPaths: <%= @index_max_paths %>
