@@ -71,7 +71,7 @@ public class RangeOfSeriesFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("rangeOfSeries: number of arguments is " + arguments.size() + ". Must be at least 1.");
+        if (arguments.size() < 1) throw new InvalidArgumentException("rangeOfSeries: number of arguments is 0. Must be at least 1.");
 
         for(Object argument : arguments) {
             if (!(argument instanceof Target)) throw new InvalidArgumentException("rangeOfSeries: argument is " + argument.getClass().getName() + ". Must be series");

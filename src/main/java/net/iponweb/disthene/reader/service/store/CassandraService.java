@@ -9,7 +9,6 @@ import com.datastax.oss.driver.api.core.metadata.Metadata;
 import com.datastax.oss.driver.api.core.metadata.Node;
 import com.datastax.oss.driver.internal.core.loadbalancing.DcInferringLoadBalancingPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
-import net.iponweb.disthene.reader.service.index.IndexService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

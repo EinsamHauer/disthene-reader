@@ -12,7 +12,6 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
-import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
@@ -29,7 +28,6 @@ import java.util.function.Function;
 /**
  * @author Andrei Ivanov
  */
-@SuppressWarnings("UnstableApiUsage")
 public class MetricService {
     private final static Logger logger = LogManager.getLogger(MetricService.class);
 

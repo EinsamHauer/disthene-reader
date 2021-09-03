@@ -150,7 +150,7 @@ public class DistheneReader {
         options.addOption("l", "log-config", true, "log config location");
         options.addOption("t", "throttling-config", true, "throttling config location");
 
-        CommandLineParser parser = new GnuParser();
+        CommandLineParser parser = new DefaultParser();
 
         try {
             CommandLine commandLine = parser.parse(options, args);

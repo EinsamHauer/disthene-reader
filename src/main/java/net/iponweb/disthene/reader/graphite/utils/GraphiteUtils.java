@@ -3,6 +3,7 @@ package net.iponweb.disthene.reader.graphite.utils;
 import com.google.common.math.DoubleMath;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author Andrei Ivanov
@@ -80,7 +81,7 @@ public class GraphiteUtils {
             // precision is just like in graphite (scale check redundant but let it be)
             if (bigDecimal.precision() > 12 && bigDecimal.scale() > 0) {
                 int roundTo = Math.max(bigDecimal.scale() - bigDecimal.precision() + 12, 0);
-                bigDecimal = bigDecimal.setScale(roundTo, BigDecimal.ROUND_HALF_UP);
+                bigDecimal = bigDecimal.setScale(roundTo, RoundingMode.HALF_UP);
             }
         }
 
@@ -91,7 +92,7 @@ public class GraphiteUtils {
     // todo: this "magic rounding" is a complete atrocity - fix it!
     public static double magicRound(double value) {
         if (value > -1.0 && value < 1.0) {
-            return new BigDecimal(value).setScale(2 - (int) Math.log10(Math.abs(value)), BigDecimal.ROUND_HALF_UP).doubleValue();
+            return new BigDecimal(value).setScale(2 - (int) Math.log10(Math.abs(value)), RoundingMode.HALF_UP).doubleValue();
         } else {
             return value;
         }
@@ -101,7 +102,7 @@ public class GraphiteUtils {
     private final static BigDecimal MINUS_ONE = BigDecimal.valueOf(-1.0);
     public static BigDecimal magicRound(BigDecimal value) {
         if (value.compareTo(MINUS_ONE) > 0 && value.compareTo(ONE) < 0) {
-            return value.setScale(2 - (int) Math.log10(Math.abs(value.doubleValue())), BigDecimal.ROUND_HALF_UP);
+            return value.setScale(2 - (int) Math.log10(Math.abs(value.doubleValue())), RoundingMode.HALF_UP);
         } else {
             return value;
         }

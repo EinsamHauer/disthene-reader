@@ -33,7 +33,7 @@ public class DashedFunction extends DistheneFunction {
 
         //todo dash length constant
         for (TimeSeries ts : processedArguments) {
-            ts.setOption(TimeSeriesOption.DASHED, arguments.size() == 1 ? new Float(5) : new Float((Double) arguments.get(1)));
+            ts.setOption(TimeSeriesOption.DASHED, arguments.size() == 1 ? 5F : ((Double) arguments.get(1)).floatValue());
             setResultingName(ts);
         }
 

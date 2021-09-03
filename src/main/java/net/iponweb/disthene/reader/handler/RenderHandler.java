@@ -44,7 +44,7 @@ public class RenderHandler implements DistheneReaderHandler {
     private final ReaderConfiguration readerConfiguration;
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private final TimeLimiter timeLimiter = new SimpleTimeLimiter(executor);
+    private final TimeLimiter timeLimiter = SimpleTimeLimiter.create(executor);
 
 
     public RenderHandler(MetricService metricService, StatsService statsService, ThrottlingService throttlingService, ReaderConfiguration readerConfiguration) {
@@ -93,13 +93,20 @@ public class RenderHandler implements DistheneReaderHandler {
 
         FullHttpResponse response;
         try {
-            response = timeLimiter.callWithTimeout(() -> handleInternal(targets, parameters), readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS, true);
+            response = timeLimiter.callWithTimeout(() -> handleInternal(targets, parameters), readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS);
         } catch (UncheckedTimeoutException e) {
             logger.debug("Request timed out: " + parameters);
             statsService.incTimedOutRequests(parameters.getTenant());
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
-        } catch (EvaluationException | LogarithmicScaleNotAllowed e) {
-            throw e;
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof EvaluationException) {
+                throw (EvaluationException) e.getCause();
+            } else if (e.getCause() instanceof LogarithmicScaleNotAllowed) {
+                throw (LogarithmicScaleNotAllowed) e.getCause();
+            } else {
+                logger.error("Unexpected error:", e);
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            }
         } catch (Exception e) {
             logger.error("Unexpected error:", e);
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);

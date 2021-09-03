@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 /**
  * @author Andrei Ivanov
  */
-@SuppressWarnings("UnstableApiUsage")
 class TablesRegistry {
     private final Logger logger = LogManager.getLogger(TablesRegistry.class);
 

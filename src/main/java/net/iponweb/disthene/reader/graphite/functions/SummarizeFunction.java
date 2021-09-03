@@ -49,8 +49,8 @@ public class SummarizeFunction extends DistheneFunction {
             List<Double> buffer = new ArrayList<>();
 
             int index = 0;
-            while (ts.getFrom() + index * ts.getStep() <= ts.getTo()) {
-                if ((ts.getFrom() + index * ts.getStep()) % step == 0 && (ts.getFrom() + index * ts.getStep()) != from) {
+            while (ts.getFrom() + (long) index * ts.getStep() <= ts.getTo()) {
+                if ((ts.getFrom() + (long) index * ts.getStep()) % step == 0 && (ts.getFrom() + (long) index * ts.getStep()) != from) {
                     switch (aggregation) {
                         case "last": {
                             consolidated.add(CollectionUtils.last(buffer));

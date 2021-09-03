@@ -40,13 +40,13 @@ public class HitcountFunction extends DistheneFunction {
             int bucketCount = (int) Math.ceil((ts.getTo() - ts.getFrom()) / (double) interval);
             Double[] buckets = new Double[bucketCount];
 //            long newStart = ts.getTo() - bucketCount * interval;
-            long newStart = (ts.getTo() / interval) * interval - (bucketCount - 1) * interval;
+            long newStart = (ts.getTo() / interval) * interval - (long) (bucketCount - 1) * interval;
 
             for (int i = 0; i < values.length; i++) {
                 Double value = values[i];
                 if (value == null) continue;
 
-                long startTime = ts.getFrom() + i * ts.getStep();
+                long startTime = ts.getFrom() + (long) i * ts.getStep();
                 int startBucket = (int) (((startTime - newStart) - (startTime - newStart) % interval) / interval);
                 int startMod = (int) ((startTime - newStart) % interval);
                 long endTime = startTime + ts.getStep();

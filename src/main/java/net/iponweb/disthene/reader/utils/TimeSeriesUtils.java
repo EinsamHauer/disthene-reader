@@ -78,10 +78,10 @@ public class TimeSeriesUtils {
         List<Double> buffer = new ArrayList<>();
 
         int index = 0;
-        while (timeSeries.getFrom() + index * timeSeries.getStep() <= to) {
+        while (timeSeries.getFrom() + (long) index * timeSeries.getStep() <= to) {
             buffer.add(timeSeries.getValues()[index]);
 
-            if ((timeSeries.getFrom() + index * timeSeries.getStep()) % step == 0) {
+            if ((timeSeries.getFrom() + (long) index * timeSeries.getStep()) % step == 0) {
                 consolidated.add(CollectionUtils.average(buffer));
                 buffer.clear();
             }

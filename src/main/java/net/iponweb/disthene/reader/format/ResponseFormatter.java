@@ -13,6 +13,7 @@ import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,14 +43,14 @@ public class ResponseFormatter {
         for(TimeSeries timeSeries : timeSeriesList) {
             Double[] values = timeSeries.getValues();
             for(int i = 0; i < values.length; i++) {
-                DateTime dt = new DateTime((timeSeries.getFrom() + i * timeSeries.getStep()) * 1000L, renderParameters.getTz());
+                DateTime dt = new DateTime((timeSeries.getFrom() + (long) i * timeSeries.getStep()) * 1000L, renderParameters.getTz());
                 String stringValue;
                 if (values[i] == null) {
                     stringValue = "";
                 } else {
                     BigDecimal bigDecimal = BigDecimal.valueOf(values[i]);
                     if (bigDecimal.precision() > 10) {
-                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
+                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, RoundingMode.HALF_UP);
                     }
 
                     stringValue = bigDecimal.stripTrailingZeros().toPlainString();
@@ -114,7 +115,7 @@ public class ResponseFormatter {
                     stringValue = GraphiteUtils.formatDoubleSpecialPlain(timeSeries.getValues()[i]);
                 }
 
-                datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + timeSeries.getStep() * i) + "]");
+                datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + (long) timeSeries.getStep() * i) + "]");
             }
             results.add("{\"target\": " + gson.toJson(timeSeries.getName()) + ", \"datapoints\": [" + Joiner.on(", ").join(datapoints) + "]}");
         }
@@ -158,7 +159,7 @@ public class ResponseFormatter {
 
                 datapoints.add(stringValue);
             }
-            results.add("{\"start\": " + timeSeries.getFrom() + ", \"step\": " + timeSeries.getStep() + ", \"end\": " + (timeSeries.getFrom() + timeSeries.getStep() * timeSeries.getValues().length) + ", \"name\": \"" + timeSeries.getName() + "\", \"data\": [" + Joiner.on(", ").join(datapoints) + "]}");
+            results.add("{\"start\": " + timeSeries.getFrom() + ", \"step\": " + timeSeries.getStep() + ", \"end\": " + (timeSeries.getFrom() + (long) timeSeries.getStep() * timeSeries.getValues().length) + ", \"name\": \"" + timeSeries.getName() + "\", \"data\": [" + Joiner.on(", ").join(datapoints) + "]}");
         }
         String responseString = "[" + Joiner.on(", ").join(results) + "]";
 
@@ -183,7 +184,7 @@ public class ResponseFormatter {
             }
 
             ts.setStep(dts.getValuesPerPoint() * dts.getStep());
-            ts.setTo(ts.getFrom() + ts.getStep() * dts.getConsolidatedValues().length - 1);
+            ts.setTo(ts.getFrom() + (long) ts.getStep() * dts.getConsolidatedValues().length - 1);
             ts.setValues(dts.getConsolidatedValues());
         }
     }

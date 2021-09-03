@@ -61,7 +61,7 @@ public class AverageSeriesFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() == 0) throw new InvalidArgumentException("averageSeries: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() == 0) throw new InvalidArgumentException("averageSeries: number of arguments is 0. Must be at least one.");
 
         for (int i = 0; i < arguments.size() - 1; i++) {
             if (!(arguments.get(i) instanceof Target))

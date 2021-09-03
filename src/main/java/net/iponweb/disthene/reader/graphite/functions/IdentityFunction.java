@@ -22,7 +22,7 @@ public class IdentityFunction extends DistheneFunction {
         int step = (int) (Math.round(rawStep / 60.) * 60);
 
         for(int i = 0; i < ts.getValues().length; i++) {
-            ts.getValues()[i] = (double) (from + i * step);
+            ts.getValues()[i] = (double) (from + (long) i * step);
         }
 
         return Collections.singletonList(ts);
