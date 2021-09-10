@@ -7,7 +7,10 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.ReaderConfiguration;
-import net.iponweb.disthene.reader.exceptions.*;
+import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
+import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
@@ -20,7 +23,7 @@ import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -29,7 +32,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrei Ivanov
@@ -77,7 +83,7 @@ public class RenderHandler implements DistheneReaderHandler {
 
         // Let's parse the targets
         for(String targetString : parameters.getTargets()) {
-            GraphiteLexer lexer = new GraphiteLexer(new ANTLRInputStream(targetString));
+            GraphiteLexer lexer = new GraphiteLexer(CharStreams.fromString(targetString));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             GraphiteParser parser = new GraphiteParser(tokens);
             ParseTree tree = parser.expression();

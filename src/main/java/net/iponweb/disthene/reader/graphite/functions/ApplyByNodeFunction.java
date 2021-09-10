@@ -9,7 +9,7 @@ import net.iponweb.disthene.reader.graphite.TargetVisitor;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteLexer;
 import net.iponweb.disthene.reader.graphite.grammar.GraphiteParser;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -41,7 +41,7 @@ public class ApplyByNodeFunction extends DistheneFunction {
         List<String> paths = getKeys(evaluator.getPaths((PathTarget) arguments.get(0)), position);
 
         for (String path : paths) {
-            GraphiteLexer lexer = new GraphiteLexer(new ANTLRInputStream(function.replaceAll("%", path)));
+            GraphiteLexer lexer = new GraphiteLexer(CharStreams.fromString(function.replaceAll("%", path)));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             GraphiteParser parser = new GraphiteParser(tokens);
             ParseTree tree = parser.expression();
