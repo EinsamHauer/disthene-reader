@@ -136,7 +136,7 @@ public class IndexService {
             return "[]";
         }
 
-        return "[" + joiner.join(getPathsFromRegExs(tenant, List.of(regEx), true)) + "]";
+        return "[" + joiner.join(getPathsFromRegExs(tenant, List.of(regEx), false)) + "]";
     }
 
     public String getSearchPathsAsString(String tenant, String regEx, int limit) throws IOException, TooMuchDataExpectedException {
