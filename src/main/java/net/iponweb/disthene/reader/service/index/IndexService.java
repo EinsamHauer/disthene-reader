@@ -92,7 +92,6 @@ public class IndexService {
 
             while (hits.getHits().length > 0) {
                 for (SearchHit hit : hits) {
-//                    result.add(hit.field("path").getValue());
                     result.add(String.valueOf(hit.getSourceAsMap().get("path")));
                 }
 
@@ -136,7 +135,43 @@ public class IndexService {
             return "[]";
         }
 
-        return "[" + joiner.join(getPathsFromRegExs(tenant, List.of(regEx), false)) + "]";
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.regexpQuery("path.keyword", regEx))
+                .must(QueryBuilders.termQuery("tenant", tenant));
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
+                .query(queryBuilder);
+
+        if (indexConfiguration.getMaxPaths() < maxResultWindow) sourceBuilder.size(indexConfiguration.getMaxPaths());
+
+        SearchRequest request = new SearchRequest(indexConfiguration.getIndex())
+                .source(sourceBuilder)
+                .scroll(scroll);
+
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        String scrollId = response.getScrollId();
+
+        // if total hits exceeds maximum - abort right away throwing an exception
+        if (response.getHits().getTotalHits().value > indexConfiguration.getMaxPaths()) {
+            logger.debug("Total number of paths exceeds the limit: " + response.getHits().getTotalHits().value);
+            throw new TooMuchDataExpectedException("Total number of paths exceeds the limit: " + response.getHits().getTotalHits().value + " (the limit is " + indexConfiguration.getMaxPaths() + ")");
+        }
+
+        SearchHits hits = response.getHits();
+        List<String> paths = new ArrayList<>();
+
+        while (hits.getHits().length > 0) {
+            for (SearchHit hit : hits) {
+                paths.add(hit.getSourceAsString());
+            }
+
+            SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId).scroll(scroll);
+            response = client.scroll(scrollRequest, RequestOptions.DEFAULT);
+            scrollId = response.getScrollId();
+            hits = response.getHits();
+        }
+
+        return "[" + joiner.join(paths) + "]";
     }
 
     public String getSearchPathsAsString(String tenant, String regEx, int limit) throws IOException, TooMuchDataExpectedException {

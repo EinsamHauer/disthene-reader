@@ -2,6 +2,9 @@ package net.iponweb.disthene.reader.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -26,8 +29,8 @@ public class ReaderServer {
 
     private final Logger logger = LogManager.getLogger(ReaderServer.class);
 
-    private EventLoopGroup bossGroup = new NioEventLoopGroup();
-    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
 
     private final ReaderConfiguration configuration;
 
@@ -38,13 +41,18 @@ public class ReaderServer {
     }
 
     public void run() throws InterruptedException {
-        bossGroup = new NioEventLoopGroup(configuration.getThreads());
-        workerGroup = new NioEventLoopGroup(configuration.getThreads());
+        if (Epoll.isAvailable()) {
+            bossGroup = new EpollEventLoopGroup(1);
+            workerGroup = new EpollEventLoopGroup();
+        } else {
+            bossGroup = new NioEventLoopGroup(1);
+            workerGroup = new NioEventLoopGroup();
+        }
 
         ServerBootstrap b = new ServerBootstrap();
 
         b.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 100)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
