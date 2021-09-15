@@ -110,11 +110,13 @@ public class FunctionRegistry {
         registry.put("sumSeriesWithWildcards", SumSeriesWithWildcardsFunction.class);
         registry.put("sum", SumSeriesFunction.class);
         registry.put("summarize", SummarizeFunction.class);
+        registry.put("smartSummarize", SmartSummarizeFunction.class);
         registry.put("threshold", ThresholdFunction.class);
         registry.put("timeShift", TimeShiftFunction.class);
         registry.put("timeStack", TimeStackFunction.class);
         registry.put("transformNull", TransformNullFunction.class);
         registry.put("useSeriesAbove", UseSeriesAboveFunction.class);
+        registry.put("substr", SubStrFunction.class);
     }
 
     //todo: from & to parameters are only because of constantLine function. sort this out?

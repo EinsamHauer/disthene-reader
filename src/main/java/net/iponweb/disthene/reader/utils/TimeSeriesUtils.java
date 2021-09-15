@@ -4,12 +4,14 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author Andrei Ivanov
  */
 public class TimeSeriesUtils {
 
+    public static Pattern DOT_PATTERN = Pattern.compile("\\.");
 
     public static boolean checkAlignment(List<TimeSeries> timeSeries) {
         if (timeSeries.size() == 0) return true;
@@ -78,10 +80,10 @@ public class TimeSeriesUtils {
         List<Double> buffer = new ArrayList<>();
 
         int index = 0;
-        while (timeSeries.getFrom() + index * timeSeries.getStep() <= to) {
+        while (timeSeries.getFrom() + (long) index * timeSeries.getStep() <= to) {
             buffer.add(timeSeries.getValues()[index]);
 
-            if ((timeSeries.getFrom() + index * timeSeries.getStep()) % step == 0) {
+            if ((timeSeries.getFrom() + (long) index * timeSeries.getStep()) % step == 0) {
                 consolidated.add(CollectionUtils.average(buffer));
                 buffer.clear();
             }

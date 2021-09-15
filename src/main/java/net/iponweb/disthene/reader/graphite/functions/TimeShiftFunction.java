@@ -4,13 +4,10 @@ import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
-import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.utils.DateTimeUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +26,9 @@ public class TimeShiftFunction extends DistheneFunction {
         // parse offset
         long offset = DateTimeUtils.parseTimeOffset((String) arguments.get(1));
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
         // apply shift to pathTarget
         // todo: we will experience some problems if this resolution doesn't exist anymore in the past... take care of this corner case!
-        processedArguments.addAll(evaluator.eval(((Target) arguments.get(0)).shiftBy(-offset)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval(((Target) arguments.get(0)).shiftBy(-offset)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 

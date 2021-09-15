@@ -19,11 +19,14 @@ import java.util.List;
  * Will probably be improved some day.
  */
 public class HoltWinters {
-
-    private static final long SEASON = 604800; // 7 days
+    private static final int SEAON_LENGTH = 60*60*24; // 1 day
+    private static final long SEASON = 60*60*24; // 7 days
+    //private static final long SEASON = 604800; // 7 days
     private static final long BOOTSTRAP = SEASON * 2;
-    private static final double ALPHA = 0.2;
-    private static final double GAMMA = 0.2;
+//    private static final double ALPHA = 0.2;
+//    private static final double GAMMA = 0.2;
+    private static final double ALPHA = 0.1;
+    private static final double GAMMA = 0.1;
     private static final double BETA = 0.0035;
 
     private Target target;
@@ -71,7 +74,9 @@ public class HoltWinters {
      * (Forecasting: principles and practice by Rob J Hyndman, George Athanasopoulos
      */
     private void analyzeSingleSeries(TimeSeries ts, long originalFrom, long originalTo, int originalLength) {
-        int seasonLength = (int) (SEASON / ts.getStep());
+        //int seasonLength = (int) (SEASON / ts.getStep());
+        int seasonLength = SEAON_LENGTH;
+        int seasonTimeSlotCnt = SEAON_LENGTH / ts.getStep();
 
         Double[] values = ts.getValues();
         Double[] forecast = new Double[values.length];
@@ -84,13 +89,13 @@ public class HoltWinters {
         double baseline = values[1] != null ? values[1] : 0;
         double slope = baseline - (values[0] != null ? values[0] : 0);
 
-        for (int i = 0; i < seasonLength; i++) {
+        for (int i = 0; i < seasonTimeSlotCnt; i++) {
             seasonal.add(values[i] != null ? values[i] : 0);
             forecast[i] = values[i] != null ? values[i] : 0;
         }
 
-        for (int i = seasonLength; i < knownLength; i++) {
-            forecast[i] = baseline + slope + seasonal.get(seasonLength - 1);
+        for (int i = seasonTimeSlotCnt; i < knownLength; i++) {
+            forecast[i] = baseline + slope + seasonal.get(seasonTimeSlotCnt - 1);
 
             double value = values[i] != null ? values[i] : 0;
             double previousBaseline = baseline;
@@ -103,16 +108,16 @@ public class HoltWinters {
         }
 
         for (int i = knownLength; i < values.length; i++) {
-            forecast[i] = baseline + slope + seasonal.get((seasonLength - 1 + (i - knownLength) % seasonLength) % seasonLength);
+            forecast[i] = baseline + slope + seasonal.get((seasonTimeSlotCnt - 1 + (i - knownLength) % seasonTimeSlotCnt) % seasonTimeSlotCnt);
         }
 
         double sum = 0;
-        for (int i = seasonLength; i < knownLength; i++) {
+        for (int i = seasonTimeSlotCnt; i < knownLength; i++) {
             double value = values[i] != null ? values[i] : 0;
             sum += (forecast[i] - value) * (forecast[i] - value);
         }
 
-        double deviation = Math.sqrt(sum / (knownLength - seasonLength));
+        double deviation = Math.sqrt(sum / (knownLength - seasonTimeSlotCnt));
 
         TimeSeries forecastTimeSeries = new TimeSeries(ts.getName(), ts.getFrom(), ts.getTo(), ts.getStep());
         forecastTimeSeries.setValues(forecast);

@@ -3,22 +3,54 @@ package net.iponweb.disthene.reader.graphite.functions;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
-import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.DateTimeUtils;
-import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Andrei Ivanov
+ * Takes one metric or a wildcard seriesList, followed by a quoted string with the length of time
+ * (See ``from / until`` in the render\_api_ for examples of time formats). Also takes a start
+ * multiplier and end multiplier for the length of time-
+ *
+ * Create a seriesList which is composed the orginal metric series stacked with time shifts
+ * starting time shifts from the start multiplier through the end multiplier.
+ *
+ * Useful for looking at history, or feeding into averageSeries or stddevSeries.
+ *
+ * Example::
+ *
+ * # create a series for today and each of the previous 7 days
+ *    &target=timeStack(Sales.widgets.largeBlue,"1d",0,7)
  */
 public class TimeStackFunction extends DistheneFunction {
 
     public TimeStackFunction(String text) {
         super(text, "timeStack");
+    }
+
+    private List<TimeSeries> timeStack(TargetEvaluator evaluator,
+                                       long delta,
+                                       int startIndex,
+                                       int endIndex) throws EvaluationException {
+        List<TimeSeries> newSeries = new ArrayList <>();
+
+        if (startIndex < endIndex) {
+            for (int shift = startIndex; shift < endIndex; shift++) {
+                List <TimeSeries> shiftedSeriesList = evaluator.eval(((Target) arguments.get(0)).shiftBy(-(delta * shift)));
+                int finalShift = shift;
+                shiftedSeriesList.forEach(series -> {
+                    series.setName("timeShift(" + series.getName() + "," + arguments.get(1) + "," + finalShift + ")");
+                    series.setFrom(this.from);
+                    series.setTo(this.to);
+                });
+                newSeries.addAll(shiftedSeriesList);
+            }
+        }
+
+        return newSeries;
     }
 
     @Override
@@ -28,22 +60,7 @@ public class TimeStackFunction extends DistheneFunction {
         int startIndex = ((Double) arguments.get(2)).intValue();
         int endIndex = ((Double) arguments.get(3)).intValue();
 
-
-        List<TimeSeries> resultList = new ArrayList<>();
-        // todo: we will experience some problems if this resolution doesn't exist anymore in the past... take care of this corner case!
-        while (startIndex <= endIndex) {
-            List<TimeSeries> processedArguments = evaluator.eval(((Target) arguments.get(0)).shiftBy(- offset * startIndex));
-            for (TimeSeries ts : processedArguments) {
-                ts.setFrom(ts.getFrom() - offset);
-                ts.setTo(ts.getTo() - offset);
-                ts.setName("timeShift(" + ts.getName() + "," + arguments.get(1) + "," + startIndex + ")");
-                resultList.add(ts);
-            }
-
-            startIndex++;
-        }
-
-        return resultList;
+        return timeStack(evaluator, offset, startIndex, endIndex  );
     }
 
     @Override

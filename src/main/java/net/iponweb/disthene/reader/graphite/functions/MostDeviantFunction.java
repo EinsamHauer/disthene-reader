@@ -26,8 +26,7 @@ public class MostDeviantFunction extends DistheneFunction {
         int number = ((Double) arguments.get(1)).intValue();
         if (number <= 0) return Collections.emptyList();
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -42,7 +41,7 @@ public class MostDeviantFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double stdev = CollectionUtils.stdev(Arrays.asList(ts.getValues()));
             if (stdev != null) {
-                if (sorted.get(stdev) == null) sorted.put(stdev, new ArrayList<TimeSeries>());
+                sorted.computeIfAbsent(stdev, k -> new ArrayList<>());
                 sorted.get(stdev).add(ts);
             }
         }
@@ -50,9 +49,7 @@ public class MostDeviantFunction extends DistheneFunction {
         List<TimeSeries> result = new ArrayList<>();
 
         for(Map.Entry<Double, List<TimeSeries>> entry : sorted.entrySet()) {
-            for (TimeSeries ts : entry.getValue()) {
-                result.add(ts);
-            }
+            result.addAll(entry.getValue());
             if (result.size() >= number) break;
         }
 

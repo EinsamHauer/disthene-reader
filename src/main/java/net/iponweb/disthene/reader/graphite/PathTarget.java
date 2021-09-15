@@ -16,6 +16,7 @@ public class PathTarget extends Target {
     private String tenant;
     private Long from;
     private Long to;
+    private Integer step;
 
     public PathTarget(String text, EvaluationContext context, String path, String tenant, Long from, Long to) {
         super(text, context);
@@ -23,6 +24,14 @@ public class PathTarget extends Target {
         this.tenant = tenant;
         this.from = from;
         this.to = to;
+    }
+
+    public Integer getStep() {
+        return step;
+    }
+
+    public void setStep(Integer step) {
+        this.step = step;
     }
 
     public String getPath() {

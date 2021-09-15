@@ -35,17 +35,22 @@ public class CountSeriesFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-
         long from = processedArguments.get(0).getFrom();
         long to = processedArguments.get(0).getTo();
         int step = processedArguments.get(0).getStep();
         int length = processedArguments.get(0).getValues().length;
+        long size = 0L;
+        for (TimeSeries timeSeries : processedArguments) {
+            if (timeSeries.getValues().length > 0) {
+                size++;
+            }
+        }
 
         TimeSeries resultTimeSeries = new TimeSeries(getText(), from, to, step);
         Double[] values = new Double[length];
 
         for (int i = 0; i < length; i++) {
-            values[i] = Double.valueOf(processedArguments.size());
+            values[i] = (double) size;
         }
 
         resultTimeSeries.setValues(values);
@@ -55,7 +60,7 @@ public class CountSeriesFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("countSeries: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() < 1) throw new InvalidArgumentException("countSeries: number of arguments is 0. Must be at least one.");
 
         for(Object argument : arguments) {
             if (!(argument instanceof Target)) throw new InvalidArgumentException("countSeries: argument is " + argument.getClass().getName() + ". Must be series");

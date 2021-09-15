@@ -23,8 +23,7 @@ public class TransformNullFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -32,7 +31,7 @@ public class TransformNullFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        Double transform = arguments.size() > 1 ? (Double) arguments.get(1) : 0.;
+        double transform = arguments.size() > 1 ? (Double) arguments.get(1) : 0.;
 
         int length = processedArguments.get(0).getValues().length;
 
@@ -40,7 +39,7 @@ public class TransformNullFunction extends DistheneFunction {
             for (int i = 0; i < length; i++) {
                 ts.getValues()[i] = ts.getValues()[i] != null ? ts.getValues()[i] : transform;
             }
-            ts.setName("transformNull(" + ts.getName() + "," + (DoubleMath.isMathematicalInteger(transform) ? Integer.toString(transform.intValue()) : transform ) + ")");
+            ts.setName("transformNull(" + ts.getName() + "," + (DoubleMath.isMathematicalInteger(transform) ? Integer.toString((int) transform) : transform ) + ")");
 
         }
 

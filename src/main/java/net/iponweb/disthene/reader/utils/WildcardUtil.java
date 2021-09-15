@@ -8,13 +8,17 @@ import org.apache.commons.lang.StringUtils;
 public class WildcardUtil {
 
     public static boolean isPlainPath(String path) {
-        char noPlainChars[] = {'*', '?', '{', '(', '['};
+        char[] noPlainChars = {'*', '?', '{', '(', '['};
         return !(StringUtils.containsAny(path, noPlainChars));
     }
 
     public static String getPathsRegExFromWildcard(String wildcard) {
-        return wildcard.replace(".", "\\.").replace("*", "[^\\.]*").replace("{", "(")
-                .replace("}", ")").replace(",", "|").replace("?", "[^\\.]");
+        return wildcard.replace(".", "\\.")
+                .replace("*", "[^\\.]*")
+                .replace("{", "(")
+                .replace("}", ")")
+                .replace(",", "|")
+                .replace("?", "[^\\.]");
     }
 
 }

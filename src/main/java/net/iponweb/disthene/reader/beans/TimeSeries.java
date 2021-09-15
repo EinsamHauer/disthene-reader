@@ -13,6 +13,7 @@ public class TimeSeries {
     private int step;
 
     private Double[] values = new Double[0];
+    private Double[] times  = new Double[0];
 
     private Map<TimeSeriesOption, Object> options = new HashMap<>();
 
@@ -21,6 +22,21 @@ public class TimeSeries {
         this.from = from;
         this.to = to;
         this.step = step;
+    }
+
+    public TimeSeries(String name, Long from, Long to, int step, Double[] values) {
+        this.name = name;
+        this.from = from;
+        this.to = to;
+        this.step = step;
+        this.values = values;
+    }
+
+    public TimeSeries(String name, Long from, Long to) {
+        this.name = name;
+        this.from = from;
+        this.to = to;
+        this.step = 60;
     }
 
     public String getName() {
@@ -55,6 +71,13 @@ public class TimeSeries {
         this.values = values;
     }
 
+    public Double[] getTimes() {
+        return times;
+    }
+
+    public void setTimes(Double[] times) {
+        this.times = times;
+    }
     public int getStep() {
         return step;
     }
@@ -77,6 +100,11 @@ public class TimeSeries {
 
     public boolean hasOption(TimeSeriesOption option) {
         return options.containsKey(option);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.name.equals(((TimeSeries)obj).name);
     }
 
     @Override

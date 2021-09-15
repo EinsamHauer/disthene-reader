@@ -6,7 +6,6 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
@@ -24,8 +23,7 @@ public class SortByTotalFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -38,7 +36,7 @@ public class SortByTotalFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double total = CollectionUtils.sum(Arrays.asList(ts.getValues()));
             if (total == null) continue;
-            if (sorted.get(total) == null) sorted.put(total, new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(total, k -> new ArrayList<>());
             sorted.get(total).add(ts);
         }
 

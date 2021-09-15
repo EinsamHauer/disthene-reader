@@ -6,15 +6,15 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
-import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
+import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Andrei Ivanov
@@ -27,8 +27,7 @@ public class CactiStyleFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -46,7 +45,13 @@ public class CactiStyleFunction extends DistheneFunction {
             Double min = CollectionUtils.min(valuesArray);
             Double max = CollectionUtils.max(valuesArray);
 
-            ts.setName(ts.getName() + " Current:" + formatter.formatValue(last, unitSystem) + "   Max:" + formatter.formatValue(max, unitSystem) + "   Min:" + formatter.formatValue(min, unitSystem));
+            ts.setName(ts.getName() +
+                    " Current:" +
+                    (Objects.isNull(last) ? "None" : formatter.formatValue(last, unitSystem)) +
+                    "   Max:" +
+                    (Objects.isNull(max) ? "None" : formatter.formatValue(max, unitSystem))+
+                    "   Min:" +
+                    (Objects.isNull(min) ? "None" : formatter.formatValue(min, unitSystem)));
         }
 
         return processedArguments;

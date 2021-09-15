@@ -6,11 +6,10 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
-import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 import net.iponweb.disthene.reader.graphite.utils.ValueFormatter;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
+import net.iponweb.disthene.reader.graphite.utils.UnitSystem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,8 +26,7 @@ public class LegendValueFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -39,7 +37,7 @@ public class LegendValueFunction extends DistheneFunction {
         UnitSystem unitSystem = UnitSystem.NONE;
         List<String> aggregations = new ArrayList<>();
         for (int i = 1; i < arguments.size(); i++) {
-            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"']", "");
             if (argument.equals("last") || argument.equals("avg") || argument.equals("total") || argument.equals("min") || argument.equals("max")) {
                 aggregations.add(argument);
             } else {
@@ -50,49 +48,45 @@ public class LegendValueFunction extends DistheneFunction {
         ValueFormatter formatter = getContext().getFormatter();
 
         for (TimeSeries ts : processedArguments) {
-            StringBuilder sb = new StringBuilder("");
+            StringBuilder sb = new StringBuilder();
             List<Double> valuesArray = Arrays.asList(ts.getValues());
             for (String aggregation : aggregations) {
                 switch (aggregation) {
-                    case "last": {
+                    case "last" -> {
                         Double v = CollectionUtils.last(valuesArray);
                         if (v != null) {
                             sb.append(" (last: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
-                        break;
                     }
-                    case "avg": {
+                    case "avg" -> {
                         Double v = CollectionUtils.average(valuesArray);
                         if (v != null) {
                             sb.append(" (avg: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
-                        break;
                     }
-                    case "total": {
+                    case "total" -> {
                         Double v = CollectionUtils.sum(valuesArray);
                         if (v != null) {
                             sb.append(" (total: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
-                        break;
                     }
-                    case "min": {
+                    case "min" -> {
                         Double v = CollectionUtils.min(valuesArray);
                         if (v != null) {
                             sb.append(" (min: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
-                        break;
                     }
-                    case "max": {
+                    case "max" -> {
                         Double v = CollectionUtils.max(valuesArray);
                         if (v != null) {
                             sb.append(" (max: ").append(formatter.formatValue(v, unitSystem)).append(")");
                         }
-                        break;
                     }
+                    default -> throw new IllegalStateException("Unexpected value: " + aggregation);
                 }
 
             }
-            ts.setName(ts.getName() + sb.toString());
+            ts.setName(ts.getName() + sb);
         }
 
         return processedArguments;
@@ -109,7 +103,7 @@ public class LegendValueFunction extends DistheneFunction {
             if (!(arguments.get(i) instanceof String))
                 throw new InvalidArgumentException("legendValue: argument is " + arguments.get(i).getClass().getName() + ". Must be a string");
 
-            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(i)).toLowerCase().replaceAll("[\"']", "");
 
             if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("total") && !argument.equals("min") && !argument.equals("max")) {
                 if ((i != arguments.size() - 1) || (i == 1))

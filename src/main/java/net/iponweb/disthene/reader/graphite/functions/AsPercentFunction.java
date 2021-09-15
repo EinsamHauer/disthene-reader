@@ -23,8 +23,7 @@ public class AsPercentFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -39,8 +38,7 @@ public class AsPercentFunction extends DistheneFunction {
         double[] total = new double[length];
 
         if (arguments.size() > 1 && (arguments.get(1) instanceof Target)) {
-            List<TimeSeries> totalSeries = new ArrayList<>();
-            totalSeries.addAll(evaluator.eval((Target) arguments.get(1)));
+            List<TimeSeries> totalSeries = new ArrayList<>(evaluator.eval((Target) arguments.get(1)));
 
             if (totalSeries.size() == 0) {
                 return Collections.emptyList();

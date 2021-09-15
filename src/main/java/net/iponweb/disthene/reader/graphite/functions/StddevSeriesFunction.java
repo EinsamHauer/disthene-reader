@@ -36,7 +36,6 @@ public class StddevSeriesFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-
         long from = processedArguments.get(0).getFrom();
         long to = processedArguments.get(0).getTo();
         int step = processedArguments.get(0).getStep();
@@ -61,7 +60,7 @@ public class StddevSeriesFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("stddevSeries: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() < 1) throw new InvalidArgumentException("stddevSeries: number of arguments is 0. Must be at least one.");
 
         for(Object argument : arguments) {
             if (!(argument instanceof Target)) throw new InvalidArgumentException("stddevSeries: argument is " + argument.getClass().getName() + ". Must be series");

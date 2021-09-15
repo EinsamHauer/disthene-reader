@@ -1,6 +1,5 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
-import com.google.common.base.Joiner;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
@@ -37,7 +36,6 @@ public class SumSeriesFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-
         long from = processedArguments.get(0).getFrom();
         long to = processedArguments.get(0).getTo();
         int step = processedArguments.get(0).getStep();
@@ -62,7 +60,7 @@ public class SumSeriesFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("sumSeries: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() < 1) throw new InvalidArgumentException("sumSeries: number of arguments is 0. Must be at least one.");
 
         for(Object argument : arguments) {
             if (!(argument instanceof Target)) throw new InvalidArgumentException("sumSeries: argument is " + argument.getClass().getName() + ". Must be series");

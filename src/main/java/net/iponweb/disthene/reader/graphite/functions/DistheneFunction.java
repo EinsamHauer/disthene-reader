@@ -28,7 +28,7 @@ public abstract class DistheneFunction extends Target {
         arguments.add(argument);
     }
 
-    public abstract void checkArguments() throws  InvalidArgumentException;
+    public abstract void checkArguments() throws InvalidArgumentException;
 
     @Override
     public String toString() {
@@ -105,5 +105,18 @@ public abstract class DistheneFunction extends Target {
         }
 
         return null;
+    }
+
+    public void check(boolean condition, String message) throws InvalidArgumentException {
+        if (! condition) {
+            throw new InvalidArgumentException(message);
+        }
+    }
+
+    public String getClassName(Object object) {
+        if (null == object) {
+            return "null";
+        }
+        return object.getClass().getName();
     }
 }

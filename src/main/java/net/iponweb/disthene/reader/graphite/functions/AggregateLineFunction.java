@@ -24,8 +24,7 @@ public class AggregateLineFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -33,40 +32,34 @@ public class AggregateLineFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        String aggregation = arguments.size() > 1 ? ((String) arguments.get(1)).toLowerCase().replaceAll("[\"\']", "") : "avg";
+        String aggregation = arguments.size() > 1 ? ((String) arguments.get(1)).toLowerCase().replaceAll("[\"']", "") : "avg";
 
         for (TimeSeries ts : processedArguments) {
             List<Double> valuesArray = Arrays.asList(ts.getValues());
             switch (aggregation) {
-                case "last": {
+                case "last" -> {
                     Double v = CollectionUtils.last(valuesArray);
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
-                    break;
                 }
-                case "avg": {
+                case "avg" -> {
                     Double v = CollectionUtils.average(valuesArray);
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
-                    break;
                 }
-                case "total": {
+                case "total" -> {
                     Double v = CollectionUtils.sum(valuesArray);
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
-                    break;
                 }
-                case "min": {
+                case "min" -> {
                     Double v = CollectionUtils.min(valuesArray);
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
-                    break;
                 }
-                case "max": {
+                case "max" -> {
                     Double v = CollectionUtils.max(valuesArray);
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
-                    break;
                 }
-                case "first": {
+                case "first" -> {
                     Double v = CollectionUtils.first(valuesArray);
                     if (v != null) CollectionUtils.constant(ts.getValues(), v);
-                    break;
                 }
             }
             setResultingName(ts);
@@ -83,7 +76,7 @@ public class AggregateLineFunction extends DistheneFunction {
 
         if (arguments.size() > 1) {
             if (!(arguments.get(1) instanceof String)) throw new InvalidArgumentException("aggregateLine: argument is " + arguments.get(1).getClass().getName() + ". Must be a string");
-            String argument = ((String) arguments.get(1)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(1)).toLowerCase().replaceAll("[\"']", "");
             if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("total") && !argument.equals("min") && !argument.equals("max") && !argument.equals("first")) {
                 throw new InvalidArgumentException("aggregateLine: must be aggregation.");
             }

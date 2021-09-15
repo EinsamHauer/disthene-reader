@@ -1,7 +1,5 @@
 package net.iponweb.disthene.reader.utils;
 
-import sun.misc.Regexp;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +8,7 @@ import java.util.regex.Pattern;
  */
 public class DateTimeUtils {
 
-    private static Pattern timeOffsetPattern = Pattern.compile("^([+-]?)(\\d+)([a-z]+)$");
+    private static final Pattern timeOffsetPattern = Pattern.compile("^([+-]?)(\\d+)([a-z]+)$");
 
     /**
      * Parses time offset from string (Examples: "-1d", "+1mon")
@@ -21,11 +19,10 @@ public class DateTimeUtils {
     public static Long parseTimeOffset(String s) {
         Matcher matcher = timeOffsetPattern.matcher(s.replaceAll("^['\"]|['\"]$", ""));
 
-        if (!matcher.matches()) return 0L;
+        if (! matcher.matches()) return 0L;
 
-        int sign = matcher.group(1).equals("+") ? 1 : -1;
+        int sign = matcher.group(1).equals("+") ? 1 : - 1;
         long offset = Integer.parseInt(matcher.group(2)) * getUnitValue(matcher.group(3));
-
         return offset * sign;
     }
 
@@ -41,7 +38,7 @@ public class DateTimeUtils {
         } else if (s.startsWith("w")) {
             return 604800;
         } else if (s.startsWith("mon")) {
-            return 2592000;
+            return 18144000;
         } else if (s.startsWith("y")) {
             return 31536000;
         } else {
@@ -51,5 +48,9 @@ public class DateTimeUtils {
 
     public static boolean testTimeOffset(String s) {
         return timeOffsetPattern.matcher(s.replaceAll("^['\"]|['\"]$", "")).matches();
+    }
+
+    public static long currentTimeSeconds() {
+        return System.currentTimeMillis() / 1000L;
     }
 }
