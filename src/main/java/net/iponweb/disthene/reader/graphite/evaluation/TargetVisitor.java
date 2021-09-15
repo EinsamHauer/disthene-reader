@@ -47,7 +47,7 @@ public class TargetVisitor extends GraphiteBaseVisitor<Target> {
                 } else if (arg instanceof GraphiteParser.ArgNumberContext) {
                     function.addArg(Double.parseDouble(arg.getText()));
                 } else if (arg instanceof GraphiteParser.ArgStringContext) {
-                    function.addArg(arg.getText().replaceAll("^[\"\']|[\"\']$", ""));
+                    function.addArg(arg.getText().replaceAll("^[\"']|[\"']$", ""));
                 }
             }
 
