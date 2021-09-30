@@ -13,9 +13,10 @@ store:
   userPassword: 'password'
   keyspace: 'metric'
   maxConnections: 2048
+  maxConcurrentRequests: 1024
+  maxQueueSize: 1000000
   readTimeout: 10
   connectTimeout: 10
-  maxRequests: 128
   cacheExpiration: 180
   tableTemplate: "metric_%s_%d"
 index:

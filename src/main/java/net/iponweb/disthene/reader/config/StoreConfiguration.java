@@ -18,7 +18,8 @@ public class StoreConfiguration {
     private int maxConnections;
     private int readTimeout;
     private int connectTimeout;
-    private int maxRequests;
+    private int maxConcurrentRequests = 1024;
+    private int maxQueueSize = 1024*1024;
     private String consistency = "ONE";
     private String keyspace;
     private int cacheExpiration = 180;
@@ -81,16 +82,24 @@ public class StoreConfiguration {
         this.connectTimeout = connectTimeout;
     }
 
-    public int getMaxRequests() {
-        return maxRequests;
-    }
-
-    public void setMaxRequests(int maxRequests) {
-        this.maxRequests = maxRequests;
-    }
-
     public String getConsistency() {
         return consistency;
+    }
+
+    public int getMaxConcurrentRequests() {
+        return maxConcurrentRequests;
+    }
+
+    public void setMaxConcurrentRequests(int maxConcurrentRequests) {
+        this.maxConcurrentRequests = maxConcurrentRequests;
+    }
+
+    public int getMaxQueueSize() {
+        return maxQueueSize;
+    }
+
+    public void setMaxQueueSize(int maxQueueSize) {
+        this.maxQueueSize = maxQueueSize;
     }
 
     public void setConsistency(String consistency) {
@@ -139,11 +148,12 @@ public class StoreConfiguration {
                 ", maxConnections=" + maxConnections +
                 ", readTimeout=" + readTimeout +
                 ", connectTimeout=" + connectTimeout +
-                ", maxRequests=" + maxRequests +
+                ", maxConcurrentRequests=" + maxConcurrentRequests +
+                ", maxQueueSize=" + maxQueueSize +
                 ", consistency='" + consistency + '\'' +
-                ", tenantKeyspace='" + keyspace + '\'' +
+                ", keyspace='" + keyspace + '\'' +
                 ", cacheExpiration=" + cacheExpiration +
-                ", tenantTableTemplate='" + tableTemplate + '\'' +
+                ", tableTemplate='" + tableTemplate + '\'' +
                 ", skipGlobalTableRollups=" + skipGlobalTableRollups +
                 '}';
     }

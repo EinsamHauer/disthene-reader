@@ -8,6 +8,7 @@ import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.metadata.Metadata;
 import com.datastax.oss.driver.api.core.metadata.Node;
 import com.datastax.oss.driver.internal.core.loadbalancing.DcInferringLoadBalancingPolicy;
+import com.datastax.oss.driver.internal.core.session.throttling.ConcurrencyLimitingRequestThrottler;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,11 +37,15 @@ public class CassandraService {
                 DriverConfigLoader.programmaticBuilder()
                         .withString(DefaultDriverOption.PROTOCOL_COMPRESSION, "lz4")
                         .withStringList(DefaultDriverOption.CONTACT_POINTS, getContactPoints(storeConfiguration))
-                        .withInt(DefaultDriverOption.CONNECTION_MAX_REQUESTS, storeConfiguration.getMaxRequests())
                         .withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(storeConfiguration.getReadTimeout()))
                         .withDuration(DefaultDriverOption.CONNECTION_CONNECT_TIMEOUT, Duration.ofSeconds(storeConfiguration.getConnectTimeout()))
                         .withString(DefaultDriverOption.REQUEST_CONSISTENCY, storeConfiguration.getConsistency())
                         .withClass(DefaultDriverOption.LOAD_BALANCING_POLICY_CLASS, DcInferringLoadBalancingPolicy.class)
+                        .withInt(DefaultDriverOption.CONNECTION_POOL_LOCAL_SIZE, storeConfiguration.getMaxConnections())
+                        .withInt(DefaultDriverOption.CONNECTION_POOL_REMOTE_SIZE, storeConfiguration.getMaxConnections())
+                        .withClass(DefaultDriverOption.REQUEST_THROTTLER_CLASS, ConcurrencyLimitingRequestThrottler.class)
+                        .withInt(DefaultDriverOption.REQUEST_THROTTLER_MAX_CONCURRENT_REQUESTS, storeConfiguration.getMaxConcurrentRequests())
+                        .withInt(DefaultDriverOption.REQUEST_THROTTLER_MAX_QUEUE_SIZE, storeConfiguration.getMaxQueueSize())
                         .build();
 
 
