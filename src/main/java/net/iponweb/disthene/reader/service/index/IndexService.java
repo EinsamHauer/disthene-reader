@@ -65,9 +65,9 @@ public class IndexService {
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                     .must(QueryBuilders.regexpQuery("path.keyword", regEx))
-                    .must(QueryBuilders.termQuery("tenant", tenant));
+                    .filter(QueryBuilders.termQuery("tenant.keyword", tenant));
 
-            if (leaf) queryBuilder.must(QueryBuilders.termQuery("leaf", true));
+            if (leaf) queryBuilder.filter(QueryBuilders.termQuery("leaf", true));
 
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
                     .fetchSource("path", null)
@@ -137,7 +137,7 @@ public class IndexService {
 
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.regexpQuery("path.keyword", regEx))
-                .must(QueryBuilders.termQuery("tenant", tenant));
+                .filter(QueryBuilders.termQuery("tenant.keyword", tenant));
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
                 .query(queryBuilder);
