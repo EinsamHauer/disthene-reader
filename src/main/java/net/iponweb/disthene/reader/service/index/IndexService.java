@@ -95,7 +95,6 @@ public class IndexService {
                     result.add(String.valueOf(hit.getSourceAsMap().get("path")));
                 }
 
-                logger.info(scrollId);
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId).scroll(scroll);
                 response = client.scroll(scrollRequest, RequestOptions.DEFAULT);
                 scrollId = response.getScrollId();
