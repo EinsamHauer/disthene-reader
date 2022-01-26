@@ -7,10 +7,9 @@ import net.iponweb.disthene.reader.utils.WildcardUtil;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -26,9 +25,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -79,8 +76,11 @@ public class IndexService {
                     .source(sourceBuilder)
                     .scroll(scroll);
 
+            final Set<String> scrollIds = new HashSet<>();
+
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             String scrollId = response.getScrollId();
+            scrollIds.add(scrollId);
 
             // if total hits exceeds maximum - abort right away throwing an exception
             if (response.getHits().getTotalHits().value > indexConfiguration.getMaxPaths()) {
@@ -95,11 +95,17 @@ public class IndexService {
                     result.add(String.valueOf(hit.getSourceAsMap().get("path")));
                 }
 
+                logger.info(scrollId);
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId).scroll(scroll);
                 response = client.scroll(scrollRequest, RequestOptions.DEFAULT);
                 scrollId = response.getScrollId();
+                scrollIds.add(scrollId);
+
                 hits = response.getHits();
+
             }
+
+            clearScrolls(scrollIds);
         }
 
         return result;
@@ -148,8 +154,11 @@ public class IndexService {
                 .source(sourceBuilder)
                 .scroll(scroll);
 
+        final Set<String> scrollIds = new HashSet<>();
+
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         String scrollId = response.getScrollId();
+        scrollIds.add(scrollId);
 
         // if total hits exceeds maximum - abort right away throwing an exception
         if (response.getHits().getTotalHits().value > indexConfiguration.getMaxPaths()) {
@@ -168,8 +177,12 @@ public class IndexService {
             SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId).scroll(scroll);
             response = client.scroll(scrollRequest, RequestOptions.DEFAULT);
             scrollId = response.getScrollId();
+            scrollIds.add(scrollId);
+
             hits = response.getHits();
         }
+
+        clearScrolls(scrollIds);
 
         return "[" + joiner.join(paths) + "]";
     }
@@ -209,4 +222,25 @@ public class IndexService {
             logger.error("Failed to close ES client: ", e);
         }
     }
+
+    private void clearScrolls(Iterable<String> scrollIds) {
+        ClearScrollRequest request = new ClearScrollRequest();
+        for (var scrollId : scrollIds) {
+            request.addScrollId(scrollId);
+        }
+
+        client.clearScrollAsync(request, RequestOptions.DEFAULT, new ActionListener<>() {
+            @Override
+            public void onResponse(ClearScrollResponse clearScrollResponse) {
+                // do nothing. We don't care
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                logger.warn("Failed to clear scroll with ids " + scrollIds, e);
+            }
+        });
+
+    }
+
 }
