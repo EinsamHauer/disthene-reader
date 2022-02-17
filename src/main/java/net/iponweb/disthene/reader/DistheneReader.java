@@ -138,7 +138,8 @@ public class DistheneReader {
                 logger.warn("HUP signal is not available. Will not handle it");
             }
         } catch (IOException e) {
-            logger.error(e);
+            logger.error("Failed to start", e);
+            System.exit(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
