@@ -107,6 +107,8 @@ public class MetricService {
         Stopwatch indexTimer = Stopwatch.createStarted();
         List<String> paths = indexService.getPaths(tenant, wildcards);
         indexTimer.stop();
+        logger.debug("Fetching from ES took " + indexTimer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
+
         statsService.addIndexResponseTime(tenant, indexTimer.elapsed(TimeUnit.MILLISECONDS));
 
         statsService.incRenderPathsRead(tenant, paths.size());
