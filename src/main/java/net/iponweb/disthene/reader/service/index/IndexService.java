@@ -70,7 +70,7 @@ public class IndexService {
                     .fetchSource("path", null)
                     .query(queryBuilder);
 
-            if (limit < maxResultWindow) sourceBuilder.size(limit);
+            sourceBuilder.size(Math.min(Math.min(limit, maxResultWindow), indexConfiguration.getScroll()));
 
             SearchRequest request = new SearchRequest(indexConfiguration.getIndex())
                     .source(sourceBuilder)

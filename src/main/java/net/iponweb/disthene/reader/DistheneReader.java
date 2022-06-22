@@ -213,7 +213,7 @@ public class DistheneReader {
 
                 throttlingService.reload(throttlingConfiguration);
 
-                logger.debug("Running with the following throttling configuration: " + throttlingConfiguration.toString());
+                logger.debug("Running with the following throttling configuration: " + throttlingConfiguration);
             } catch (Exception e) {
                 logger.error("Reloading throttling configuration failed");
                 logger.error(e);

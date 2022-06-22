@@ -90,7 +90,7 @@ public class LegendValueFunction extends DistheneFunction {
                 }
 
             }
-            ts.setName(ts.getName() + sb.toString());
+            ts.setName(ts.getName() + sb);
         }
 
         return processedArguments;
