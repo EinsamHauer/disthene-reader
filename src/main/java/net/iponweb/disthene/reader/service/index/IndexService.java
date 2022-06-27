@@ -147,7 +147,7 @@ public class IndexService {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
                 .query(queryBuilder);
 
-        if (indexConfiguration.getMaxPaths() < maxResultWindow) sourceBuilder.size(indexConfiguration.getMaxPaths());
+        sourceBuilder.size(Math.min(Math.min(indexConfiguration.getMaxPaths(), maxResultWindow), indexConfiguration.getScroll()));
 
         SearchRequest request = new SearchRequest(indexConfiguration.getIndex())
                 .source(sourceBuilder)
