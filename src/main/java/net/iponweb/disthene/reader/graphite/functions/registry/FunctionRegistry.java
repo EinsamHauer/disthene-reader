@@ -73,6 +73,7 @@ public class FunctionRegistry {
         registry.put("maximumBelow", MaximumBelowFunction.class);
         registry.put("minimumAbove", MinimumAboveFunction.class);
         registry.put("minimumBelow", MinimumBelowFunction.class);
+        registry.put("minMax", MinMaxFunction.class);
         registry.put("maxSeries", MaxSeriesFunction.class);
         registry.put("minSeries", MinSeriesFunction.class);
         registry.put("mostDeviant", MostDeviantFunction.class);
