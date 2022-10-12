@@ -163,9 +163,11 @@ public class DistheneReader {
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("Disthene", options);
+            System.exit(1);
         } catch (Exception e) {
             System.out.println("Start failed");
             e.printStackTrace();
+            System.exit(2);
         }
 
     }
