@@ -61,7 +61,7 @@ public class IndexService {
             String regEx = Joiner.on("|").skipNulls().join(regExs);
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                    .must(QueryBuilders.regexpQuery("path", regEx))
+                    .must(QueryBuilders.regexpQuery("path.keyword", regEx))
                     .filter(QueryBuilders.termQuery("tenant.keyword", tenant));
 
             if (leaf) queryBuilder.filter(QueryBuilders.termQuery("leaf", true));
@@ -141,7 +141,7 @@ public class IndexService {
         }
 
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.regexpQuery("path", regEx))
+                .must(QueryBuilders.regexpQuery("path.keyword", regEx))
                 .filter(QueryBuilders.termQuery("tenant.keyword", tenant));
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
@@ -202,7 +202,7 @@ public class IndexService {
 
             CountRequest countRequest = new CountRequest(indexConfiguration.getIndex())
                     .query(QueryBuilders.boolQuery()
-                            .must(QueryBuilders.regexpQuery("path", path + "\\..*"))
+                            .must(QueryBuilders.regexpQuery("path.keyword", path + "\\..*"))
                             .must(QueryBuilders.termQuery("tenant.keyword", tenant))
                             .must(QueryBuilders.termQuery("leaf", true)));
 
