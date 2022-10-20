@@ -4,7 +4,7 @@
     <groupId>net.iponweb.disthene.reader</groupId>
     <artifactId>disthene-reader</artifactId>
     <packaging>jar</packaging>
-    <version>2.0.13</version>
+    <version>2.0.14</version>
     <name>disthene-reader</name>
     <url>https://maven.apache.org</url>
 
@@ -109,7 +109,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.7</version>
+                <version>4.9.3</version>
                 <configuration>
                     <sourceDirectory>src</sourceDirectory>
                     <visitor>true</visitor>

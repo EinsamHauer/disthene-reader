@@ -50,6 +50,7 @@ public class TimeShiftFunction extends DistheneFunction {
         if (arguments.size() > 3 || arguments.size() < 2) throw new InvalidArgumentException("timeShift: number of arguments is " + arguments.size() + ". Must be two.");
         // argument cannot be a result of another function - it's not clear how to evaluate it in that case
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("timeShift: argument is " + arguments.get(0).getClass().getName() + ". Must be series wildcard");
+        if (!(arguments.get(1) instanceof String)) throw new InvalidArgumentException("timeShift: 2nd argument is " + arguments.get(1).getClass().getSimpleName() + ". Must be a string");
         if (!DateTimeUtils.testTimeOffset((String) arguments.get(1))) throw new InvalidArgumentException("timeShift: shift cannot be parsed (" + arguments.get(1) + ")");
     }
 }

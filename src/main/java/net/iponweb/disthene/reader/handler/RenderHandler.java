@@ -3,7 +3,9 @@ package net.iponweb.disthene.reader.handler;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.ReaderConfiguration;
@@ -111,11 +113,16 @@ public class RenderHandler implements DistheneReaderHandler {
                 throw (LogarithmicScaleNotAllowed) e.getCause();
             } else {
                 logger.error("Unexpected error:", e);
-                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
             }
+        } catch (UncheckedExecutionException e) {
+            if (!(e.getCause() instanceof ParseCancellationException)) {
+                logger.error("Unexpected error:", e);
+            }
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
         } catch (Exception e) {
             logger.error("Unexpected error:", e);
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
         }
 
         timer.stop();

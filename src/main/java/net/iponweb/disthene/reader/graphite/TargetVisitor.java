@@ -54,7 +54,6 @@ public class TargetVisitor extends GraphiteBaseVisitor<Target> {
 
             return function;
         } catch (InvalidFunctionException | InvalidArgumentException e) {
-            e.printStackTrace();
             throw new ParseCancellationException(e.getMessage(), e);
         }
 
