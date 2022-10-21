@@ -113,13 +113,13 @@ public class RenderHandler implements DistheneReaderHandler {
                 throw (LogarithmicScaleNotAllowed) e.getCause();
             } else {
                 logger.error("Unexpected error:", e);
-                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
             }
         } catch (UncheckedExecutionException e) {
             if (!(e.getCause() instanceof ParseCancellationException)) {
                 logger.error("Unexpected error:", e);
             }
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
         } catch (Exception e) {
             logger.error("Unexpected error:", e);
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
