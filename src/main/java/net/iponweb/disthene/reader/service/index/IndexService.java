@@ -73,8 +73,7 @@ public class IndexService {
             sourceBuilder.size(Math.min(Math.min(limit, maxResultWindow), indexConfiguration.getScroll()));
             SearchRequest request = new SearchRequest(indexConfiguration.getIndex())
                     .source(sourceBuilder)
-                    .scroll(scroll)
-                    .requestCache(true);
+                    .scroll(scroll);
 
             final Set<String> scrollIds = new HashSet<>();
 
@@ -151,8 +150,7 @@ public class IndexService {
 
         SearchRequest request = new SearchRequest(indexConfiguration.getIndex())
                 .source(sourceBuilder)
-                .scroll(scroll)
-                .requestCache(true);
+                .scroll(scroll);
 
         final Set<String> scrollIds = new HashSet<>();
 
