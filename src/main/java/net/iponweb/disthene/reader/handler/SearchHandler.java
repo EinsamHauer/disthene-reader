@@ -1,8 +1,13 @@
 package net.iponweb.disthene.reader.handler;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
+import com.google.common.util.concurrent.UncheckedTimeoutException;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
+import net.iponweb.disthene.reader.config.ReaderConfiguration;
 import net.iponweb.disthene.reader.exceptions.MissingParameterException;
 import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
@@ -12,30 +17,57 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 public class SearchHandler implements DistheneReaderHandler {
     private final static Logger logger = LogManager.getLogger(SearchHandler.class);
-
-    private final static int SEARCH_LIMIT = 100;
 
     private final IndexService indexService;
     private final StatsService statsService;
 
-    public SearchHandler(IndexService indexService, StatsService statsService) {
+    private final ReaderConfiguration readerConfiguration;
+
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
+    private final TimeLimiter timeLimiter = SimpleTimeLimiter.create(executor);
+
+    public SearchHandler(IndexService indexService, StatsService statsService, ReaderConfiguration readerConfiguration) {
         this.indexService = indexService;
         this.statsService = statsService;
+        this.readerConfiguration = readerConfiguration;
     }
 
     @Override
     public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, IOException, TooMuchDataExpectedException {
         SearchParameters parameters = parse(request);
+        logger.debug("Got request: " + parameters);
+
+        Stopwatch timer = Stopwatch.createStarted();
 
         statsService.incPathsRequests(parameters.getTenant());
 
-        String pathsAsString = indexService.getSearchPathsAsString(parameters.getTenant(), parameters.getQuery(), SEARCH_LIMIT);
+        FullHttpResponse response;
+        try {
+            response = timeLimiter.callWithTimeout(() -> handleInternal(parameters), readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS);
+        } catch (UncheckedTimeoutException e) {
+            logger.debug("Request timed out: " + parameters);
+            statsService.incTimedOutRequests(parameters.getTenant());
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
+        } catch (Exception e) {
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
+        }
+
+        timer.stop();
+        logger.debug("Request took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + parameters + ")");
+
+        return response;
+    }
+
+    private FullHttpResponse handleInternal(SearchParameters parameters) throws IOException {
+        String pathsAsString = indexService.getSearchPathsAsString(parameters.getTenant(), parameters.getQuery());
 
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
@@ -95,6 +127,14 @@ public class SearchHandler implements DistheneReaderHandler {
 
         void setQuery(String query) {
             this.query = query;
+        }
+
+        @Override
+        public String toString() {
+            return "SearchParameters{" +
+                    "tenant='" + tenant + '\'' +
+                    ", query='" + query + '\'' +
+                    '}';
         }
     }
 }

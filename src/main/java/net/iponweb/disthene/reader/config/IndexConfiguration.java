@@ -13,6 +13,7 @@ public class IndexConfiguration {
     private int scroll;
     private int timeout;
     private int maxPaths;
+    private int maxSearchPaths = 100;
 
     public String getIndex() {
         return index;
@@ -62,6 +63,14 @@ public class IndexConfiguration {
         this.maxPaths = maxPaths;
     }
 
+    public int getMaxSearchPaths() {
+        return maxSearchPaths;
+    }
+
+    public void setMaxSearchPaths(int maxSearchPaths) {
+        this.maxSearchPaths = maxSearchPaths;
+    }
+
     @Override
     public String toString() {
         return "IndexConfiguration{" +
@@ -71,6 +80,7 @@ public class IndexConfiguration {
                 ", scroll=" + scroll +
                 ", timeout=" + timeout +
                 ", maxPaths=" + maxPaths +
+                ", maxSearchPaths=" + maxSearchPaths +
                 '}';
     }
 }

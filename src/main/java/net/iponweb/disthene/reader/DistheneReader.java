@@ -117,7 +117,7 @@ public class DistheneReader {
             readerServer.registerHandler(RENDER_PATH, renderHandler);
 
             logger.info("Creating search handler");
-            SearchHandler searchHandler = new SearchHandler(indexService, statsService);
+            SearchHandler searchHandler = new SearchHandler(indexService, statsService, distheneReaderConfiguration.getReader());
             readerServer.registerHandler(SEARCH_PATH, searchHandler);
 
             logger.info("Creating path stats handler");

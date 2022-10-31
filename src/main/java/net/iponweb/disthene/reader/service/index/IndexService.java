@@ -185,8 +185,28 @@ public class IndexService {
         return "[" + joiner.join(paths) + "]";
     }
 
-    public String getSearchPathsAsString(String tenant, String regEx, int limit) throws IOException, TooMuchDataExpectedException {
-        return Joiner.on(",").skipNulls().join(getPathsFromRegExs(tenant, List.of(regEx), false, limit));
+    public String getSearchPathsAsString(String tenant, String regEx) throws IOException {
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.regexpQuery("path.keyword", regEx))
+                .filter(QueryBuilders.termQuery("tenant.keyword", tenant));
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
+                .fetchSource("path", null)
+                .query(queryBuilder)
+                .size(Math.min(indexConfiguration.getMaxSearchPaths(), maxResultWindow));
+
+        SearchRequest request = new SearchRequest(indexConfiguration.getIndex())
+                .source(sourceBuilder)
+                .requestCache(true);
+
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+
+        List<String> paths = new ArrayList<>();
+        for (SearchHit hit : response.getHits()) {
+            paths.add(hit.getSourceAsString());
+        }
+
+        return Joiner.on(",").skipNulls().join(paths);
     }
 
     public String getPathsWithStats(String tenant, String wildcard) throws TooMuchDataExpectedException, IOException {
