@@ -203,7 +203,7 @@ public class IndexService {
 
         List<String> paths = new ArrayList<>();
         for (SearchHit hit : response.getHits()) {
-            paths.add(hit.getSourceAsString());
+            paths.add(String.valueOf(hit.getSourceAsMap().get("path")));
         }
 
         return Joiner.on(",").skipNulls().join(paths);
