@@ -1,6 +1,7 @@
 package net.iponweb.disthene.reader.service.index;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
 import net.iponweb.disthene.reader.config.IndexConfiguration;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.utils.WildcardUtil;
@@ -26,6 +27,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrei Ivanov
@@ -199,7 +201,10 @@ public class IndexService {
                 .source(sourceBuilder)
                 .requestCache(true);
 
+        Stopwatch indexTimer = Stopwatch.createStarted();
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        indexTimer.stop();
+        logger.debug("Fetching from ES took " + indexTimer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + regEx + ")");
 
         List<String> paths = new ArrayList<>();
         for (SearchHit hit : response.getHits()) {
