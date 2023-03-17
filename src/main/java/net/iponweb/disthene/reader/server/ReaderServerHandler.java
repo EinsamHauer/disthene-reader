@@ -33,20 +33,20 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
 
         try {
             HttpRequest request = (HttpRequest) message;
-            boolean keepAlive = HttpHeaders.isKeepAlive(request);
+            boolean keepAlive = HttpUtil.isKeepAlive(request);
 
             FullHttpResponse response;
 
-            if (DefaultHttpHeaders.is100ContinueExpected(request)) {
+            if (HttpUtil.is100ContinueExpected(request)) {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
             }
 
-            logger.debug("Got request: " + ((HttpRequest) message).getMethod() + " " + ((HttpRequest) message).getUri());
+            logger.debug("Got request: " + ((HttpRequest) message).method() + " " + ((HttpRequest) message).uri());
             byte[] bytes = new byte[((HttpContent) message).content().readableBytes()];
             ((HttpContent) message).content().readBytes(bytes);
             logger.debug("Request content: " + new String(bytes));
 
-            String path = new QueryStringDecoder(((HttpRequest) message).getUri()).path();
+            String path = new QueryStringDecoder(((HttpRequest) message).uri()).path();
 
             DistheneReaderHandler handler = null;
             for(Map.Entry<Pattern,DistheneReaderHandler> entry : handlers.entrySet()) {
@@ -65,7 +65,7 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
 
             if (keepAlive) {
-                response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
                 ctx.write(response);
             } else {
                 ctx.write(response).addListener(ChannelFutureListener.CLOSE);
