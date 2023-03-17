@@ -108,20 +108,20 @@ public class StatsService {
                 totalThrottled += statsRecord.getThrottled();
                 totalTimedOutRequests += statsRecord.getTimedOutRequests();
 
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsRecord.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsRecord.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsRecord.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsRecord.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".throttled " + statsRecord.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsRecord.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsRecord.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsRecord.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsRecord.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsRecord.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".throttled " + statsRecord.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsRecord.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + totalRenderPathsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + totalTimedOutRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.render_requests " + totalRenderRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.render_paths_read " + totalRenderPathsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.render_points_read " + totalRenderPointsRead + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.paths_requests " + totalPathsRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.throttled " + totalThrottled + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.timed_out_requests " + totalTimedOutRequests + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             dos.flush();
             connection.close();
