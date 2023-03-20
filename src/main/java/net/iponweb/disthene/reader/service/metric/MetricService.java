@@ -54,7 +54,6 @@ public class MetricService {
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-
         Rollup bestRollup = getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
@@ -123,7 +122,6 @@ public class MetricService {
         // Calculate rollup etc
         Long now = System.currentTimeMillis() * 1000;
         Long effectiveTo = Math.min(to, now);
-
         Rollup bestRollup = getRollup(from);
         Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
@@ -214,7 +212,6 @@ public class MetricService {
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
-
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
             if (now - rollup.getPeriod() * rollup.getRollup() <= from) {
                 survivals.add(rollup);
