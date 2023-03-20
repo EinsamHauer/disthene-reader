@@ -32,5 +32,6 @@ stats:
   interval: 60
   tenant: "graphite"
   hostname: "disthene-1a"
+  pathPrefix: ""
   carbonHost: "carbon.example.net"
   carbonPort: 2003

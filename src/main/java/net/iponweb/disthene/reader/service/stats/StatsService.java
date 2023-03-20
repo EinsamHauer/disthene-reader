@@ -112,64 +112,64 @@ public class StatsService {
                 String tenant = entry.getKey();
                 StatsSnapshot statsSnapshot = entry.getValue();
 
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsSnapshot.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsSnapshot.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsSnapshot.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".render_requests " + statsSnapshot.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".render_paths_read " + statsSnapshot.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".render_points_read " + statsSnapshot.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
                 // response response time
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
                 // store response response time
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.50 " + statsSnapshot.getStoreResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.75 " + statsSnapshot.getStoreResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.95 " + statsSnapshot.getStoreResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.percentiles.99 " + statsSnapshot.getStoreResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".store.total " + statsSnapshot.getTotalStoreResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".store.percentiles.50 " + statsSnapshot.getStoreResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".store.percentiles.75 " + statsSnapshot.getStoreResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".store.percentiles.95 " + statsSnapshot.getStoreResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".store.percentiles.99 " + statsSnapshot.getStoreResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".store.total " + statsSnapshot.getTotalStoreResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
                 // index response response time
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.50 " + statsSnapshot.getIndexResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.75 " + statsSnapshot.getIndexResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.95 " + statsSnapshot.getIndexResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.percentiles.99 " + statsSnapshot.getIndexResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-                dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.tenants." + tenant + ".index.total " + statsSnapshot.getTotalIndexResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".index.percentiles.50 " + statsSnapshot.getIndexResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".index.percentiles.75 " + statsSnapshot.getIndexResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".index.percentiles.95 " + statsSnapshot.getIndexResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".index.percentiles.99 " + statsSnapshot.getIndexResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+                dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.tenants." + tenant + ".index.total " + statsSnapshot.getTotalIndexResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
             }
 
             StatsSnapshot statsSnapshot = globalStats.reset();
 
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_requests " + statsSnapshot.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_paths_read " + statsSnapshot.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.render_points_read " + statsSnapshot.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.render_requests " + statsSnapshot.getRenderRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.render_paths_read " + statsSnapshot.getRenderPathsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.render_points_read " + statsSnapshot.getRenderPointsRead() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.paths_requests " + statsSnapshot.getPathsRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.throttled " + statsSnapshot.getThrottled() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.timed_out_requests " + statsSnapshot.getTimedOutRequests() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             // response response time
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.response.percentiles.50 " + statsSnapshot.getResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.response.percentiles.75 " + statsSnapshot.getResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.response.percentiles.95 " + statsSnapshot.getResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.response.percentiles.99 " + statsSnapshot.getResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.response.total " + statsSnapshot.getTotalResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             // store response response time
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.50 " + statsSnapshot.getStoreResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.75 " + statsSnapshot.getStoreResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.95 " + statsSnapshot.getStoreResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.percentiles.99 " + statsSnapshot.getStoreResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.store.total " + statsSnapshot.getTotalStoreResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.store.percentiles.50 " + statsSnapshot.getStoreResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.store.percentiles.75 " + statsSnapshot.getStoreResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.store.percentiles.95 " + statsSnapshot.getStoreResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.store.percentiles.99 " + statsSnapshot.getStoreResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.store.total " + statsSnapshot.getTotalStoreResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             // index response response time
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.50 " + statsSnapshot.getIndexResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.75 " + statsSnapshot.getIndexResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.95 " + statsSnapshot.getIndexResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.percentiles.99 " + statsSnapshot.getIndexResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
-            dos.writeBytes(statsConfiguration.getHostname() + ".disthene-reader.index.total " + statsSnapshot.getTotalIndexResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.index.percentiles.50 " + statsSnapshot.getIndexResponseTimesMedian() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.index.percentiles.75 " + statsSnapshot.getIndexResponseTimes75thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.index.percentiles.95 " + statsSnapshot.getIndexResponseTimes95thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.index.percentiles.99 " + statsSnapshot.getIndexResponseTimes99thPercentile() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
+            dos.writeBytes(statsConfiguration.getPath() + ".disthene-reader.index.total " + statsSnapshot.getTotalIndexResponseTime() + " " + timestamp + " " + statsConfiguration.getTenant() + "\n");
 
             dos.flush();
             connection.close();

@@ -10,6 +10,7 @@ public class StatsConfiguration {
     private int interval;
     private String tenant;
     private String hostname;
+    private String pathPrefix;
     private String carbonHost;
     private int carbonPort;
 
@@ -20,6 +21,7 @@ public class StatsConfiguration {
         } catch (UnknownHostException e) {
             hostname = "unknown";
         }
+        pathPrefix = "";
     }
 
     public int getInterval() {
@@ -46,6 +48,15 @@ public class StatsConfiguration {
         this.hostname = hostname;
     }
 
+    public String getPathPrefix() {
+        return pathPrefix;
+    }
+
+    public void setPathPrefix(String pathPrefix) {
+        // remove right-trailing dot
+        this.pathPrefix = pathPrefix.endsWith(".") ? pathPrefix.replaceAll("\\.+\\z", "") : pathPrefix;
+    }
+
     public String getCarbonHost() {
         return carbonHost;
     }
@@ -62,12 +73,21 @@ public class StatsConfiguration {
         this.carbonPort = carbonPort;
     }
 
+    public String getPath() {
+        if (pathPrefix.isEmpty()) {
+            return hostname;
+        } else {
+            return pathPrefix + "." + hostname;
+        }
+    }
+
     @Override
     public String toString() {
         return "StatsConfiguration{" +
                 "interval=" + interval +
                 ", tenant='" + tenant + '\'' +
                 ", hostname='" + hostname + '\'' +
+                ", pathPrefix='" + pathPrefix + '\'' +
                 ", carbonHost='" + carbonHost + '\'' +
                 ", carbonPort=" + carbonPort +
                 '}';

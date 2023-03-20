@@ -205,8 +205,10 @@ stats:
   interval: 60
 # tenant to use for stats
   tenant: "graphite"
-# hostname to use
+# (optional) hostname to use if not specified system's hostname will be used
   hostname: "disthene-reader"
+# (optional) path prefix for stats metrics, default to ""
+  pathPrefix: ""
 # carbon server to send stats to
   carbonHost: "carbon.example.net"
 # carbon port to send stats to
