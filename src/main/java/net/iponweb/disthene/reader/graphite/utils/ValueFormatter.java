@@ -11,7 +11,7 @@ import java.util.Map;
 public abstract class ValueFormatter {
 
     public enum ValueFormatterType {
-        HUMAN, MACHINE;
+        HUMAN, MACHINE
     }
 
     static private final Map<ValueFormatterType, ValueFormatter> instances = new HashMap<>();

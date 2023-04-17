@@ -10,8 +10,6 @@ import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Andrei Ivanov
@@ -24,8 +22,7 @@ public class AliasSubFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -35,8 +32,6 @@ public class AliasSubFunction extends DistheneFunction {
 
         String regex = (String) arguments.get(1);
         String replacement = ((String) arguments.get(2)).replaceAll("\\\\", "\\$");
-
-        Pattern pattern = Pattern.compile(regex);
 
         for (TimeSeries ts : processedArguments) {
             ts.setName(ts.getName().replaceAll(regex, replacement));

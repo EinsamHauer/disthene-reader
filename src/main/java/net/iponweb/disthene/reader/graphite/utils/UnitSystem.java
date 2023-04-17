@@ -11,9 +11,7 @@ public enum UnitSystem {
     SI("si"),
     NONE("");
 
-    private List<Unit> prefixes = new ArrayList<>();
-
-
+    private final List<Unit> prefixes = new ArrayList<>();
 
     UnitSystem(String system) {
         switch (system) {

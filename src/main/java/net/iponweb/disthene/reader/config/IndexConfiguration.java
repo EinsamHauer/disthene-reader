@@ -7,22 +7,13 @@ import java.util.List;
  * @author Andrei Ivanov
  */
 public class IndexConfiguration {
-    private String name;
     private String index;
-    private String type;
     private List<String> cluster = new ArrayList<>();
     private int port;
     private int scroll;
     private int timeout;
     private int maxPaths;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    private int maxSearchPaths = 100;
 
     public String getIndex() {
         return index;
@@ -46,14 +37,6 @@ public class IndexConfiguration {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public int getScroll() {
@@ -80,17 +63,24 @@ public class IndexConfiguration {
         this.maxPaths = maxPaths;
     }
 
+    public int getMaxSearchPaths() {
+        return maxSearchPaths;
+    }
+
+    public void setMaxSearchPaths(int maxSearchPaths) {
+        this.maxSearchPaths = maxSearchPaths;
+    }
+
     @Override
     public String toString() {
         return "IndexConfiguration{" +
-                "name='" + name + '\'' +
-                ", index='" + index + '\'' +
-                ", type='" + type + '\'' +
+                "index='" + index + '\'' +
                 ", cluster=" + cluster +
                 ", port=" + port +
                 ", scroll=" + scroll +
                 ", timeout=" + timeout +
                 ", maxPaths=" + maxPaths +
+                ", maxSearchPaths=" + maxSearchPaths +
                 '}';
     }
 }

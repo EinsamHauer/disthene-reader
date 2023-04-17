@@ -12,7 +12,6 @@ import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Andrei Ivanov
@@ -25,8 +24,7 @@ public class DivideSeriesFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> dividends = new ArrayList<>();
-        dividends.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> dividends = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (dividends.size() == 0) return Collections.emptyList();
 
@@ -36,8 +34,7 @@ public class DivideSeriesFunction extends DistheneFunction {
         TimeSeries divisor = divisors.get(0);
 
 
-        List<TimeSeries> tmp = new ArrayList<>();
-        tmp.addAll(dividends);
+        List<TimeSeries> tmp = new ArrayList<>(dividends);
         tmp.add(divisor);
         if (!TimeSeriesUtils.checkAlignment(tmp)) {
             throw new TimeSeriesNotAlignedException();

@@ -23,8 +23,7 @@ public class SecondYAxisFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -42,7 +41,7 @@ public class SecondYAxisFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() > 1 || arguments.size() == 0) throw new InvalidArgumentException("secondYAxis: number of arguments is " + arguments.size() + ". Must be one.");
+        if (arguments.size() != 1) throw new InvalidArgumentException("secondYAxis: number of arguments is " + arguments.size() + ". Must be one.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("secondYAxis: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
 
     }

@@ -28,10 +28,9 @@ public class SummarizeFunction extends DistheneFunction {
         // parse interval
         int step = (int) Math.abs(DateTimeUtils.parseTimeOffset((String) arguments.get(1)));
 
-        String aggregation = arguments.size() > 2 ? ((String) arguments.get(2)).toLowerCase().replaceAll("[\"\']", "") : "sum";
+        String aggregation = arguments.size() > 2 ? ((String) arguments.get(2)).toLowerCase().replaceAll("[\"']", "") : "sum";
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -50,8 +49,8 @@ public class SummarizeFunction extends DistheneFunction {
             List<Double> buffer = new ArrayList<>();
 
             int index = 0;
-            while (ts.getFrom() + index * ts.getStep() <= ts.getTo()) {
-                if ((ts.getFrom() + index * ts.getStep()) % step == 0 && (ts.getFrom() + index * ts.getStep()) != from) {
+            while (ts.getFrom() + (long) index * ts.getStep() <= ts.getTo()) {
+                if ((ts.getFrom() + (long) index * ts.getStep()) % step == 0 && (ts.getFrom() + (long) index * ts.getStep()) != from) {
                     switch (aggregation) {
                         case "last": {
                             consolidated.add(CollectionUtils.last(buffer));
@@ -122,7 +121,7 @@ public class SummarizeFunction extends DistheneFunction {
 
         if (arguments.size() > 2) {
             if (!(arguments.get(2) instanceof String)) throw new InvalidArgumentException("summarize: argument is " + arguments.get(2).getClass().getName() + ". Must be a string");
-            String argument = ((String) arguments.get(2)).toLowerCase().replaceAll("[\"\']", "");
+            String argument = ((String) arguments.get(2)).toLowerCase().replaceAll("[\"']", "");
             if (!argument.equals("last") && !argument.equals("avg") && !argument.equals("sum") && !argument.equals("min") && !argument.equals("max")) {
                 throw new InvalidArgumentException("summarize: must be aggregation.");
             }

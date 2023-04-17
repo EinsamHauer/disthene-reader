@@ -26,8 +26,7 @@ public class HitcountFunction extends DistheneFunction {
         // parse interval
         int interval = (int) Math.abs(DateTimeUtils.parseTimeOffset((String) arguments.get(1)));
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -41,13 +40,13 @@ public class HitcountFunction extends DistheneFunction {
             int bucketCount = (int) Math.ceil((ts.getTo() - ts.getFrom()) / (double) interval);
             Double[] buckets = new Double[bucketCount];
 //            long newStart = ts.getTo() - bucketCount * interval;
-            long newStart = (ts.getTo() / interval) * interval - (bucketCount - 1) * interval;
+            long newStart = (ts.getTo() / interval) * interval - (long) (bucketCount - 1) * interval;
 
             for (int i = 0; i < values.length; i++) {
                 Double value = values[i];
                 if (value == null) continue;
 
-                long startTime = ts.getFrom() + i * ts.getStep();
+                long startTime = ts.getFrom() + (long) i * ts.getStep();
                 int startBucket = (int) (((startTime - newStart) - (startTime - newStart) % interval) / interval);
                 int startMod = (int) ((startTime - newStart) % interval);
                 long endTime = startTime + ts.getStep();

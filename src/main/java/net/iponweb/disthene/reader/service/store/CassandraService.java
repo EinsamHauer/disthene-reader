@@ -4,7 +4,8 @@ import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import net.iponweb.disthene.reader.config.StoreConfiguration;
 import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 
@@ -12,8 +13,7 @@ import java.util.Collection;
  * @author Andrei Ivanov
  */
 public class CassandraService {
-
-    private Logger logger = Logger.getLogger(CassandraService.class);
+    private final static Logger logger = LogManager.getLogger(CassandraService.class);
 
     private Cluster cluster;
     private Session session;

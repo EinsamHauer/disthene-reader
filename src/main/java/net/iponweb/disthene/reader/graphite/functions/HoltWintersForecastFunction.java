@@ -3,13 +3,10 @@ package net.iponweb.disthene.reader.graphite.functions;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
-import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.graphite.utils.HoltWinters;
-import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +31,7 @@ public class HoltWintersForecastFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() > 1 || arguments.size() == 0) throw new InvalidArgumentException("holtWintersForecast: number of arguments is " + arguments.size() + ". Must be 1.");
+        if (arguments.size() != 1) throw new InvalidArgumentException("holtWintersForecast: number of arguments is " + arguments.size() + ". Must be 1.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("holtWintersForecast: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
     }
 }

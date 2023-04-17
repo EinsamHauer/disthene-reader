@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class DecoratedTimeSeries {
 
-    private TimeSeries timeSeries;
+    private final TimeSeries timeSeries;
     private double xStep;
     private int valuesPerPoint;
 

@@ -11,9 +11,9 @@ import net.iponweb.disthene.reader.graph.Graph;
 import net.iponweb.disthene.reader.graphite.utils.GraphiteUtils;
 import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import org.joda.time.DateTime;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
 public class ResponseFormatter {
 
 
-    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws NotImplementedException, LogarithmicScaleNotAllowed {
+    public static FullHttpResponse formatResponse(List<TimeSeries> timeSeriesList, RenderParameters parameters) throws UnsupportedOperationException, LogarithmicScaleNotAllowed {
         // Let's remove empty series
         List<TimeSeries> filtered = filterAllNulls(timeSeriesList);
 
@@ -33,7 +33,7 @@ public class ResponseFormatter {
             case CSV: return formatResponseAsCSV(filtered, parameters);
             case PNG: return formatResponseAsPng(filtered, parameters);
             case GRAPHPLOT_JSON: return formatResponseAsGraphplotJson(filtered, parameters);
-            default:throw new NotImplementedException();
+            default:throw new UnsupportedOperationException();
         }
     }
 
@@ -43,14 +43,14 @@ public class ResponseFormatter {
         for(TimeSeries timeSeries : timeSeriesList) {
             Double[] values = timeSeries.getValues();
             for(int i = 0; i < values.length; i++) {
-                DateTime dt = new DateTime((timeSeries.getFrom() + i * timeSeries.getStep()) * 1000, renderParameters.getTz());
+                DateTime dt = new DateTime((timeSeries.getFrom() + (long) i * timeSeries.getStep()) * 1000L, renderParameters.getTz());
                 String stringValue;
                 if (values[i] == null) {
                     stringValue = "";
                 } else {
                     BigDecimal bigDecimal = BigDecimal.valueOf(values[i]);
                     if (bigDecimal.precision() > 10) {
-                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, BigDecimal.ROUND_HALF_UP);
+                        bigDecimal = bigDecimal.setScale(bigDecimal.precision() - 1, RoundingMode.HALF_UP);
                     }
 
                     stringValue = bigDecimal.stripTrailingZeros().toPlainString();
@@ -115,7 +115,7 @@ public class ResponseFormatter {
                     stringValue = GraphiteUtils.formatDoubleSpecialPlain(timeSeries.getValues()[i]);
                 }
 
-                datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + timeSeries.getStep() * i) + "]");
+                datapoints.add("[" + stringValue + ", " + (timeSeries.getFrom() + (long) timeSeries.getStep() * i) + "]");
             }
             results.add("{\"target\": " + gson.toJson(timeSeries.getName()) + ", \"datapoints\": [" + Joiner.on(", ").join(datapoints) + "]}");
         }
@@ -144,8 +144,6 @@ public class ResponseFormatter {
     private static FullHttpResponse formatResponseAsGraphplotJson(List<TimeSeries> timeSeriesList, RenderParameters renderParameters) {
         List<String> results = new ArrayList<>();
 
-        Gson gson = new Gson();
-
         // consolidate data points
         consolidate(timeSeriesList, renderParameters.getMaxDataPoints());
 
@@ -161,7 +159,7 @@ public class ResponseFormatter {
 
                 datapoints.add(stringValue);
             }
-            results.add("{\"start\": " + timeSeries.getFrom() + ", \"step\": " + timeSeries.getStep() + ", \"end\": " + (timeSeries.getFrom() + timeSeries.getStep() * timeSeries.getValues().length) + ", \"name\": \"" + timeSeries.getName() + "\", \"data\": [" + Joiner.on(", ").join(datapoints) + "]}");
+            results.add("{\"start\": " + timeSeries.getFrom() + ", \"step\": " + timeSeries.getStep() + ", \"end\": " + (timeSeries.getFrom() + (long) timeSeries.getStep() * timeSeries.getValues().length) + ", \"name\": \"" + timeSeries.getName() + "\", \"data\": [" + Joiner.on(", ").join(datapoints) + "]}");
         }
         String responseString = "[" + Joiner.on(", ").join(results) + "]";
 
@@ -186,7 +184,7 @@ public class ResponseFormatter {
             }
 
             ts.setStep(dts.getValuesPerPoint() * dts.getStep());
-            ts.setTo(ts.getFrom() + ts.getStep() * dts.getConsolidatedValues().length - 1);
+            ts.setTo(ts.getFrom() + (long) ts.getStep() * dts.getConsolidatedValues().length - 1);
             ts.setValues(dts.getConsolidatedValues());
         }
     }

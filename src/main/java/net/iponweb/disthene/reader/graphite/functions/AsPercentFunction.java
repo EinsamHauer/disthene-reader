@@ -23,8 +23,7 @@ public class AsPercentFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -32,15 +31,11 @@ public class AsPercentFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-
-
-
         int length = processedArguments.get(0).getValues().length;
         double[] total = new double[length];
 
         if (arguments.size() > 1 && (arguments.get(1) instanceof Target)) {
-            List<TimeSeries> totalSeries = new ArrayList<>();
-            totalSeries.addAll(evaluator.eval((Target) arguments.get(1)));
+            List<TimeSeries> totalSeries = new ArrayList<>(evaluator.eval((Target) arguments.get(1)));
 
             if (totalSeries.size() == 0) {
                 return Collections.emptyList();
@@ -102,7 +97,7 @@ public class AsPercentFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() > 2 || arguments.size() == 0) throw new InvalidArgumentException("asPercent: number of arguments is " + arguments.size() + ". Must be 1.");
+        if (arguments.size() > 2 || arguments.size() == 0) throw new InvalidArgumentException("asPercent: number of arguments is " + arguments.size() + ". Must be one or two.");
         if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
         if (arguments.size() > 1 && !(arguments.get(1) instanceof Target) && !(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("asPercent: argument is " + arguments.get(1).getClass().getName() + ". Must be series or number");
     }

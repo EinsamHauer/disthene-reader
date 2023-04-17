@@ -1,9 +1,7 @@
 package net.iponweb.disthene.reader.utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.*;
 
 /**
  * @author Andrei Ivanov
@@ -130,9 +128,7 @@ public class CollectionUtils {
     }
 
     public static void constant(Double[] values, Double constant) {
-        for (int i = 0; i < values.length; i++) {
-            values[i] = constant;
-        }
+        Arrays.fill(values, constant);
     }
 
     private static List<Double> filterNulls(Collection<Double> values) {
@@ -145,7 +141,10 @@ public class CollectionUtils {
     }
 
     // faster but unsafe methods assuming all values are not nulls and list is not empty
-    public static Double unsafeSum(Collection<Double> values) {
+    public static Double unsafeSum(@Nullable Collection<Double> values) {
+        // may be null
+        if (values == null) return 0d;
+
         // shortcut if there is only one value
         if (values.size() == 1) return values.iterator().next();
 
@@ -156,7 +155,10 @@ public class CollectionUtils {
         return sum;
     }
 
-    public static Double unsafeAverage(Collection<Double> values) {
+    public static Double unsafeAverage(@Nullable Collection<Double> values) {
+        // may be null
+        if (values == null) return 0d;
+
         // shortcut if there is only one value
         if (values.size() == 1) return values.iterator().next();
 

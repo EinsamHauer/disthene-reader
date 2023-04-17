@@ -18,8 +18,11 @@ import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,15 +33,15 @@ import java.util.concurrent.TimeUnit;
  * @author Andrei Ivanov
  */
 public class MetricService {
-    final static Logger logger = Logger.getLogger(MetricService.class);
+    private final static Logger logger = LogManager.getLogger(MetricService.class);
 
-    private IndexService indexService;
-    private CassandraService cassandraService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final CassandraService cassandraService;
+    private final StatsService statsService;
 
-    private DistheneReaderConfiguration distheneReaderConfiguration;
+    private final DistheneReaderConfiguration distheneReaderConfiguration;
 
-    private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
     public MetricService(IndexService indexService, CassandraService cassandraService, StatsService statsService, DistheneReaderConfiguration distheneReaderConfiguration) {
         this.indexService = indexService;
@@ -47,22 +50,25 @@ public class MetricService {
         this.statsService = statsService;
     }
 
-    public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public List<String> getPaths(String tenant, String wildcard) throws TooMuchDataExpectedException, IOException {
+        return indexService.getPaths(tenant, Collections.singletonList(wildcard));
+    }
+
+    public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
         Collections.sort(paths);
 
         // Calculate rollup etc
-        Long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
 
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
+        long timestamp = effectiveFrom;
         int index = 0;
         while (timestamp <= effectiveTo) {
             timestampIndices.put(timestamp, index++);
@@ -108,29 +114,32 @@ public class MetricService {
             }
         }
 
-
         return "{\"from\":" + effectiveFrom + ",\"to\":" + effectiveTo + ",\"step\":" + bestRollup.getRollup() +
                 ",\"series\":{" + Joiner.on(",").skipNulls().join(singlePathJsons) + "}}";
 
     }
 
-    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
+        Stopwatch indexTimer = Stopwatch.createStarted();
         List<String> paths = indexService.getPaths(tenant, wildcards);
+        indexTimer.stop();
+        logger.debug("Fetching from ES took " + indexTimer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
+
+        statsService.addIndexResponseTime(tenant, indexTimer.elapsed(TimeUnit.MILLISECONDS));
 
         statsService.incRenderPathsRead(tenant, paths.size());
 
         // Calculate rollup etc
-        Long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
 
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
+        long timestamp = effectiveFrom;
         int index = 0;
         while (timestamp <= effectiveTo) {
             timestampIndices.put(timestamp, index++);
@@ -208,12 +217,12 @@ public class MetricService {
     }
 
     public Rollup getRollup(long from) {
-        long now = System.currentTimeMillis() / 1000L ;
+        long now = System.currentTimeMillis() / 1000L;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
-            if (now - rollup.getPeriod() * rollup.getRollup() <= from) {
+            if (now - (long) rollup.getPeriod() * rollup.getRollup() <= from) {
                 survivals.add(rollup);
             }
         }
@@ -227,20 +236,23 @@ public class MetricService {
     }
 
     private static class SinglePathResult {
-        String path;
+        final String path;
         String json;
         Double[] values = null;
         boolean allNulls = true;
+        final boolean isSumMetric;
 
         private SinglePathResult(String path) {
             this.path = path;
+            // trying to optimize something that JIT should do. Probably redundant
+            this.isSumMetric = isSumMetric(path);
         }
 
         public String getPath() {
             return path;
         }
 
-        public String getJson() {
+        String getJson() {
             return json;
         }
 
@@ -248,7 +260,7 @@ public class MetricService {
             return values;
         }
 
-        public boolean isAllNulls() {
+        boolean isAllNulls() {
             return allNulls;
         }
 

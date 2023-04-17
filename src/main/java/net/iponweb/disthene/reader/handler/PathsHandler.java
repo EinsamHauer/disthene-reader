@@ -9,19 +9,20 @@ import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
  * @author Andrei Ivanov
  */
 public class PathsHandler implements DistheneReaderHandler {
+    private final static Logger logger = LogManager.getLogger(PathsHandler.class);
 
-    private final static Logger logger = Logger.getLogger(PathsHandler.class);
-
-    private IndexService indexService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final StatsService statsService;
 
     public PathsHandler(IndexService indexService, StatsService statsService) {
         this.indexService = indexService;
@@ -29,7 +30,7 @@ public class PathsHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, TooMuchDataExpectedException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, TooMuchDataExpectedException, IOException {
         PathsParameters parameters = parse(request);
 
         statsService.incPathsRequests(parameters.getTenant());
@@ -81,7 +82,7 @@ public class PathsHandler implements DistheneReaderHandler {
         }
     }
 
-    private class PathsParameters {
+    private static class PathsParameters {
         private String tenant;
         private String query;
 
