@@ -8,26 +8,31 @@ import net.iponweb.disthene.reader.utils.WildcardUtil;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest;
-import org.elasticsearch.action.search.*;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.core.CountRequest;
-import org.elasticsearch.client.core.CountResponse;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.core.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.Scroll;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.opensearch.action.ActionListener;
+import org.opensearch.action.admin.indices.settings.get.GetSettingsRequest;
+import org.opensearch.action.search.*;
+import org.opensearch.client.RequestOptions;
+import org.opensearch.client.RestClient;
+import org.opensearch.client.RestHighLevelClient;
+import org.opensearch.client.core.CountRequest;
+import org.opensearch.client.core.CountResponse;
+import org.opensearch.common.settings.Settings;
+import org.opensearch.common.unit.TimeValue;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.search.Scroll;
+import org.opensearch.search.SearchHit;
+import org.opensearch.search.SearchHits;
+import org.opensearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import io.github.acm19.aws.interceptor.http.AwsRequestSigningApacheInterceptor;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.signer.Aws4Signer;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * @author Andrei Ivanov
@@ -44,16 +49,20 @@ public class IndexService {
     public IndexService(IndexConfiguration indexConfiguration) throws IOException {
         this.indexConfiguration = indexConfiguration;
 
+        HttpRequestInterceptor interceptor = new AwsRequestSigningApacheInterceptor(
+                "es",
+                Aws4Signer.create(),
+                DefaultCredentialsProvider.create(),
+                Region.EU_CENTRAL_1
+                );
+
+        String host  = indexConfiguration.getCluster().get(0);
         client = new RestHighLevelClient(
-                RestClient.builder(
-                        indexConfiguration.getCluster().stream().map(node -> new HttpHost(node, indexConfiguration.getPort())).toArray(HttpHost[]::new)));
-
-        GetSettingsRequest request = new GetSettingsRequest().indices(indexConfiguration.getIndex())
-                .names("index.max_result_window")
-                .includeDefaults(true);
-
-        Settings settings = client.indices().getSettings(request, RequestOptions.DEFAULT).getIndexToSettings().get(indexConfiguration.getIndex());
-        maxResultWindow = settings.getAsInt("index.max_result_window", 10_000);
+                RestClient.builder(HttpHost.create(host))
+                .setHttpClientConfigCallback(hacb -> hacb.addInterceptorLast(interceptor))
+                .setCompressionEnabled(true)
+                .setChunkedEnabled(false));
+        maxResultWindow = 10_000; 
     }
 
     private List<String> getPathsFromRegExs(String tenant, List<String> regExs, boolean leaf, int limit) throws TooMuchDataExpectedException, IOException {
