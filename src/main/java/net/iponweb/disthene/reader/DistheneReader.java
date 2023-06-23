@@ -12,6 +12,7 @@ import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.representer.Representer;
 import sun.misc.Signal;
@@ -52,7 +53,7 @@ public class DistheneReader {
     private static final Yaml yaml;
 
     static {
-        Representer representer = new Representer();
+        Representer representer = new Representer(new DumperOptions());
         representer.getPropertyUtils().setSkipMissingProperties(true);
         yaml = new Yaml(representer);
     }
