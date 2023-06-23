@@ -1,6 +1,5 @@
 package net.iponweb.disthene.reader.handler;
 
-import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.Attribute;
@@ -12,20 +11,19 @@ import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.exceptions.UnsupportedMethodException;
 import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
  * @author Andrei Ivanov
  */
 public class PathStatsHandler implements DistheneReaderHandler {
+    private final static Logger logger = LogManager.getLogger(PathStatsHandler.class);
 
-    final static Logger logger = Logger.getLogger(PathStatsHandler.class);
-
-    private IndexService indexService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final StatsService statsService;
 
     public PathStatsHandler(IndexService indexService, StatsService statsService) {
         this.indexService = indexService;
@@ -33,7 +31,7 @@ public class PathStatsHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, TooMuchDataExpectedException {
+    public FullHttpResponse handle(HttpRequest request) throws ParameterParsingException, TooMuchDataExpectedException, IOException {
         PathStatsParameters parameters = parse(request);
 
         statsService.incPathsRequests(parameters.getTenant());
@@ -86,7 +84,7 @@ public class PathStatsHandler implements DistheneReaderHandler {
         }
     }
 
-    private class PathStatsParameters {
+    private static class PathStatsParameters {
         private String tenant;
         private String query;
 
@@ -98,11 +96,11 @@ public class PathStatsHandler implements DistheneReaderHandler {
             this.tenant = tenant;
         }
 
-        public String getQuery() {
+        String getQuery() {
             return query;
         }
 
-        public void setQuery(String query) {
+        void setQuery(String query) {
             this.query = query;
         }
     }

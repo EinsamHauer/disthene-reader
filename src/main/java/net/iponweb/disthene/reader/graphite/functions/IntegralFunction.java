@@ -9,7 +9,6 @@ import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,8 +23,7 @@ public class IntegralFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -61,7 +59,7 @@ public class IntegralFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("integral: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() < 1) throw new InvalidArgumentException("integral: number of arguments is 0. Must be at least one.");
 
         for(Object argument : arguments) {
             if (!(argument instanceof Target)) throw new InvalidArgumentException("integral: argument is " + argument.getClass().getName() + ". Must be series");

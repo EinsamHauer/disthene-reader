@@ -1,0 +1,18 @@
+[Unit]
+Description=Disthene reader server
+StartLimitIntervalSec=180
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=disthene-reader
+LimitNOFILE=1000000
+LimitMEMLOCK=infinity
+EnvironmentFile=/etc/default/disthene-reader
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /usr/lib/disthene-reader/disthene-reader.jar $OPTS
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

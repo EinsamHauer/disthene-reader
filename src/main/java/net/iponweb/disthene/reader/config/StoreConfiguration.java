@@ -1,27 +1,30 @@
 package net.iponweb.disthene.reader.config;
 
-import net.iponweb.disthene.reader.utils.CassandraLoadBalancingPolicies;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("unused")
 public class StoreConfiguration {
     private List<String> cluster = new ArrayList<>();
-    private String keyspace;
-    private String columnFamily;
     private String userName;
     private String userPassword;
     private int port;
     private int maxConnections;
-    private double readTimeout;
-    private double connectTimeout;
-    private int maxRequests;
+    private int readTimeout;
+    private int connectTimeout;
+    private int maxConcurrentRequests = 1024;
+    private int maxQueueSize = 1024*1024;
     private String consistency = "ONE";
-    private String loadBalancingPolicyName = CassandraLoadBalancingPolicies.tokenDcAwareRoundRobinPolicy;
-    private String protocolVersion = "V2";
+    private String keyspace;
+    private int cacheExpiration = 180;
+    private String tableTemplate = "metric_%s_%d"; //%s - tenant, %d rollup
+    private Set<Integer> skipGlobalTableRollups = new HashSet<>();
 
     public String getUserName() {
         return userName;
@@ -47,14 +50,6 @@ public class StoreConfiguration {
         this.cluster = cluster;
     }
 
-    public String getKeyspace() {
-        return keyspace;
-    }
-
-    public void setKeyspace(String keyspace) {
-        this.keyspace = keyspace;
-    }
-
     public int getPort() {
         return port;
     }
@@ -71,78 +66,95 @@ public class StoreConfiguration {
         this.maxConnections = maxConnections;
     }
 
-    public double getReadTimeout() {
+    public int getReadTimeout() {
         return readTimeout;
     }
 
-    public void setReadTimeout(double readTimeout) {
+    public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
     }
 
-    public double getConnectTimeout() {
+    public int getConnectTimeout() {
         return connectTimeout;
     }
 
-    public void setConnectTimeout(double connectTimeout) {
+    public void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
-    }
-
-    public int getMaxRequests() {
-        return maxRequests;
-    }
-
-    public void setMaxRequests(int maxRequests) {
-        this.maxRequests = maxRequests;
-    }
-
-    public String getColumnFamily() {
-        return columnFamily;
-    }
-
-    public void setColumnFamily(String columnFamily) {
-        this.columnFamily = columnFamily;
     }
 
     public String getConsistency() {
         return consistency;
     }
 
+    public int getMaxConcurrentRequests() {
+        return maxConcurrentRequests;
+    }
+
+    public void setMaxConcurrentRequests(int maxConcurrentRequests) {
+        this.maxConcurrentRequests = maxConcurrentRequests;
+    }
+
+    public int getMaxQueueSize() {
+        return maxQueueSize;
+    }
+
+    public void setMaxQueueSize(int maxQueueSize) {
+        this.maxQueueSize = maxQueueSize;
+    }
+
     public void setConsistency(String consistency) {
         this.consistency = consistency;
     }
 
-    public String getLoadBalancingPolicyName() {
-        return loadBalancingPolicyName;
+    public String getKeyspace() {
+        return keyspace;
     }
 
-    public void setLoadBalancingPolicyName(String policy) {
-        this.loadBalancingPolicyName = policy;
+    public void setKeyspace(String keyspace) {
+        this.keyspace = keyspace;
     }
 
-    public String getProtocolVersion() {
-        return protocolVersion;
+    public int getCacheExpiration() {
+        return cacheExpiration;
     }
 
-    public void setProtocolVersion(String protocolVersion) {
-        this.protocolVersion = protocolVersion;
+    public void setCacheExpiration(int cacheExpiration) {
+        this.cacheExpiration = cacheExpiration;
+    }
+
+    public String getTableTemplate() {
+        return tableTemplate;
+    }
+
+    public void setTableTemplate(String tableTemplate) {
+        this.tableTemplate = tableTemplate;
+    }
+
+    public Set<Integer> getSkipGlobalTableRollups() {
+        return skipGlobalTableRollups;
+    }
+
+    public void setSkipGlobalTableRollups(Set<Integer> skipGlobalTableRollups) {
+        this.skipGlobalTableRollups = skipGlobalTableRollups;
     }
 
     @Override
     public String toString() {
         return "StoreConfiguration{" +
                 "cluster=" + cluster +
-                ", keyspace='" + keyspace + '\'' +
-                ", columnFamily='" + columnFamily + '\'' +
                 ", userName='" + userName + '\'' +
                 ", userPassword='" + userPassword + '\'' +
                 ", port=" + port +
                 ", maxConnections=" + maxConnections +
                 ", readTimeout=" + readTimeout +
                 ", connectTimeout=" + connectTimeout +
-                ", maxRequests=" + maxRequests +
+                ", maxConcurrentRequests=" + maxConcurrentRequests +
+                ", maxQueueSize=" + maxQueueSize +
                 ", consistency='" + consistency + '\'' +
-                ", loadBalancingPolicyName='" + loadBalancingPolicyName + '\'' +
-                ", protocolVersion='" + protocolVersion + '\'' +
+                ", keyspace='" + keyspace + '\'' +
+                ", cacheExpiration=" + cacheExpiration +
+                ", tableTemplate='" + tableTemplate + '\'' +
+                ", skipGlobalTableRollups=" + skipGlobalTableRollups +
                 '}';
     }
 }

@@ -23,8 +23,7 @@ public class AliasByNodeFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -39,7 +38,7 @@ public class AliasByNodeFunction extends DistheneFunction {
 
         for (TimeSeries ts : processedArguments) {
             String[] split = ts.getName().split("\\.");
-            List<String> parts = new ArrayList<String>();
+            List<String> parts = new ArrayList<>();
             for (int node : nodes) {
                 if (node >= 0 && node < split.length) {
                     parts.add(split[node]);

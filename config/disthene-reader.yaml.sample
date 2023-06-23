@@ -12,21 +12,19 @@ store:
   userName: 'username'
   userPassword: 'password'
   keyspace: 'metric'
-  columnFamily: 'metric'
   maxConnections: 2048
+  maxConcurrentRequests: 1024
+  maxQueueSize: 1000000
   readTimeout: 10
   connectTimeout: 10
-  maxRequests: 128
-  loadBalancingPolicyName: 'TokenDcAwareRoundRobinPolicy'
-  protocolVersion: "V2"
+  cacheExpiration: 180
+  tableTemplate: "metric_%s_%d"
 index:
-  name: "disthene"
   cluster:
     - "es-1"
     - "es-1"
-  port: 9300
+  port: 9200
   index: "disthene_paths"
-  type: "path"
   scroll: 50000
   timeout: 120000
   maxPaths: 50000

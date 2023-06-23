@@ -11,7 +11,7 @@ pathElement: (partialPathElement | matchEnum)+;
 
 matchEnum: LEFT_BRACE (partialPathElement COMMA)* partialPathElement RIGHT_BRACE;
 
-args: (WS* arg WS* COMMA WS*)* arg WS*;
+args: (WS* arg WS* COMMA WS*)* arg WS* | WS*;
 
 arg:
                 Boolean                 # ArgBoolean
@@ -36,7 +36,7 @@ QoutedString: DoubleQuotedString | SingleQuotedString;
 DoubleQuotedString: '"' ~[\r\n]*? '"';
 SingleQuotedString: '\'' ~[\r\n]*? '\'';
 FunctionName: [a-zA-Z_]+ [a-zA-Z_0-9]*;
-ValidChars: [=!#$%&*+\-/0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]^_`abcdefghijklmnopqrstuvwxyz|~]+;
+ValidChars: [=!#$%&*+\-/0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz|~]+;
 EscapedChar: BACKSLASH SYMBOL;
 
 DOT: '.';
@@ -49,7 +49,7 @@ SYMBOL: [(){},=.'"];
 BACKSLASH: '\\';
 DIGIT: [0-9];
 WS: (' ' | '\t')+ -> skip;
-VALID_METRIC_CHAR: [!#$%&*+\-/0123456789,:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]\{\}^_`abcdefghijklmnopqrstuvwxyz|~];
+VALID_METRIC_CHAR: [!#$%&*+\-/0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]{}^_`abcdefghijklmnopqrstuvwxyz|~];
 TRUE: ('t' | 'T')('r' | 'R')('u' | 'U')('e' | 'E');
 FALSE: ('f' | 'F')('a' | 'A')('l' | 'L')('s' | 'S')('e' | 'E');
 

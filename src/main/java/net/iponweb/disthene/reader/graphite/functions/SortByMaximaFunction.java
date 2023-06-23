@@ -23,8 +23,7 @@ public class SortByMaximaFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -37,7 +36,7 @@ public class SortByMaximaFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double max = CollectionUtils.max(Arrays.asList(ts.getValues()));
             if (max == null) continue;
-            if (sorted.get(max) == null) sorted.put(max, new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(max, k -> new ArrayList<>());
             sorted.get(max).add(ts);
         }
 

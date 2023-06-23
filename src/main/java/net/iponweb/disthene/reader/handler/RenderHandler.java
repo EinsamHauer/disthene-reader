@@ -3,11 +3,16 @@ package net.iponweb.disthene.reader.handler;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.ReaderConfiguration;
-import net.iponweb.disthene.reader.exceptions.*;
+import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.InvalidParameterValueException;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
+import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.format.ResponseFormatter;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.TargetVisitor;
@@ -20,30 +25,34 @@ import net.iponweb.disthene.reader.handler.parameters.RenderParameters;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.throttling.ThrottlingService;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrei Ivanov
  */
+@SuppressWarnings("UnstableApiUsage")
 public class RenderHandler implements DistheneReaderHandler {
+    private final static Logger logger = LogManager.getLogger(RenderHandler.class);
 
-    final static Logger logger = Logger.getLogger(RenderHandler.class);
-
-    private TargetEvaluator evaluator;
-    private StatsService statsService;
-    private ThrottlingService throttlingService;
-    private ReaderConfiguration readerConfiguration;
+    private final TargetEvaluator evaluator;
+    private final StatsService statsService;
+    private final ThrottlingService throttlingService;
+    private final ReaderConfiguration readerConfiguration;
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private TimeLimiter timeLimiter = new SimpleTimeLimiter(executor);
+    private final TimeLimiter timeLimiter = SimpleTimeLimiter.create(executor);
 
 
     public RenderHandler(MetricService metricService, StatsService statsService, ThrottlingService throttlingService, ReaderConfiguration readerConfiguration) {
@@ -54,7 +63,7 @@ public class RenderHandler implements DistheneReaderHandler {
     }
 
     @Override
-    public FullHttpResponse handle(final HttpRequest request) throws ParameterParsingException, ExecutionException, InterruptedException, EvaluationException, LogarithmicScaleNotAllowed {
+    public FullHttpResponse handle(final HttpRequest request) throws ParameterParsingException, EvaluationException, LogarithmicScaleNotAllowed {
         final RenderParameters parameters = RenderParameters.parse(request);
 
         logger.debug("Got request: " + parameters);
@@ -76,7 +85,7 @@ public class RenderHandler implements DistheneReaderHandler {
 
         // Let's parse the targets
         for(String targetString : parameters.getTargets()) {
-            GraphiteLexer lexer = new GraphiteLexer(new ANTLRInputStream(targetString));
+            GraphiteLexer lexer = new GraphiteLexer(CharStreams.fromString(targetString));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             GraphiteParser parser = new GraphiteParser(tokens);
             ParseTree tree = parser.expression();
@@ -92,25 +101,35 @@ public class RenderHandler implements DistheneReaderHandler {
 
         FullHttpResponse response;
         try {
-            response = timeLimiter.callWithTimeout(new Callable<FullHttpResponse>() {
-                @Override
-                public FullHttpResponse call() throws EvaluationException, LogarithmicScaleNotAllowed {
-                    return handleInternal(targets, parameters);
-                }
-            }, readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS, true);
+            response = timeLimiter.callWithTimeout(() -> handleInternal(targets, parameters), readerConfiguration.getRequestTimeout(), TimeUnit.SECONDS);
         } catch (UncheckedTimeoutException e) {
             logger.debug("Request timed out: " + parameters);
             statsService.incTimedOutRequests(parameters.getTenant());
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE);
-        } catch (EvaluationException | LogarithmicScaleNotAllowed e) {
-            throw e;
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof EvaluationException) {
+                throw (EvaluationException) e.getCause();
+            } else if (e.getCause() instanceof LogarithmicScaleNotAllowed) {
+                throw (LogarithmicScaleNotAllowed) e.getCause();
+            } else {
+                logger.error("Unexpected error:", e);
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
+            }
+        } catch (UncheckedExecutionException e) {
+            if (!(e.getCause() instanceof ParseCancellationException)) {
+                logger.error("Unexpected error:", e);
+            }
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
         } catch (Exception e) {
-            logger.error(e);
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            logger.error("Unexpected error:", e);
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a weird problem: " + e.getCause().getMessage()).getBytes()));
         }
 
         timer.stop();
+        statsService.addResponseTime(parameters.getTenant(), timer.elapsed(TimeUnit.MILLISECONDS));
+
         logger.debug("Request took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + parameters + ")");
+
 
         return response;
     }

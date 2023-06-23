@@ -23,8 +23,7 @@ public class DashedFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -34,7 +33,7 @@ public class DashedFunction extends DistheneFunction {
 
         //todo dash length constant
         for (TimeSeries ts : processedArguments) {
-            ts.setOption(TimeSeriesOption.DASHED, arguments.size() == 1 ? new Float(5) : new Float((Double) arguments.get(1)));
+            ts.setOption(TimeSeriesOption.DASHED, arguments.size() == 1 ? 5F : ((Double) arguments.get(1)).floatValue());
             setResultingName(ts);
         }
 

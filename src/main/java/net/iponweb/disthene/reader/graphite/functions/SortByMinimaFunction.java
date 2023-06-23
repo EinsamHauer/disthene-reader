@@ -23,8 +23,7 @@ public class SortByMinimaFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -37,7 +36,7 @@ public class SortByMinimaFunction extends DistheneFunction {
         for(TimeSeries ts : processedArguments) {
             Double min = CollectionUtils.min(Arrays.asList(ts.getValues()));
             if (min == null) continue;
-            if (sorted.get(min) == null) sorted.put(min, new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(min, k -> new ArrayList<>());
             sorted.get(min).add(ts);
         }
 

@@ -3,7 +3,7 @@ disthene-reader: cassandra backed metric storage *reader*
 
 ## Motivation
 This is a "dual" project to [disthene](https://github.com/EinsamHauer/disthene). Though the data written by **disthene** can still be read and plotted by combination of **cyanite** & **graphite-api**, this schema introduces quite some overhead at least caused by serializing/deserializing to/from json. In cases when rendering a graph involves 10s of millions of data points this overhead is quite noticable.
-Besides that **graphite-api** as well as original **graphite** rendering could really be a bit faster.
+Besides, that **graphite-api** as well as original **graphite** rendering could really be a bit faster.
 All in all, this project is about read and rendering performance exactly like **disthene** is about write performance.
 
 ## What's in
@@ -44,6 +44,105 @@ The following functions are not implemented:
 * randomWalkFunction
 * events
 
+The current set of implemented functions:
+* absolute
+* aggregateLine
+* alias
+* aliasByNode
+* aliasByMetric
+* aliasSub
+* alpha
+* applyByNode
+* areaBetween
+* asPercent
+* averageOutsidePercentile
+* averageAbove
+* averageBelow
+* averageSeries
+* averageSeriesWithWildcards
+* avg
+* cactiStyle
+* changed
+* color
+* constantLine
+* countSeries
+* currentAbove
+* currentBelow
+* dashed
+* derivative
+* diffSeries
+* divideSeries
+* drawAsInfinite
+* grep
+* group
+* groupByNode
+* groupByNodes
+* exclude
+* highestAverage
+* highestCurrent
+* highestMax
+* hitcount
+* holtWintersAberration
+* holtWintersConfidenceArea
+* holtWintersConfidenceBands
+* holtWintersForecast
+* integral
+* invert
+* isNonNull
+* keepLastValue
+* legendValue
+* limit
+* lineWidth
+* logarithm
+* log
+* lowestAverage
+* lowestCurrent
+* maximumAbove
+* maximumBelow
+* minimumAbove
+* minimumBelow
+* maxSeries
+* minSeries
+* mostDeviant
+* movingAverage
+* movingMax
+* movingMedian
+* movingMin
+* multiplySeries
+* multiplySeriesWithWildcards
+* nonNegativeDerivative
+* nPercentile
+* offset
+* offsetToZero
+* pct
+* percentileOfSeries
+* perSecond
+* pow
+* rangeOfSeries
+* removeAbovePercentile
+* removeAboveValue
+* removeBelowPercentile
+* removeBelowValue
+* scale
+* scaleToSeconds
+* secondYAxis
+* sortByMaxima
+* sortByMinima
+* sortByName
+* sortByTotal
+* squareRoot
+* stacked
+* stdev
+* stddevSeries
+* sumSeries
+* sumSeriesWithWildcards
+* sum
+* summarize
+* threshold
+* timeShift
+* timeStack
+* transformNull
+* useSeriesAbove
 
 
 
@@ -87,21 +186,18 @@ store:
     - "cassandra-2"
   port: 9042
   keyspace: 'metric'
-  columnFamily: 'metric'
 # maximum connections per host , timeouts in seconds, max requests per host - these are literally used in C* java driver settings
   maxConnections: 2048
   readTimeout: 10
   connectTimeout: 10
   maxRequests: 128
 index:
-# ES cluster name, contact points, native port, index name & type
-  name: "disthene"
+# ES contact points, native port, index name & type
   cluster:
     - "es-1"
     - "es-2"
-  port: 9300
+  port: 9200
   index: "disthene"
-  type: "path"
 # Maxim number paths allowed per one wildcard. This is just to prevent abuse
   maxPaths: 50000
 stats:
@@ -124,7 +220,7 @@ Configuration is straight forward as per log4j
 
 The MIT License (MIT)
 
-Copyright (C) 2015 Andrei Ivanov
+Copyright (C) 2021 Andrei Ivanov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -63,7 +63,7 @@ public class MultiplySeriesFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() < 1) throw new InvalidArgumentException("multiplySeries: number of arguments is " + arguments.size() + ". Must be at least one.");
+        if (arguments.size() < 1) throw new InvalidArgumentException("multiplySeries: number of arguments is 0. Must be at least one.");
 
         for(Object argument : arguments) {
             if (!(argument instanceof Target)) throw new InvalidArgumentException("multiplySeries: argument is " + argument.getClass().getName() + ". Must be series");

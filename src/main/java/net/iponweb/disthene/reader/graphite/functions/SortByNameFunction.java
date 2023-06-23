@@ -6,7 +6,6 @@ import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
-import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
 import java.util.*;
@@ -23,8 +22,7 @@ public class SortByNameFunction extends DistheneFunction {
 
     @Override
     public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
-        List<TimeSeries> processedArguments = new ArrayList<>();
-        processedArguments.addAll(evaluator.eval((Target) arguments.get(0)));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval((Target) arguments.get(0)));
 
         if (processedArguments.size() == 0) return new ArrayList<>();
 
@@ -35,7 +33,7 @@ public class SortByNameFunction extends DistheneFunction {
         SortedMap<String, List<TimeSeries>> sorted = new TreeMap<>();
 
         for(TimeSeries ts : processedArguments) {
-            if (sorted.get(ts.getName()) == null) sorted.put(ts.getName(), new ArrayList<TimeSeries>());
+            sorted.computeIfAbsent(ts.getName(), k -> new ArrayList<>());
             sorted.get(ts.getName()).add(ts);
         }
 

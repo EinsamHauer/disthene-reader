@@ -26,12 +26,12 @@ public class HoltWinters {
     private static final double GAMMA = 0.2;
     private static final double BETA = 0.0035;
 
-    private Target target;
-    private TargetEvaluator evaluator;
+    private final Target target;
+    private final TargetEvaluator evaluator;
 
-    List<TimeSeries> original = new ArrayList<>();
-    private List<TimeSeries> forecasts = new ArrayList<>();
-    private List<Double> deviations = new ArrayList<>();
+    final List<TimeSeries> original = new ArrayList<>();
+    private final List<TimeSeries> forecasts = new ArrayList<>();
+    private final List<Double> deviations = new ArrayList<>();
 
     public HoltWinters(Target target, TargetEvaluator evaluator) {
         this.target = target;

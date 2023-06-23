@@ -1,15 +1,10 @@
 package net.iponweb.disthene.reader.graphite.functions;
 
 import net.iponweb.disthene.reader.beans.TimeSeries;
-import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
-import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
-import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
-import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,7 +18,7 @@ public class ConstantLineFunction extends DistheneFunction {
     }
 
     @Override
-    public List<TimeSeries> evaluate(TargetEvaluator evaluator) throws EvaluationException {
+    public List<TimeSeries> evaluate(TargetEvaluator evaluator) {
         Double constant = (Double) arguments.get(0);
 
         TimeSeries ts = evaluator.getEmptyTimeSeries(from, to);

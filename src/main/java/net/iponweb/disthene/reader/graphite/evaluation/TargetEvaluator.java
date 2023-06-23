@@ -9,11 +9,13 @@ import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.exceptions.TooMuchDataExpectedException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
 import net.iponweb.disthene.reader.graphite.Target;
-import net.iponweb.disthene.reader.graphite.functions.DistheneFunction;
 import net.iponweb.disthene.reader.service.metric.MetricService;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,9 +25,9 @@ import java.util.concurrent.ExecutionException;
  * @author Andrei Ivanov
  */
 public class TargetEvaluator {
-    final static Logger logger = Logger.getLogger(TargetEvaluator.class);
+    private final static Logger logger = LogManager.getLogger(TargetEvaluator.class);
 
-    private MetricService metricService;
+    private final MetricService metricService;
 
     public TargetEvaluator(MetricService metricService) {
         this.metricService = metricService;
@@ -38,23 +40,18 @@ public class TargetEvaluator {
     public List<TimeSeries> visit(PathTarget pathTarget) throws EvaluationException {
         try {
             return metricService.getMetricsAsList(pathTarget.getTenant(), Collections.singletonList(pathTarget.getPath()), pathTarget.getFrom(), pathTarget.getTo());
-        } catch (ExecutionException | InterruptedException | TooMuchDataExpectedException e) {
+        } catch (IOException | ExecutionException | InterruptedException | TooMuchDataExpectedException e) {
             logger.error(e.getMessage());
             logger.debug(e);
             throw new EvaluationException(e);
         }
     }
 
-    public List<TimeSeries> visit(DistheneFunction function) throws EvaluationException {
-        return function.evaluate(this);
-    }
-
     //todo: the logic below is duplicated several times - fix it!
     public TimeSeries getEmptyTimeSeries(long from, long to) {
-        Long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = metricService.getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
 
         int length = (int) ((effectiveTo - effectiveFrom) / bestRollup.getRollup() + 1);
@@ -69,8 +66,7 @@ public class TargetEvaluator {
     public List<TimeSeries> bootstrap(Target target, List<TimeSeries> original, long period) throws EvaluationException {
         if (original.size() == 0) return new ArrayList<>();
 
-        List<TimeSeries> bootstrapped = new ArrayList<>();
-        bootstrapped.addAll(eval(target.previous(period)));
+        List<TimeSeries> bootstrapped = new ArrayList<>(eval(target.previous(period)));
 
         if (bootstrapped.size() != original.size()) throw new InvalidNumberOfSeriesException();
         if (!TimeSeriesUtils.checkAlignment(bootstrapped)) throw new TimeSeriesNotAlignedException();
@@ -85,7 +81,7 @@ public class TargetEvaluator {
                 for (int i = 0; i < ts.getValues().length; i++) {
                     values.addAll(Collections.nCopies(ratio, ts.getValues()[i]));
                 }
-                ts.setValues(values.toArray(new Double[values.size()]));
+                ts.setValues(values.toArray(new Double[0]));
             }
         }
 
@@ -95,5 +91,16 @@ public class TargetEvaluator {
         }
 
         return bootstrapped;
+    }
+
+    // a hack in a way
+    public List<String> getPaths(PathTarget pathTarget) throws EvaluationException {
+        try {
+            return metricService.getPaths(pathTarget.getTenant(), pathTarget.getPath());
+        } catch (IOException | TooMuchDataExpectedException e) {
+            logger.error(e.getMessage());
+            logger.debug(e);
+            throw new EvaluationException(e);
+        }
     }
 }

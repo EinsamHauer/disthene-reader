@@ -6,10 +6,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
 import net.iponweb.disthene.reader.exceptions.EvaluationException;
+import net.iponweb.disthene.reader.exceptions.LogarithmicScaleNotAllowed;
+import net.iponweb.disthene.reader.exceptions.ParameterParsingException;
 import net.iponweb.disthene.reader.handler.DistheneReaderHandler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -20,11 +23,11 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author Andrei Ivanov
  */
 public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
-    final static Logger logger = Logger.getLogger(ReaderServerHandler.class);
+    private final static Logger logger = LogManager.getLogger(ReaderServerHandler.class);
 
-    private Map<Pattern, DistheneReaderHandler> handlers = new HashMap<>();
+    private final Map<Pattern, DistheneReaderHandler> handlers;
 
-    public ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
+    ReaderServerHandler(Map<Pattern, DistheneReaderHandler> handlers) {
         this.handlers = handlers;
     }
 
@@ -56,44 +59,50 @@ public class ReaderServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-
             if (handler != null) {
                 response = handler.handle(request);
             } else {
                 response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
             }
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
 
             if (keepAlive) {
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-                ctx.write(response);
+                ctx.writeAndFlush(response, ctx.voidPromise());
             } else {
-                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+                response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
             }
-        } catch (EvaluationException e) {
+        } catch (EvaluationException | ParameterParsingException | LogarithmicScaleNotAllowed e) {
             FullHttpResponse response;
             if (e.getCause() != null) {
-                response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getCause().getMessage()).getBytes()));
+                response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getCause().getMessage()).getBytes()));
             } else {
-                response = new DefaultFullHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
+                response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
             }
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
             logger.error("Invalid request: " + e.getMessage());
             logger.debug("Invalid request: ", e);
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(("Ohoho.. We have a problem: " + e.getMessage()).getBytes()));
-            ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        } finally {
+            ((HttpContent) message).content().release();
         }
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error("Exception while processing request", cause);
+        // the check below is mostly because of "Connection reset by peer" exceptions overwhelming the log
+        if (cause instanceof IOException) {
+            logger.trace("Exception while processing request", cause);
+        } else {
+            logger.error("Exception while processing request", cause);
+        }
         ctx.close();
     }
 }

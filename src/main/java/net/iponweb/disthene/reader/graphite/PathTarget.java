@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class PathTarget extends Target {
 
-    private String path;
-    private String tenant;
+    private final String path;
+    private final String tenant;
     private Long from;
     private Long to;
 

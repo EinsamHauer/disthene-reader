@@ -1,15 +1,13 @@
 package net.iponweb.disthene.reader.service.metric;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.google.common.base.Function;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
+import com.spotify.futures.CompletableFutures;
 import net.iponweb.disthene.reader.beans.TimeSeries;
 import net.iponweb.disthene.reader.config.DistheneReaderConfiguration;
 import net.iponweb.disthene.reader.config.Rollup;
@@ -18,27 +16,28 @@ import net.iponweb.disthene.reader.service.index.IndexService;
 import net.iponweb.disthene.reader.service.stats.StatsService;
 import net.iponweb.disthene.reader.service.store.CassandraService;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.function.Function;
 
 /**
  * @author Andrei Ivanov
  */
 public class MetricService {
-    final static Logger logger = Logger.getLogger(MetricService.class);
+    private final static Logger logger = LogManager.getLogger(MetricService.class);
 
-    private IndexService indexService;
-    private CassandraService cassandraService;
-    private StatsService statsService;
+    private final IndexService indexService;
+    private final CassandraService cassandraService;
+    private final StatsService statsService;
 
-    private DistheneReaderConfiguration distheneReaderConfiguration;
+    private final DistheneReaderConfiguration distheneReaderConfiguration;
 
-    private ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
     public MetricService(IndexService indexService, CassandraService cassandraService, StatsService statsService, DistheneReaderConfiguration distheneReaderConfiguration) {
         this.indexService = indexService;
@@ -47,22 +46,25 @@ public class MetricService {
         this.statsService = statsService;
     }
 
-    public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public List<String> getPaths(String tenant, String wildcard) throws TooMuchDataExpectedException, IOException {
+        return indexService.getPaths(tenant, Collections.singletonList(wildcard));
+    }
+
+    public String getMetricsAsJson(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
         List<String> paths = indexService.getPaths(tenant, wildcards);
         Collections.sort(paths);
 
         // Calculate rollup etc
-        Long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
 
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
+        long timestamp = effectiveFrom;
         int index = 0;
         while (timestamp <= effectiveTo) {
             timestampIndices.put(timestamp, index++);
@@ -75,62 +77,53 @@ public class MetricService {
 
 
         // Now let's query C*
-        List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
+        List<CompletionStage<SinglePathResult>> completionStages = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<ResultSet, SinglePathResult> serializeFunction =
-                    new Function<ResultSet, SinglePathResult>() {
-                        public SinglePathResult apply(ResultSet resultSet) {
-                            SinglePathResult result = new SinglePathResult(path);
-                            result.makeJson(resultSet, length, timestampIndices);
-                            return result;
-                        }
-                    };
+            Function<AsyncResultSet, SinglePathResult> serializeFunction = resultSet -> {
+                SinglePathResult result = new SinglePathResult(path);
+                result.makeJson(resultSet, length, timestampIndices);
+                return result;
+            };
 
-
-            futures.add(
-                    Futures.transform(
-                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
-                            serializeFunction,
-                            executorService
-                    )
-            );
+            cassandraService
+                    .executeAsync(tenant, path, bestRollup.getRollup(), effectiveFrom, effectiveTo)
+                    .ifPresent(asyncResultSetCompletionStage -> completionStages.add(asyncResultSetCompletionStage.thenApplyAsync(serializeFunction, executorService)));
         }
-
-        futures = Futures.inCompletionOrder(futures);
 
         // Build response content JSON
         List<String> singlePathJsons = new ArrayList<>();
-
-        for (ListenableFuture<SinglePathResult> future : futures) {
-            SinglePathResult singlePathResult = future.get();
+        for (SinglePathResult singlePathResult : CompletableFutures.allAsList(completionStages).get()) {
             if (!singlePathResult.isAllNulls()) {
                 singlePathJsons.add("\"" + singlePathResult.getPath() + "\":" + singlePathResult.getJson());
             }
         }
-
 
         return "{\"from\":" + effectiveFrom + ",\"to\":" + effectiveTo + ",\"step\":" + bestRollup.getRollup() +
                 ",\"series\":{" + Joiner.on(",").skipNulls().join(singlePathJsons) + "}}";
 
     }
 
-    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException {
+    public List<TimeSeries> getMetricsAsList(String tenant, List<String> wildcards, long from, long to) throws ExecutionException, InterruptedException, TooMuchDataExpectedException, IOException {
+        Stopwatch indexTimer = Stopwatch.createStarted();
         List<String> paths = indexService.getPaths(tenant, wildcards);
+        indexTimer.stop();
+        logger.debug("Fetching from ES took " + indexTimer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
+
+        statsService.addIndexResponseTime(tenant, indexTimer.elapsed(TimeUnit.MILLISECONDS));
 
         statsService.incRenderPathsRead(tenant, paths.size());
 
         // Calculate rollup etc
-        Long now = System.currentTimeMillis() * 1000;
-        Long effectiveTo = Math.min(to, now);
+        long effectiveTo = Math.min(to, Instant.now().getEpochSecond());
         Rollup bestRollup = getRollup(from);
-        Long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
+        long effectiveFrom = (from % bestRollup.getRollup()) == 0 ? from : from + bestRollup.getRollup() - (from % bestRollup.getRollup());
         effectiveTo = effectiveTo - (effectiveTo % bestRollup.getRollup());
         logger.debug("Effective from: " + effectiveFrom);
         logger.debug("Effective to: " + effectiveTo);
 
         // now build the weird data structures ("in the meanwhile")
         final Map<Long, Integer> timestampIndices = new HashMap<>();
-        Long timestamp = effectiveFrom;
+        long timestamp = effectiveFrom;
         int index = 0;
         while (timestamp <= effectiveTo) {
             timestampIndices.put(timestamp, index++);
@@ -148,35 +141,24 @@ public class MetricService {
         }
 
         // Now let's query C*
-        List<ListenableFuture<SinglePathResult>> futures = Lists.newArrayListWithExpectedSize(paths.size());
+        List<CompletionStage<SinglePathResult>> completionStages = Lists.newArrayListWithExpectedSize(paths.size());
         for (final String path : paths) {
-            Function<ResultSet, SinglePathResult> serializeFunction =
-                    new Function<ResultSet, SinglePathResult>() {
-                        public SinglePathResult apply(ResultSet resultSet) {
-                            SinglePathResult result = new SinglePathResult(path);
-                            result.makeArray(resultSet, length, timestampIndices);
-                            return result;
-                        }
-                    };
+            Function<AsyncResultSet, SinglePathResult> serializeFunction = resultSets -> {
+                SinglePathResult result = new SinglePathResult(path);
+                result.makeArray(resultSets, length, timestampIndices);
+                return result;
+            };
 
-
-            futures.add(
-                    Futures.transform(
-                            cassandraService.executeAsync(tenant, path, bestRollup.getPeriod(), bestRollup.getRollup(), effectiveFrom, effectiveTo),
-                            serializeFunction,
-                            executorService
-                    )
-            );
+            cassandraService
+                    .executeAsync(tenant, path, bestRollup.getRollup(), effectiveFrom, effectiveTo)
+                    .ifPresent(asyncResultSetCompletionStage -> completionStages.add(asyncResultSetCompletionStage.thenApplyAsync(serializeFunction, executorService)));
         }
 
-        Stopwatch timer = Stopwatch.createStarted();
-
-        futures = Futures.inCompletionOrder(futures);
+        Stopwatch cassandraTimer = Stopwatch.createStarted();
 
         List<TimeSeries> timeSeries = new ArrayList<>();
 
-        for (ListenableFuture<SinglePathResult> future : futures) {
-            SinglePathResult singlePathResult = future.get();
+        for (SinglePathResult singlePathResult : CompletableFutures.allAsList(completionStages).get()) {
             if (singlePathResult.getValues() != null) {
                 TimeSeries ts = new TimeSeries(singlePathResult.getPath(), effectiveFrom, effectiveTo, bestRollup.getRollup());
                 ts.setValues(singlePathResult.getValues());
@@ -185,16 +167,14 @@ public class MetricService {
         }
 
         logger.debug("Number of series fetched: " + timeSeries.size());
-        timer.stop();
-        logger.debug("Fetching from Cassandra took " + timer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
+        cassandraTimer.stop();
+
+        statsService.addStoreResponseTime(tenant, cassandraTimer.elapsed(TimeUnit.MILLISECONDS));
+
+        logger.debug("Fetching from Cassandra took " + cassandraTimer.elapsed(TimeUnit.MILLISECONDS) + " milliseconds (" + wildcards + ")");
 
         // sort it by path
-        Collections.sort(timeSeries, new Comparator<TimeSeries>() {
-            @Override
-            public int compare(TimeSeries ts1, TimeSeries ts2) {
-                return ts1.getName().compareTo(ts2.getName());
-            }
-        });
+        timeSeries.sort(Comparator.comparing(TimeSeries::getName));
 
         int totalPoints = 0;
 
@@ -208,12 +188,12 @@ public class MetricService {
     }
 
     public Rollup getRollup(long from) {
-        long now = System.currentTimeMillis() / 1000L ;
+        long now = System.currentTimeMillis() / 1000L;
 
         // Let's find a rollup that potentially can have all the data taking retention in account
         List<Rollup> survivals = new ArrayList<>();
         for (Rollup rollup : distheneReaderConfiguration.getReader().getRollups()) {
-            if (now - rollup.getPeriod() * rollup.getRollup() <= from) {
+            if (now - (long) rollup.getPeriod() * rollup.getRollup() <= from) {
                 survivals.add(rollup);
             }
         }
@@ -227,20 +207,23 @@ public class MetricService {
     }
 
     private static class SinglePathResult {
-        String path;
+        final String path;
         String json;
         Double[] values = null;
         boolean allNulls = true;
+        final boolean isSumMetric;
 
         private SinglePathResult(String path) {
             this.path = path;
+            // trying to optimize something that JIT should do. Probably redundant
+            this.isSumMetric = isSumMetric(path);
         }
 
         public String getPath() {
             return path;
         }
 
-        public String getJson() {
+        String getJson() {
             return json;
         }
 
@@ -248,33 +231,25 @@ public class MetricService {
             return values;
         }
 
-        public boolean isAllNulls() {
+        boolean isAllNulls() {
             return allNulls;
         }
 
-        public void makeJson(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
-            Double values[] = new Double[length];
-            for (Row row : resultSet) {
-                allNulls = false;
-                values[timestampIndices.get(row.getLong("time"))] =
-                        isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
-            }
-
+        private void makeJson(AsyncResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
+            makeArray(resultSet, length, timestampIndices);
             json = new Gson().toJson(values);
         }
 
-        public void makeArray(ResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
-            if (resultSet.getAvailableWithoutFetching() > 0) {
+        private void makeArray(AsyncResultSet resultSet, int length, Map<Long, Integer> timestampIndices) {
+            values = new Double[length];
+
+            for (Row row : resultSet.currentPage()) {
                 allNulls = false;
-                values = new Double[length];
-                for (Row row : resultSet) {
-                    values[timestampIndices.get(row.getLong("time"))] =
-                            isSumMetric(path) ? CollectionUtils.unsafeSum(row.getList("data", Double.class)) : CollectionUtils.unsafeAverage(row.getList("data", Double.class));
-                }
-            } else {
-                values = new Double[length];
-                for (Map.Entry<Long, Integer> entry : timestampIndices.entrySet()) {
-                    values[entry.getValue()] = null;
+                int index = timestampIndices.get(row.getLong("time"));
+                if (isSumMetric) {
+                    values[index] = (values[index] != null ? values[index] : 0) + CollectionUtils.unsafeSum(row.getList("data", Double.class));
+                } else {
+                    values[index] = CollectionUtils.unsafeAverage(row.getList("data", Double.class));
                 }
             }
         }

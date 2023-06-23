@@ -14,8 +14,8 @@ import java.util.List;
  */
 public abstract class DistheneFunction extends Target {
 
-    protected List<Object> arguments = new ArrayList<>();
-    protected String name;
+    protected final List<Object> arguments = new ArrayList<>();
+    protected final String name;
     protected Long from;
     protected Long to;
 
@@ -61,7 +61,7 @@ public abstract class DistheneFunction extends Target {
         this.to = to;
     }
 
-    protected String getResultingName(TimeSeries timeSeries) {
+    String getResultingName(TimeSeries timeSeries) {
         return name + "(" + timeSeries.getName() + ")";
     }
 

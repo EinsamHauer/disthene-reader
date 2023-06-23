@@ -5,7 +5,6 @@ import net.iponweb.disthene.reader.exceptions.EvaluationException;
 import net.iponweb.disthene.reader.exceptions.InvalidArgumentException;
 import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.PathTarget;
-import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.CollectionUtils;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
@@ -30,11 +29,9 @@ public class UseSeriesAboveFunction extends DistheneFunction {
         String search = (String) arguments.get(2);
         String replace = (String) arguments.get(3);
 
-        List<TimeSeries> processedArguments = new ArrayList<>();
         PathTarget target = (PathTarget) arguments.get(0);
-        processedArguments.addAll(evaluator.eval(target));
+        List<TimeSeries> processedArguments = new ArrayList<>(evaluator.eval(target));
 
-        List<TimeSeries> newProcessedArguments = new ArrayList<>();
         PathTarget newPathTarget = new PathTarget(
                 target.getText().replaceAll(search, replace),
                 target.getContext(),
@@ -42,7 +39,7 @@ public class UseSeriesAboveFunction extends DistheneFunction {
                 target.getTenant(),
                 target.getFrom(),
                 target.getTo());
-        newProcessedArguments.addAll(evaluator.eval(newPathTarget));
+        List<TimeSeries> newProcessedArguments = new ArrayList<>(evaluator.eval(newPathTarget));
 
 
         if (processedArguments.size() == 0 || newProcessedArguments.size() == 0) return new ArrayList<>();

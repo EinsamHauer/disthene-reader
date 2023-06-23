@@ -7,6 +7,7 @@ import net.iponweb.disthene.reader.exceptions.TimeSeriesNotAlignedException;
 import net.iponweb.disthene.reader.graphite.Target;
 import net.iponweb.disthene.reader.graphite.evaluation.TargetEvaluator;
 import net.iponweb.disthene.reader.utils.TimeSeriesUtils;
+import org.apache.commons.math3.util.Precision;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +15,10 @@ import java.util.List;
 /**
  * @author Andrei Ivanov
  */
-public class PowFunction extends DistheneFunction {
+public class RoundFunction extends DistheneFunction {
 
-    public PowFunction(String text) {
-        super(text, "pow");
+    public RoundFunction(String text) {
+        super(text, "round");
     }
 
     @Override
@@ -30,18 +31,17 @@ public class PowFunction extends DistheneFunction {
             throw new TimeSeriesNotAlignedException();
         }
 
-        Double pow = (Double) arguments.get(1);
+        int precision = ((Double) arguments.get(1)).intValue();
 
         int length = processedArguments.get(0).getValues().length;
 
         for (TimeSeries ts : processedArguments) {
             for (int i = 0; i < length; i++) {
                 if (ts.getValues()[i] != null) {
-                    double y = Math.pow(ts.getValues()[i], pow);
-                    ts.getValues()[i] = Double.isNaN(y) ? null : y;
+                    ts.getValues()[i] = Precision.round(ts.getValues()[i], precision);
                 }
             }
-            ts.setName("pow(" + ts.getName() + "," + pow + ")");
+            ts.setName("round(" + ts.getName() + "," + precision + ")");
         }
 
         return processedArguments;
@@ -49,8 +49,8 @@ public class PowFunction extends DistheneFunction {
 
     @Override
     public void checkArguments() throws InvalidArgumentException {
-        if (arguments.size() != 2) throw new InvalidArgumentException("pow: number of arguments is " + arguments.size() + ". Must be two.");
-        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("pow: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
-        if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("pow: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
+        if (arguments.size() != 2) throw new InvalidArgumentException("round: number of arguments is " + arguments.size() + ". Must be two.");
+        if (!(arguments.get(0) instanceof Target)) throw new InvalidArgumentException("round: argument is " + arguments.get(0).getClass().getName() + ". Must be series");
+        if (!(arguments.get(1) instanceof Double)) throw new InvalidArgumentException("round: argument is " + arguments.get(1).getClass().getName() + ". Must be a number");
     }
 }

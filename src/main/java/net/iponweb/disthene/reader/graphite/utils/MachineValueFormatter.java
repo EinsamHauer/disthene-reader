@@ -3,6 +3,7 @@ package net.iponweb.disthene.reader.graphite.utils;
 import com.google.common.math.DoubleMath;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author Andrei Ivanov
@@ -17,8 +18,8 @@ public class MachineValueFormatter extends ValueFormatter {
         if (!DoubleMath.isMathematicalInteger(value)) {
             // precision is just like in graphite (scale check redundant but let it be)
             if (bigDecimal.precision() > 12 && bigDecimal.scale() > 0) {
-                int roundTo = bigDecimal.scale() - bigDecimal.precision() + 12 > 0 ? bigDecimal.scale() - bigDecimal.precision() + 12 : 0;
-                bigDecimal = bigDecimal.setScale(roundTo, BigDecimal.ROUND_HALF_UP);
+                int roundTo = Math.max(bigDecimal.scale() - bigDecimal.precision() + 12, 0);
+                bigDecimal = bigDecimal.setScale(roundTo, RoundingMode.HALF_UP);
             }
         }
 
